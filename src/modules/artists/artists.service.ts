@@ -74,10 +74,6 @@ export class ArtistsService extends BaseService<Artist> {
 
     const { item: artist } = await this.findOne(id);
 
-    if (!artist) {
-      throw new BadRequestException('Artist not found');
-    }
-
     const { genres } = artist;
 
     query.genres = genres.join(',');

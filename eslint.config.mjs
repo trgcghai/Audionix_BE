@@ -8,7 +8,7 @@ export default tseslint.config(
   {
     ignores: ['eslint.config.mjs'],
     // @ts-ignore
-    extends: ['plugin:prettier/recommended'],
+    // extends: ['plugin:prettier/recommended'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,

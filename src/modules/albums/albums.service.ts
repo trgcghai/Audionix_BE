@@ -50,6 +50,19 @@ export class AlbumsService extends BaseService<Album> {
     };
   }
 
+  async updateAlbumFollowCount(albumId: string, number_of_increment: number) {
+    if (!mongoose.isValidObjectId(albumId)) {
+      throw new BadRequestException('Album ID is invalid');
+    }
+
+    const { item: album } = await this.findOne(albumId);
+
+    album.number_of_followers += number_of_increment;
+    await album.save();
+
+    return album;
+  }
+
   async findByArtist(artistId: string, query: Record<string, any>) {
     query.artist = artistId;
     const {

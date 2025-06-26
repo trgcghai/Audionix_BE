@@ -59,5 +59,5 @@ export class ArtistsController {
 
 // -crud: xong
 // -lấy ra tracks của artist: /:id/tracks: xong
-// -lấy ra albums của artist: /:id/albums
+// -lấy ra albums của artist: /:id/albums: xong
 // -lấy ra artist tương tự based on genres /:id/related-artists: xong

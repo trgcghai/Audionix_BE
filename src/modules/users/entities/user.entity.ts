@@ -43,16 +43,23 @@ export class User {
     cover_images: Image[];
   }[];
 
-  @Prop()
+  @Prop({
+    type: [
+      {
+        _id: { type: mongoose.Schema.ObjectId, ref: 'Album' },
+        title: { type: String, required: true },
+        images: [
+          {
+            url: { type: String, required: true },
+            height: { type: Number, required: true },
+            width: { type: Number, required: true },
+          },
+        ],
+      },
+    ],
+  })
   followed_albums: {
     _id: ObjectId;
-    title: string;
-    images: Image[];
-  }[];
-
-  @Prop()
-  playlists: {
-    id: ObjectId;
     title: string;
     images: Image[];
   }[];
