@@ -12,3 +12,11 @@ export interface ErrorResponse extends BaseResponse {
 export interface Response<T> extends BaseResponse {
   data: T;
 }
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  totalItems: number;
+  totalPages: number;
+  current: number;
+  limit: number;
+}

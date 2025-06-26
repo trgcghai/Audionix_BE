@@ -8,10 +8,15 @@ import {
   Delete,
   Query,
   HttpStatus,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  CheckFollowingArtistsDto,
+  FollowArtistDto,
+} from './dto/artist-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -44,5 +49,24 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Put('me/following/artists')
+  followArtist(@Body() followArtistDto: FollowArtistDto) {
+    return this.usersService.followArtist(followArtistDto);
+  }
+
+  @Delete('me/following/artists')
+  unfollowArtist(@Body() followArtistDto: FollowArtistDto) {
+    return this.usersService.unfollowArtist(followArtistDto);
+  }
+
+  @Post('me/following/artists/contains')
+  checkIfUserIsFollowingArtists(
+    @Body() checkFollowingArtistsDto: CheckFollowingArtistsDto,
+  ) {
+    return this.usersService.checkIfUserIsFollowingArtists(
+      checkFollowingArtistsDto,
+    );
   }
 }

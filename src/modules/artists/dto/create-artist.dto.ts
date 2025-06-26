@@ -1,7 +1,6 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
-  IsEmail,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -11,7 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-class AvatarDto {
+class CoverImageDto {
   @IsUrl()
   @IsNotEmpty()
   url: string;
@@ -29,18 +28,14 @@ class AvatarDto {
   width: number;
 }
 
-export class CreateUserDto {
+export class CreateArtistDto {
   @IsString()
   @IsNotEmpty()
-  username: string;
-
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
+  name: string;
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AvatarDto)
+  @Type(() => CoverImageDto)
   @IsOptional()
-  avatar: AvatarDto[];
+  cover_images: CoverImageDto[];
 }

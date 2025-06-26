@@ -10,7 +10,12 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/v1');
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  );
 
   await app.listen(configService.get<string>('PORT')!);
 }

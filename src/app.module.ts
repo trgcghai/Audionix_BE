@@ -7,10 +7,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseTransformInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/httpException.filter';
+import { ArtistsModule } from './modules/artists/artists.module';
 
 @Module({
   imports: [
     UsersModule,
+    ArtistsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
