@@ -3,14 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
 } from '@nestjs/common';
 import { ArtistsService } from './artists.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
-import { UpdateArtistDto } from './dto/update-artist.dto';
 
 @Controller('artists')
 export class ArtistsController {
@@ -35,11 +33,6 @@ export class ArtistsController {
     return this.artistsService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateArtistDto: UpdateArtistDto) {
-    return this.artistsService.update(id, updateArtistDto);
-  }
-
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.artistsService.remove(id);
@@ -48,6 +41,11 @@ export class ArtistsController {
   @Get(':id/tracks')
   findAllTracks(@Param('id') id: string, @Query() query: Record<string, any>) {
     return this.artistsService.findAllTracks(id, query);
+  }
+
+  @Get(':id/albums')
+  findAllAlbums(@Param('id') id: string, @Query() query: Record<string, any>) {
+    return this.artistsService.findAllAlbums(id, query);
   }
 
   @Get(':id/related-artists')

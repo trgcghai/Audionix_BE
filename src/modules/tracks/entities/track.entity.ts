@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Image } from 'src/common/interfaces/entity.interface';
 import { Artist } from 'src/modules/artists/entities/artist.entity';
+import { TrackStatus } from '../enum/track-status.enum';
 
 export type TrackDocument = HydratedDocument<Track>;
 
@@ -56,7 +57,7 @@ export class Track {
     type: String,
     trim: true,
     required: true,
-    enum: ['draft', 'published', 'unlisted', 'hidden', 'deleted'],
+    enum: TrackStatus,
   })
   status: string;
 

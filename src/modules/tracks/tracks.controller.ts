@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create-track.dto';
-import { UpdateTrackDto } from './dto/update-track.dto';
 
 @Controller('tracks')
 export class TracksController {
@@ -33,11 +32,6 @@ export class TracksController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tracksService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTrackDto: UpdateTrackDto) {
-    return this.tracksService.update(id, updateTrackDto);
   }
 
   @Delete(':id')

@@ -3,14 +3,15 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
-import { UpdateArtistDto } from './dto/update-artist.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Artist } from './entities/artist.entity';
 import mongoose, { Model } from 'mongoose';
 import { BaseService } from 'src/utils/service.util';
 import { TracksService } from '../tracks/tracks.service';
+import { AlbumsService } from '../albums/albums.service';
 
 @Injectable()
 export class ArtistsService extends BaseService<Artist> {
@@ -18,6 +19,8 @@ export class ArtistsService extends BaseService<Artist> {
     @InjectModel(Artist.name) private artistModel: Model<Artist>,
     @Inject(forwardRef(() => TracksService))
     private trackService: TracksService,
+    @Inject(forwardRef(() => AlbumsService))
+    private albumService: AlbumsService,
   ) {
     super(artistModel);
   }
@@ -36,32 +39,6 @@ export class ArtistsService extends BaseService<Artist> {
     };
   }
 
-  async update(id: string, updateArtistDto: UpdateArtistDto) {
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestException('Invalid ID format');
-    }
-
-    const result = await this.artistModel
-      .updateOne(
-        {
-          _id: id,
-        },
-        {
-          $set: updateArtistDto,
-        },
-      )
-      .exec();
-
-    return {
-      matchedCount: result.matchedCount,
-      modifiedCount: result.modifiedCount,
-      message:
-        result.modifiedCount > 0
-          ? 'Artist updated successfully'
-          : 'No changes made or artist not found',
-    };
-  }
-
   async findAllTracks(id: string, query: Record<string, any>) {
     if (!mongoose.isValidObjectId(id)) {
       throw new BadRequestException('Invalid artist ID format');
@@ -70,10 +47,24 @@ export class ArtistsService extends BaseService<Artist> {
     const isArtistExists = await this.artistModel.exists({ _id: id });
 
     if (!isArtistExists) {
-      throw new BadRequestException('Artist not found');
+      throw new NotFoundException('Artist not found');
     }
 
     return await this.trackService.findByArtist(id, query);
+  }
+
+  async findAllAlbums(id: string, query: Record<string, any>) {
+    if (!mongoose.isValidObjectId(id)) {
+      throw new BadRequestException('Invalid artist ID format');
+    }
+
+    const isArtistExists = await this.artistModel.exists({ _id: id });
+
+    if (!isArtistExists) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    return await this.albumService.findByArtist(id, query);
   }
 
   async findRelatedArtists(id: string, query: Record<string, any>) {

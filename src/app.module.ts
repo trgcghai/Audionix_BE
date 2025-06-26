@@ -9,6 +9,7 @@ import { ResponseTransformInterceptor } from './common/interceptors/response.int
 import { HttpExceptionFilter } from './common/filters/httpException.filter';
 import { ArtistsModule } from './modules/artists/artists.module';
 import { TracksModule } from './modules/tracks/tracks.module';
+import { AlbumsModule } from './modules/albums/albums.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { TracksModule } from './modules/tracks/tracks.module';
       inject: [ConfigService],
     }),
     TracksModule,
+    AlbumsModule,
   ],
   controllers: [AppController],
   providers: [

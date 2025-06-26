@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -39,32 +38,6 @@ export class UsersService extends BaseService<User> {
     });
     return {
       _id: result._id,
-    };
-  }
-
-  async update(id: string, updateUserDto: UpdateUserDto) {
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestException('Invalid ID format');
-    }
-
-    const result = await this.userModel
-      .updateOne(
-        {
-          _id: id,
-        },
-        {
-          $set: updateUserDto,
-        },
-      )
-      .exec();
-
-    return {
-      matchedCount: result.matchedCount,
-      modifiedCount: result.modifiedCount,
-      message:
-        result.modifiedCount > 0
-          ? 'User updated successfully'
-          : 'No changes made or user not found',
     };
   }
 
