@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { Image } from 'src/common/interfaces/entity.interface';
+// import { Image } from 'src/common/interfaces/entity.interface';
 
 export type ArtistDocument = HydratedDocument<Artist>;
 
@@ -27,11 +29,13 @@ export class Artist {
       },
     ],
   })
-  cover_images: {
-    url: string;
-    height: number;
-    width: number;
-  }[];
+  cover_images: Image[];
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  genres: string[];
 }
 
 export const ArtistSchema = SchemaFactory.createForClass(Artist);

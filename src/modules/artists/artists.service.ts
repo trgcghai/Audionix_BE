@@ -1,15 +1,24 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Artist } from './entities/artist.entity';
 import mongoose, { Model } from 'mongoose';
-import aqp from 'api-query-params';
 import { BaseService } from 'src/utils/service.util';
+import { TracksService } from '../tracks/tracks.service';
 
 @Injectable()
 export class ArtistsService extends BaseService<Artist> {
-  constructor(@InjectModel(Artist.name) private artistModel: Model<Artist>) {
+  constructor(
+    @InjectModel(Artist.name) private artistModel: Model<Artist>,
+    @Inject(forwardRef(() => TracksService))
+    private trackService: TracksService,
+  ) {
     super(artistModel);
   }
 
@@ -19,21 +28,11 @@ export class ArtistsService extends BaseService<Artist> {
     const result = await this.artistModel.create({
       name,
       cover_images: cover_images || [],
+      genres: [],
     });
 
     return {
       _id: result._id,
-    };
-  }
-
-  async findOne(id: string) {
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestException('Invalid ID format');
-    }
-
-    const artist = await this.artistModel.findOne({ _id: id }).exec();
-    return {
-      artist,
     };
   }
 
@@ -58,24 +57,40 @@ export class ArtistsService extends BaseService<Artist> {
       modifiedCount: result.modifiedCount,
       message:
         result.modifiedCount > 0
-          ? 'User updated successfully'
-          : 'No changes made or user not found',
+          ? 'Artist updated successfully'
+          : 'No changes made or artist not found',
     };
   }
 
-  async remove(id: string) {
+  async findAllTracks(id: string, query: Record<string, any>) {
     if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestException('Invalid ID format');
+      throw new BadRequestException('Invalid artist ID format');
     }
 
-    const result = await this.artistModel.deleteOne({ _id: id }).exec();
+    const isArtistExists = await this.artistModel.exists({ _id: id });
 
-    return {
-      deletedCount: result.deletedCount,
-      message:
-        result.deletedCount > 0
-          ? 'User deleted successfully'
-          : 'User not found',
-    };
+    if (!isArtistExists) {
+      throw new BadRequestException('Artist not found');
+    }
+
+    return await this.trackService.findByArtist(id, query);
+  }
+
+  async findRelatedArtists(id: string, query: Record<string, any>) {
+    if (!mongoose.isValidObjectId(id)) {
+      throw new BadRequestException('Invalid artist ID format');
+    }
+
+    const { item: artist } = await this.findOne(id);
+
+    if (!artist) {
+      throw new BadRequestException('Artist not found');
+    }
+
+    const { genres } = artist;
+
+    query.genres = genres.join(',');
+
+    return await this.findAll(query, query.limit, query.current);
   }
 }

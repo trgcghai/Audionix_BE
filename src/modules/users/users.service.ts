@@ -4,7 +4,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import aqp from 'api-query-params';
 import { ArtistsService } from '../artists/artists.service';
 import {
   CheckFollowingArtistsDto,
@@ -43,17 +42,6 @@ export class UsersService extends BaseService<User> {
     };
   }
 
-  async findOne(id: string) {
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestException('Invalid ID format');
-    }
-
-    const user = await this.userModel.findOne({ _id: id }).exec();
-    return {
-      user,
-    };
-  }
-
   async update(id: string, updateUserDto: UpdateUserDto) {
     if (!mongoose.isValidObjectId(id)) {
       throw new BadRequestException('Invalid ID format');
@@ -80,22 +68,6 @@ export class UsersService extends BaseService<User> {
     };
   }
 
-  async remove(id: string) {
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestException('Invalid ID format');
-    }
-
-    const result = await this.userModel.deleteOne({ _id: id }).exec();
-
-    return {
-      deletedCount: result.deletedCount,
-      message:
-        result.deletedCount > 0
-          ? 'User deleted successfully'
-          : 'User not found',
-    };
-  }
-
   async followArtist(followArtistDto: FollowArtistDto) {
     const { userId, artistId } = followArtistDto;
 
@@ -106,7 +78,7 @@ export class UsersService extends BaseService<User> {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const { user } = await this.findOne(userId);
+    const { item: user } = await this.findOne(userId);
 
     if (!user) {
       throw new BadRequestException('User not found');
@@ -120,7 +92,7 @@ export class UsersService extends BaseService<User> {
       throw new BadRequestException('Artist already followed');
     }
 
-    const { artist } = await this.artistService.findOne(artistId);
+    const { item: artist } = await this.artistService.findOne(artistId);
 
     if (!artist) {
       throw new BadRequestException('Artist not found');
@@ -154,7 +126,7 @@ export class UsersService extends BaseService<User> {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const { user } = await this.findOne(userId);
+    const { item: user } = await this.findOne(userId);
 
     if (!user) {
       throw new BadRequestException('User not found');
@@ -168,7 +140,7 @@ export class UsersService extends BaseService<User> {
       throw new BadRequestException('Artist is not followed');
     }
 
-    const { artist } = await this.artistService.findOne(artistId);
+    const { item: artist } = await this.artistService.findOne(artistId);
 
     if (!artist) {
       throw new BadRequestException('Artist not found');
@@ -203,7 +175,7 @@ export class UsersService extends BaseService<User> {
       throw new BadRequestException('Invalid user ID format');
     }
 
-    const { user } = await this.findOne(userId);
+    const { item: user } = await this.findOne(userId);
 
     if (!user) {
       throw new BadRequestException('User not found');

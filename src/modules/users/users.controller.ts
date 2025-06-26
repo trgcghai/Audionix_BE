@@ -7,16 +7,12 @@ import {
   Param,
   Delete,
   Query,
-  HttpStatus,
   Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {
-  CheckFollowingArtistsDto,
-  FollowArtistDto,
-} from './dto/artist-user.dto';
+import { FollowArtistDto } from './dto/artist-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -61,12 +57,25 @@ export class UsersController {
     return this.usersService.unfollowArtist(followArtistDto);
   }
 
-  @Post('me/following/artists/contains')
+  @Get(':id/following/artists/contains')
   checkIfUserIsFollowingArtists(
-    @Body() checkFollowingArtistsDto: CheckFollowingArtistsDto,
+    @Param('id') id: string,
+    @Query('artistIds') artistIds: string,
   ) {
-    return this.usersService.checkIfUserIsFollowingArtists(
-      checkFollowingArtistsDto,
-    );
+    return this.usersService.checkIfUserIsFollowingArtists({
+      userId: id,
+      artistIds: artistIds.split(','),
+    });
   }
 }
+
+// -crud: xong
+// -follow / unfollow artist: xong
+// -kiểm tra follow artist hay không: xong
+
+// -follow album: put /me/following/albums
+// -unfollow album: delete /me/following/albums
+// -kiểm tra follow album hay không: get /me/following/albums/contains
+// -lấy ra playlist: get /me/playlists
+// -lấy ra album đang theo dõi: get /me/following/albums
+// -lấy ra artist đang theo dõi: get /me/following/artists

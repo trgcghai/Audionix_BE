@@ -44,4 +44,22 @@ export class ArtistsController {
   remove(@Param('id') id: string) {
     return this.artistsService.remove(id);
   }
+
+  @Get(':id/tracks')
+  findAllTracks(@Param('id') id: string, @Query() query: Record<string, any>) {
+    return this.artistsService.findAllTracks(id, query);
+  }
+
+  @Get(':id/related-artists')
+  findRelatedArtists(
+    @Param('id') id: string,
+    @Query() query: Record<string, any>,
+  ) {
+    return this.artistsService.findRelatedArtists(id, query);
+  }
 }
+
+// -crud: xong
+// -lấy ra tracks của artist: /:id/tracks: xong
+// -lấy ra albums của artist: /:id/albums
+// -lấy ra artist tương tự based on genres /:id/related-artists: xong

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, ObjectId } from 'mongoose';
-import { Artist } from 'src/modules/artists/entities/artist.entity';
+import { Image } from 'src/common/interfaces/entity.interface';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -40,33 +40,21 @@ export class User {
   followed_artists: {
     _id: ObjectId;
     name: string;
-    cover_images: {
-      url: string;
-      height: number;
-      width: number;
-    };
+    cover_images: Image[];
   }[];
 
   @Prop()
   followed_albums: {
-    id: ObjectId;
+    _id: ObjectId;
     title: string;
-    images: {
-      url: string;
-      height: number;
-      width: number;
-    }[];
+    images: Image[];
   }[];
 
   @Prop()
   playlists: {
     id: ObjectId;
     title: string;
-    images: {
-      url: string;
-      height: number;
-      width: number;
-    }[];
+    images: Image[];
   }[];
 
   @Prop({
@@ -78,11 +66,7 @@ export class User {
       },
     ],
   })
-  avatar: {
-    url: string;
-    height: number;
-    width: number;
-  }[];
+  avatar: Image[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
