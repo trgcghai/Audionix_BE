@@ -38,6 +38,11 @@ export class ArtistsController {
     return this.artistsService.remove(id);
   }
 
+  @Delete()
+  removeMultiple(@Body('ids') ids: string[]) {
+    return this.artistsService.remove(...ids);
+  }
+
   @Get(':id/tracks')
   findAllTracks(@Param('id') id: string, @Query() query: Record<string, any>) {
     return this.artistsService.findAllTracks(id, query);

@@ -37,4 +37,9 @@ export class AlbumsController {
   remove(@Param('id') id: string) {
     return this.albumsService.remove(id);
   }
+
+  @Delete()
+  removeMultiple(@Body('ids') ids: string[]) {
+    return this.albumsService.remove(...ids);
+  }
 }

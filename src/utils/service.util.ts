@@ -58,12 +58,14 @@ export class BaseService<T> {
     };
   }
 
-  async remove(id: string) {
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestException('Invalid ID format');
+  async remove(...ids: string[]) {
+    for (const id of ids) {
+      if (!mongoose.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
     }
 
-    const result = await this.model.deleteOne({ _id: id }).exec();
+    const result = await this.model.deleteMany({ _id: { $in: ids } }).exec();
 
     return {
       deletedCount: result.deletedCount,

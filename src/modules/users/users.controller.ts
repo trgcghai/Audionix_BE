@@ -64,6 +64,16 @@ export class UsersController {
   }
 
   /* 
+    Delete method to remove multiple users by their IDs.
+    @Body('ids') ids: string[] - An array of user IDs to remove.
+    Returns a confirmation message or the removed user objects.
+  */
+  @Delete()
+  removeMultiple(@Body('ids') ids: string[]) {
+    return this.usersService.remove(...ids);
+  }
+
+  /* 
     Put method to follow an artist.
     @Body() followArtistDto: FollowArtistDto - The data transfer object containing user ID and artist ID.
     Returns a confirmation message or the updated user object.
@@ -135,14 +145,19 @@ export class UsersController {
       albumIds: albumIds.split(','),
     });
   }
+
+  @Get(':id/playlists')
+  findPlaylist(@Param('id') id: string, @Query() query: Record<string, any>) {
+    return this.usersService.findPlaylist(id, query);
+  }
 }
 
 // -crud: xong
 // -follow / unfollow artist: xong
 // -kiểm tra follow artist hay không: xong
 
-// -follow album: put /me/following/albums: xong
-// -unfollow album: delete /me/following/albums: xong
-// -kiểm tra follow album hay không: get /me/following/albums/contains: xong
+// -follow album: put: xong
+// -unfollow album: delete: xong
+// -kiểm tra follow album hay không: xong
 
-// -lấy ra playlist của người dùng: get /me/playlists
+// -lấy ra playlist của người dùng: xong

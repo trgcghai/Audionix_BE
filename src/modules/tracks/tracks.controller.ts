@@ -37,4 +37,9 @@ export class TracksController {
   remove(@Param('id') id: string) {
     return this.tracksService.remove(id);
   }
+
+  @Delete()
+  removeMultiple(@Body('ids') ids: string[]) {
+    return this.tracksService.remove(...ids);
+  }
 }

@@ -10,6 +10,7 @@ import { HttpExceptionFilter } from './common/filters/httpException.filter';
 import { ArtistsModule } from './modules/artists/artists.module';
 import { TracksModule } from './modules/tracks/tracks.module';
 import { AlbumsModule } from './modules/albums/albums.module';
+import { PlaylistsModule } from './modules/playlists/playlists.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AlbumsModule } from './modules/albums/albums.module';
     }),
     TracksModule,
     AlbumsModule,
+    PlaylistsModule,
   ],
   controllers: [AppController],
   providers: [

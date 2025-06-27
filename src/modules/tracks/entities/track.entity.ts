@@ -6,25 +6,7 @@ import { TrackStatus } from '../enum/track-status.enum';
 
 export type TrackDocument = HydratedDocument<Track>;
 
-@Schema({
-  timestamps: true,
-  toJSON: {
-    transform: (_, ret) => {
-      if (ret.artist) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        delete ret.artist.createdAt;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        delete ret.artist.updatedAt;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        delete ret.artist.__v;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        delete ret.artist.genres;
-      }
-
-      return ret;
-    },
-  },
-})
+@Schema({ timestamps: true })
 export class Track {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
@@ -69,11 +51,23 @@ export class Track {
   albums: string[];
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Artist',
-    required: true,
+    type: {
+      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Artist' },
+      name: { type: String, required: true },
+      cover_images: [
+        {
+          url: { type: String, required: true },
+          height: { type: Number, required: true },
+          width: { type: Number, required: true },
+        },
+      ],
+    },
   })
-  artist: Artist;
+  artist: {
+    _id: mongoose.Schema.Types.ObjectId;
+    name: string;
+    cover_images: Image[];
+  };
 
   @Prop({
     type: [String],

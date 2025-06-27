@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import mongoose, { Model } from 'mongoose';
@@ -11,6 +16,7 @@ import {
 import { BaseService } from 'src/utils/service.util';
 import { CheckFollowingAlbumsDto, FollowAlbumDto } from './dto/album-user.dto';
 import { AlbumsService } from '../albums/albums.service';
+import { PlaylistsService } from '../playlists/playlists.service';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -18,6 +24,8 @@ export class UsersService extends BaseService<User> {
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly artistService: ArtistsService,
     private readonly albumService: AlbumsService,
+    @Inject(forwardRef(() => PlaylistsService))
+    private playlistsService: PlaylistsService,
   ) {
     super(userModel);
   }
@@ -277,5 +285,13 @@ export class UsersService extends BaseService<User> {
     return {
       result,
     };
+  }
+
+  async findPlaylist(id: string, query: Record<string, any>) {
+    if (!this.checkIdsValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    return await this.playlistsService.findByUser(id, query);
   }
 }

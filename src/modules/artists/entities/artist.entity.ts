@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Image } from 'src/common/interfaces/entity.interface';
-// import { Image } from 'src/common/interfaces/entity.interface';
 
 export type ArtistDocument = HydratedDocument<Artist>;
 
