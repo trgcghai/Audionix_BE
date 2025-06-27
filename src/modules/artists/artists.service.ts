@@ -25,6 +25,19 @@ export class ArtistsService extends BaseService<Artist> {
     super(artistModel);
   }
 
+  async checkArtistExists(id: string): Promise<boolean> {
+    if (!mongoose.isValidObjectId(id)) {
+      throw new BadRequestException('Invalid artist ID format');
+    }
+    const isArtistExists = await this.artistModel.exists({ _id: id });
+
+    if (!isArtistExists) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    return !!isArtistExists;
+  }
+
   async create(createArtistDto: CreateArtistDto) {
     const { name, cover_images } = createArtistDto;
 
@@ -40,31 +53,19 @@ export class ArtistsService extends BaseService<Artist> {
   }
 
   async findAllTracks(id: string, query: Record<string, any>) {
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestException('Invalid artist ID format');
+    const isArtistExists = await this.checkArtistExists(id);
+
+    if (isArtistExists) {
+      return await this.trackService.findByArtist(id, query);
     }
-
-    const isArtistExists = await this.artistModel.exists({ _id: id });
-
-    if (!isArtistExists) {
-      throw new NotFoundException('Artist not found');
-    }
-
-    return await this.trackService.findByArtist(id, query);
   }
 
   async findAllAlbums(id: string, query: Record<string, any>) {
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestException('Invalid artist ID format');
+    const isArtistExists = await this.checkArtistExists(id);
+
+    if (isArtistExists) {
+      return await this.albumService.findByArtist(id, query);
     }
-
-    const isArtistExists = await this.artistModel.exists({ _id: id });
-
-    if (!isArtistExists) {
-      throw new NotFoundException('Artist not found');
-    }
-
-    return await this.albumService.findByArtist(id, query);
   }
 
   async findRelatedArtists(id: string, query: Record<string, any>) {
