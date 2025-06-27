@@ -22,6 +22,33 @@ export class UsersService extends BaseService<User> {
     super(userModel);
   }
 
+  checkIdsValid(...ids: string[]) {
+    for (const id of ids) {
+      if (!mongoose.isValidObjectId(id)) {
+        return false;
+      }
+      return true;
+    }
+  }
+
+  checkUserAlreadyFollowed(
+    user: User,
+    itemId: string,
+    type: 'artist' | 'album',
+  ): boolean {
+    if (type === 'artist') {
+      return user.followed_artists
+        .map((artist) => artist._id.toString())
+        .includes(itemId);
+    }
+    if (type === 'album') {
+      return user.followed_albums
+        .map((album) => album._id.toString())
+        .includes(itemId);
+    }
+    return false;
+  }
+
   async create(createUserDto: CreateUserDto) {
     const { email } = createUserDto;
 
@@ -47,18 +74,17 @@ export class UsersService extends BaseService<User> {
   async followArtist(followArtistDto: FollowArtistDto) {
     const { userId, artistId } = followArtistDto;
 
-    if (
-      !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(artistId)
-    ) {
+    if (!this.checkIdsValid(userId, artistId)) {
       throw new BadRequestException('Invalid ID format');
     }
 
     const { item: user } = await this.findOne(userId);
 
-    const isArtistAlreadyFollowed = user.followed_artists
-      .map((artist) => artist._id.toString())
-      .includes(artistId);
+    const isArtistAlreadyFollowed = this.checkUserAlreadyFollowed(
+      user,
+      artistId,
+      'artist',
+    );
 
     if (isArtistAlreadyFollowed) {
       throw new BadRequestException('Artist already followed');
@@ -87,24 +113,23 @@ export class UsersService extends BaseService<User> {
   async unfollowArtist(followArtistDto: FollowArtistDto) {
     const { userId, artistId } = followArtistDto;
 
-    if (
-      !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(artistId)
-    ) {
+    if (!this.checkIdsValid(userId, artistId)) {
       throw new BadRequestException('Invalid ID format');
     }
 
     const { item: user } = await this.findOne(userId);
 
-    const isArtistAlreadyFollowed = user.followed_artists
-      .map((artist) => artist._id.toString())
-      .includes(artistId);
+    const isArtistAlreadyFollowed = this.checkUserAlreadyFollowed(
+      user,
+      artistId,
+      'artist',
+    );
 
     if (!isArtistAlreadyFollowed) {
       throw new BadRequestException('Artist is not followed');
     }
 
-    const { item: artist } = await this.artistService.findOne(artistId);
+    await this.artistService.findOne(artistId);
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
@@ -127,23 +152,15 @@ export class UsersService extends BaseService<User> {
   ) {
     const { userId, artistIds } = checkFollowingArtistsDto;
 
-    const isValidArtistIds = artistIds.every((id) =>
-      mongoose.isValidObjectId(id),
-    );
-
-    if (!mongoose.isValidObjectId(userId) || !isValidArtistIds) {
+    if (!this.checkIdsValid(userId, ...artistIds)) {
       throw new BadRequestException('Invalid user ID format');
     }
 
     const { item: user } = await this.findOne(userId);
 
-    const followedArtists = user.followed_artists.map((artist) =>
-      artist._id.toString(),
-    );
-
     const result = artistIds.map((artistId) => ({
       artistId,
-      isFollowing: followedArtists.includes(artistId),
+      isFollowing: this.checkUserAlreadyFollowed(user, artistId, 'artist'),
     }));
 
     return {
@@ -154,10 +171,7 @@ export class UsersService extends BaseService<User> {
   async followAlbum(followAlbumDto: FollowAlbumDto) {
     const { userId, albumId } = followAlbumDto;
 
-    if (
-      !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(albumId)
-    ) {
+    if (!this.checkIdsValid(userId, albumId)) {
       throw new BadRequestException('Invalid ID format');
     }
 
@@ -169,9 +183,11 @@ export class UsersService extends BaseService<User> {
 
     const { item: album } = await this.albumService.findOne(albumId);
 
-    const isAlbumAlreadyFollowed = user.followed_albums
-      .map((album) => album._id.toString())
-      .includes(albumId);
+    const isAlbumAlreadyFollowed = this.checkUserAlreadyFollowed(
+      user,
+      albumId,
+      'album',
+    );
 
     if (isAlbumAlreadyFollowed) {
       throw new BadRequestException('Album already followed');
@@ -200,10 +216,7 @@ export class UsersService extends BaseService<User> {
   async unfollowAlbum(followAlbumDto: FollowAlbumDto) {
     const { userId, albumId } = followAlbumDto;
 
-    if (
-      !mongoose.isValidObjectId(userId) ||
-      !mongoose.isValidObjectId(albumId)
-    ) {
+    if (!this.checkIdsValid(userId, albumId)) {
       throw new BadRequestException('Invalid ID format');
     }
 
@@ -215,9 +228,11 @@ export class UsersService extends BaseService<User> {
 
     await this.albumService.findOne(albumId);
 
-    const isAlbumAlreadyFollowed = user.followed_albums
-      .map((album) => album._id.toString())
-      .includes(albumId);
+    const isAlbumAlreadyFollowed = this.checkUserAlreadyFollowed(
+      user,
+      albumId,
+      'album',
+    );
 
     if (!isAlbumAlreadyFollowed) {
       throw new BadRequestException('Album is not followed');
@@ -248,23 +263,15 @@ export class UsersService extends BaseService<User> {
   ) {
     const { userId, albumIds } = checkFollowingAlbumsDto;
 
-    const isValidAlbumIds = albumIds.every((id) =>
-      mongoose.isValidObjectId(id),
-    );
-
-    if (!mongoose.isValidObjectId(userId) || !isValidAlbumIds) {
+    if (!this.checkIdsValid(userId, ...albumIds)) {
       throw new BadRequestException('Invalid user ID format');
     }
 
     const { item: user } = await this.findOne(userId);
 
-    const followedArtists = user.followed_albums.map((album) =>
-      album._id.toString(),
-    );
-
     const result = albumIds.map((albumId) => ({
       albumId,
-      isFollowing: followedArtists.includes(albumId),
+      isFollowing: this.checkUserAlreadyFollowed(user, albumId, 'album'),
     }));
 
     return {

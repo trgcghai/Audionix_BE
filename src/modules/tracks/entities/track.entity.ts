@@ -11,9 +11,13 @@ export type TrackDocument = HydratedDocument<Track>;
   toJSON: {
     transform: (_, ret) => {
       if (ret.artist) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         delete ret.artist.createdAt;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         delete ret.artist.updatedAt;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         delete ret.artist.__v;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         delete ret.artist.genres;
       }
 

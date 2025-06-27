@@ -71,7 +71,11 @@ export class AlbumsService extends BaseService<Album> {
       totalPages,
       current,
       limit,
-    } = await this.findAll(query, query.limit, query.current);
+    } = await this.findAll(
+      query,
+      query.limit as number,
+      query.current as number,
+    );
 
     return {
       albums,

@@ -78,6 +78,10 @@ export class ArtistsService extends BaseService<Artist> {
 
     query.genres = genres.join(',');
 
-    return await this.findAll(query, query.limit, query.current);
+    return await this.findAll(
+      query,
+      query.limit as number,
+      query.current as number,
+    );
   }
 }

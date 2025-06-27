@@ -56,7 +56,11 @@ export class TracksService extends BaseService<Track> {
       totalPages,
       current,
       limit,
-    } = await this.findAll(query, query.limit, query.current);
+    } = await this.findAll(
+      query,
+      query.limit as number,
+      query.current as number,
+    );
 
     return {
       tracks,
