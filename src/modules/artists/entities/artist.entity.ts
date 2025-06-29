@@ -10,7 +10,7 @@ export class Artist {
     type: mongoose.Schema.Types.ObjectId,
     auto: true,
   })
-  _id: mongoose.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
 
   @Prop({
     type: String,

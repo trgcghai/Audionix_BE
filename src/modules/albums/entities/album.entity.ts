@@ -11,7 +11,7 @@ export class Album {
     type: mongoose.Schema.Types.ObjectId,
     auto: true,
   })
-  _id: mongoose.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
 
   @Prop({
     type: String,
@@ -53,21 +53,9 @@ export class Album {
   cover_images: Image[];
 
   @Prop({
-    type: [
-      {
-        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Track' },
-        title: { type: String, required: true },
-        duration_ms: { type: Number, required: true },
-        time_added: { type: Date, default: Date.now },
-      },
-    ],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Track' }],
   })
-  tracks: {
-    _id: mongoose.Schema.Types.ObjectId;
-    title: string;
-    duration_ms: number;
-    time_added: Date;
-  }[];
+  tracks: mongoose.Schema.Types.ObjectId[];
 
   @Prop({
     type: [String],
@@ -81,22 +69,6 @@ export class Album {
     min: 0,
   })
   number_of_followers: number;
-
-  @Virtual({
-    get: function (this: Album): number {
-      return this.tracks ? this.tracks.length : 0;
-    },
-  })
-  number_of_tracks: number;
-
-  @Virtual({
-    get: function (this: Album): number {
-      return this.tracks
-        ? this.tracks.reduce((prev, curr) => prev + curr.duration_ms || 0, 0)
-        : 0;
-    },
-  })
-  total_duration_ms: number;
 }
 
 export const AlbumSchema = SchemaFactory.createForClass(Album);

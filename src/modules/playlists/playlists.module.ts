@@ -4,10 +4,12 @@ import { PlaylistsController } from './playlists.controller';
 import { Playlist, PlaylistSchema } from './entities/playlist.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from '../users/users.module';
+import { TracksModule } from '../tracks/tracks.module';
 
 @Module({
   imports: [
     forwardRef(() => UsersModule),
+    forwardRef(() => TracksModule),
     MongooseModule.forFeature([
       {
         name: Playlist.name,

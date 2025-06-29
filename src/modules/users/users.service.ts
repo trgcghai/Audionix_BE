@@ -17,6 +17,8 @@ import { BaseService } from 'src/utils/service.util';
 import { CheckFollowingAlbumsDto, FollowAlbumDto } from './dto/album-user.dto';
 import { AlbumsService } from '../albums/albums.service';
 import { PlaylistsService } from '../playlists/playlists.service';
+import { Artist } from '../artists/entities/artist.entity';
+import { Album } from '../albums/entities/album.entity';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -46,12 +48,12 @@ export class UsersService extends BaseService<User> {
   ): boolean {
     if (type === 'artist') {
       return user.followed_artists
-        .map((artist) => artist._id.toString())
+        .map((artist) => artist.toString())
         .includes(itemId);
     }
     if (type === 'album') {
       return user.followed_albums
-        .map((album) => album._id.toString())
+        .map((album) => album.toString())
         .includes(itemId);
     }
     return false;
@@ -88,32 +90,18 @@ export class UsersService extends BaseService<User> {
 
     const { item: user } = await this.findOne(userId);
 
-    const isArtistAlreadyFollowed = this.checkUserAlreadyFollowed(
-      user,
-      artistId,
-      'artist',
-    );
-
-    if (isArtistAlreadyFollowed) {
-      throw new BadRequestException('Artist already followed');
-    }
-
     const { item: artist } = await this.artistService.findOne(artistId);
 
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(
-        userId,
-        {
-          $push: {
-            followed_artists: artist,
-          },
+    const result = await user
+      .updateOne({
+        $addToSet: {
+          followed_artists: artist,
         },
-        { new: true },
-      )
+      })
       .exec();
 
     return {
-      user: updatedUser,
+      result,
       message: 'Artist followed successfully',
     };
   }
@@ -127,30 +115,16 @@ export class UsersService extends BaseService<User> {
 
     const { item: user } = await this.findOne(userId);
 
-    const isArtistAlreadyFollowed = this.checkUserAlreadyFollowed(
-      user,
-      artistId,
-      'artist',
-    );
-
-    if (!isArtistAlreadyFollowed) {
-      throw new BadRequestException('Artist is not followed');
-    }
-
     await this.artistService.findOne(artistId);
 
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      userId,
-      {
-        $pull: {
-          followed_artists: { _id: artistId },
-        },
+    const result = await user.updateOne({
+      $pull: {
+        followed_artists: { _id: artistId },
       },
-      { new: true },
-    );
+    });
 
     return {
-      user: updatedUser,
+      result,
       message: 'Artist unfollowed successfully',
     };
   }
@@ -185,38 +159,20 @@ export class UsersService extends BaseService<User> {
 
     const { item: user } = await this.findOne(userId);
 
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
     const { item: album } = await this.albumService.findOne(albumId);
 
-    const isAlbumAlreadyFollowed = this.checkUserAlreadyFollowed(
-      user,
-      albumId,
-      'album',
-    );
-
-    if (isAlbumAlreadyFollowed) {
-      throw new BadRequestException('Album already followed');
-    }
-
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(
-        userId,
-        {
-          $push: {
-            followed_albums: album,
-          },
+    const result = await user
+      .updateOne({
+        $addToSet: {
+          followed_albums: album,
         },
-        { new: true },
-      )
+      })
       .exec();
 
     await this.albumService.updateAlbumFollowCount(albumId, 1);
 
     return {
-      user: updatedUser,
+      result,
       message: 'Album followed successfully',
     };
   }
@@ -230,38 +186,20 @@ export class UsersService extends BaseService<User> {
 
     const { item: user } = await this.findOne(userId);
 
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
     await this.albumService.findOne(albumId);
 
-    const isAlbumAlreadyFollowed = this.checkUserAlreadyFollowed(
-      user,
-      albumId,
-      'album',
-    );
-
-    if (!isAlbumAlreadyFollowed) {
-      throw new BadRequestException('Album is not followed');
-    }
-
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(
-        userId,
-        {
-          $pull: {
-            followed_albums: { _id: albumId },
-          },
+    const result = await user
+      .updateOne({
+        $pull: {
+          followed_albums: { _id: albumId },
         },
-        { new: true },
-      )
+      })
       .exec();
 
     await this.albumService.updateAlbumFollowCount(albumId, -1);
 
     return {
-      user: updatedUser,
+      result,
       message: 'Album unfollowed successfully',
     };
   }
@@ -293,5 +231,33 @@ export class UsersService extends BaseService<User> {
     }
 
     return await this.playlistsService.findByUser(id, query);
+  }
+
+  async findFollowedArtists(id: string) {
+    if (!this.checkIdsValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const { item: user } = await this.findOne(id);
+
+    await user.populate<{ followed_artists: Artist }>('followed_artists');
+
+    return {
+      artists: user.followed_artists,
+    };
+  }
+
+  async findFollowedAlbums(id: string) {
+    if (!this.checkIdsValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const { item: user } = await this.findOne(id);
+
+    await user.populate<{ followed_albums: Album }>('followed_albums');
+
+    return {
+      albums: user.followed_albums,
+    };
   }
 }

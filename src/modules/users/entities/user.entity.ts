@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, ObjectId } from 'mongoose';
+import { ref } from 'process';
 import { Image } from 'src/common/interfaces/entity.interface';
 
 export type UserDocument = HydratedDocument<User>;
@@ -31,44 +32,22 @@ export class User {
   @Prop({
     type: [
       {
-        _id: { type: mongoose.Schema.ObjectId, ref: 'Artist' },
-        name: { type: String, required: true },
-        cover_images: [
-          {
-            url: { type: String, required: true },
-            height: { type: Number, required: true },
-            width: { type: Number, required: true },
-          },
-        ],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Artist',
       },
     ],
   })
-  followed_artists: {
-    _id: ObjectId;
-    name: string;
-    cover_images: Image[];
-  }[];
+  followed_artists: mongoose.Schema.Types.ObjectId[];
 
   @Prop({
     type: [
       {
-        _id: { type: mongoose.Schema.ObjectId, ref: 'Album' },
-        title: { type: String, required: true },
-        images: [
-          {
-            url: { type: String, required: true },
-            height: { type: Number, required: true },
-            width: { type: Number, required: true },
-          },
-        ],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Album',
       },
     ],
   })
-  followed_albums: {
-    _id: ObjectId;
-    title: string;
-    images: Image[];
-  }[];
+  followed_albums: mongoose.Schema.Types.ObjectId[];
 
   @Prop({
     type: [

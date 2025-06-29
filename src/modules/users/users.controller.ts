@@ -74,6 +74,16 @@ export class UsersController {
   }
 
   /* 
+    Get method to retrieve artists followed by a user.
+    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
+    Returns a list of artists followed by the user.
+  */
+  @Get(':id/following/artists')
+  findFollowedArtists(@Param('id') id: string) {
+    return this.usersService.findFollowedArtists(id);
+  }
+
+  /* 
     Put method to follow an artist.
     @Body() followArtistDto: FollowArtistDto - The data transfer object containing user ID and artist ID.
     Returns a confirmation message or the updated user object.
@@ -107,6 +117,16 @@ export class UsersController {
       userId: id,
       artistIds: artistIds.split(','),
     });
+  }
+
+  /* 
+    Get method to retrieve artists followed by a user.
+    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
+    Returns a list of artists followed by the user.
+  */
+  @Get(':id/following/albums')
+  findFollowedAlbums(@Param('id') id: string) {
+    return this.usersService.findFollowedAlbums(id);
   }
 
   /* 
@@ -146,6 +166,12 @@ export class UsersController {
     });
   }
 
+  /* 
+    Get method to retrieve playlists of a user.
+    @Param('id') id: string - The ID of the user whose playlists are to be retrieved.
+    @Query() query: Record<string, any> - Optional query parameters for filtering.
+    Returns a list of playlists associated with the user.
+  */
   @Get(':id/playlists')
   findPlaylist(@Param('id') id: string, @Query() query: Record<string, any>) {
     return this.usersService.findPlaylist(id, query);

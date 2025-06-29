@@ -1,7 +1,7 @@
 import mongoose, { HydratedDocument } from 'mongoose';
 import { PlaylistStatus } from '../enum/playlist-status.enum';
 import { Image } from 'src/common/interfaces/entity.interface';
-import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type PlaylistDocument = HydratedDocument<Playlist>;
 
@@ -51,37 +51,9 @@ export class Playlist {
   cover_images: Image[];
 
   @Prop({
-    type: [
-      {
-        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Track' },
-        title: { type: String, required: true },
-        duration_ms: { type: Number, required: true },
-        time_added: { type: Date, default: Date.now },
-      },
-    ],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Track' }],
   })
-  tracks: {
-    _id: mongoose.Schema.Types.ObjectId;
-    title: string;
-    duration_ms: number;
-    time_added: Date;
-  }[];
-
-  @Virtual({
-    get: function (this: Playlist): number {
-      return this.tracks ? this.tracks.length : 0;
-    },
-  })
-  number_of_tracks: number;
-
-  @Virtual({
-    get: function (this: Playlist): number {
-      return this.tracks
-        ? this.tracks.reduce((prev, curr) => prev + curr.duration_ms || 0, 0)
-        : 0;
-    },
-  })
-  total_duration_ms: number;
+  tracks: mongoose.Schema.Types.ObjectId[];
 }
 
 export const PlaylistSchema = SchemaFactory.createForClass(Playlist);

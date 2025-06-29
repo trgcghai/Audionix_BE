@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Image } from 'src/common/interfaces/entity.interface';
-import { Artist } from 'src/modules/artists/entities/artist.entity';
 import { TrackStatus } from '../enum/track-status.enum';
+import { ref } from 'process';
 
 export type TrackDocument = HydratedDocument<Track>;
 
@@ -12,7 +12,7 @@ export class Track {
     type: mongoose.Schema.Types.ObjectId,
     auto: true,
   })
-  _id: mongoose.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
 
   @Prop({
     type: String,
@@ -47,27 +47,21 @@ export class Track {
   })
   status: string;
 
-  @Prop()
-  albums: string[];
+  @Prop({
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Album',
+      },
+    ],
+  })
+  albums: mongoose.Schema.Types.ObjectId[];
 
   @Prop({
-    type: {
-      _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Artist' },
-      name: { type: String, required: true },
-      cover_images: [
-        {
-          url: { type: String, required: true },
-          height: { type: Number, required: true },
-          width: { type: Number, required: true },
-        },
-      ],
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Artist',
   })
-  artist: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-    cover_images: Image[];
-  };
+  artist: mongoose.Schema.Types.ObjectId;
 
   @Prop({
     type: [String],

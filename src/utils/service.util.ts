@@ -58,6 +58,24 @@ export class BaseService<T> {
     };
   }
 
+  async findMany(ids: string[]) {
+    for (const id of ids) {
+      if (!mongoose.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+    }
+
+    const items = await this.model.find({ _id: { $in: ids } }).exec();
+
+    if (items.length === 0) {
+      throw new NotFoundException(`${this.model.modelName} not found`);
+    }
+
+    return {
+      items,
+    };
+  }
+
   async remove(...ids: string[]) {
     for (const id of ids) {
       if (!mongoose.isValidObjectId(id)) {
