@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Query,
+  Put,
 } from '@nestjs/common';
 import { AlbumsService } from './albums.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
@@ -68,5 +69,26 @@ export class AlbumsController {
   @Delete()
   removeMultiple(@Body('ids') ids: string[]) {
     return this.albumsService.remove(...ids);
+  }
+
+  @Get(':id/tracks')
+  findTracksInAlbum(@Param('id') id: string) {
+    return this.albumsService.findTracksInAlbum(id);
+  }
+
+  @Put(':id/tracks')
+  addTracksToAlbum(
+    @Param('id') albumId: string,
+    @Body('trackIds') trackIds: string[] = [],
+  ) {
+    return this.albumsService.addTracksToAlbum({ albumId, trackIds });
+  }
+
+  @Delete(':id/tracks')
+  removeTracksFromAlbum(
+    @Param('id') albumId: string,
+    @Body('trackIds') trackIds: string[] = [],
+  ) {
+    return this.albumsService.removeTracksFromAlbum({ albumId, trackIds });
   }
 }

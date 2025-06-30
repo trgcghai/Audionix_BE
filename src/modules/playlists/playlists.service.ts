@@ -109,13 +109,7 @@ export class PlaylistsService extends BaseService<Playlist> {
 
     const result = await playlist.updateOne({
       $addToSet: {
-        tracks: tracks.map((track) => ({
-          _id: track._id,
-          title: track.title,
-          duration_ms: track.duration_ms,
-          cover_images: track.cover_images,
-          time_added: new Date(),
-        })),
+        tracks: tracks,
       },
     });
 
@@ -145,7 +139,9 @@ export class PlaylistsService extends BaseService<Playlist> {
     const result = await playlist.updateOne({
       $pull: {
         tracks: {
-          $in: trackIds,
+          _id: {
+            $in: trackIds,
+          },
         },
       },
     });
@@ -167,7 +163,7 @@ export class PlaylistsService extends BaseService<Playlist> {
       throw new NotFoundException('Playlist not found');
     }
 
-    await playlist.populate<{ tracks: Track }>('tracks');
+    await playlist.populate('tracks._id');
 
     return {
       _id: playlist._id,

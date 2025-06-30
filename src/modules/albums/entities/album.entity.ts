@@ -53,9 +53,17 @@ export class Album {
   cover_images: Image[];
 
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Track' }],
+    type: [
+      {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Track' },
+        time_added: { type: mongoose.Schema.Types.Date, default: Date.now },
+      },
+    ],
   })
-  tracks: mongoose.Schema.Types.ObjectId[];
+  tracks: {
+    _id: mongoose.Schema.Types.ObjectId;
+    time_added: mongoose.Schema.Types.Date;
+  }[];
 
   @Prop({
     type: [String],
