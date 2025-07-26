@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { AlbumStatus } from '../enum/album-status.enum';
 import { Image } from 'src/common/interfaces/entity.interface';

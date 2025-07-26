@@ -6,9 +6,13 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create-track.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { CustomFileValidator } from 'src/common/validators/file.validator';
 
 @Controller('tracks')
 export class TracksController {
@@ -20,8 +24,25 @@ export class TracksController {
    * Returns the id of the created track.
    */
   @Post()
-  create(@Body() createTrackDto: CreateTrackDto) {
-    return this.tracksService.create(createTrackDto);
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'audio', maxCount: 1 },
+      { name: 'cover_image', maxCount: 1 },
+    ]),
+  )
+  uploadFile(
+    @Body() createTrackDto: CreateTrackDto,
+    @UploadedFiles(new CustomFileValidator())
+    files: {
+      audio?: Express.Multer.File[];
+      cover_image?: Express.Multer.File[];
+    },
+  ) {
+    return this.tracksService.create({
+      createTrackDto,
+      audioFile: files.audio || [],
+      coverImageFile: files.cover_image || [],
+    });
   }
 
   /**
@@ -37,7 +58,7 @@ export class TracksController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
-    return this.tracksService.findAll(query, limit, current);
+    return this.tracksService.findWithArtist(query, limit, current);
   }
 
   /**
@@ -57,7 +78,7 @@ export class TracksController {
    */
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.tracksService.remove(id);
+    return this.tracksService.deleteTrack(id);
   }
 
   /**

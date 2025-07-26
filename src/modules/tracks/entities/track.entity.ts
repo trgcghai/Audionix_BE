@@ -2,7 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Image } from 'src/common/interfaces/entity.interface';
 import { TrackStatus } from '../enum/track-status.enum';
-import { ref } from 'process';
 
 export type TrackDocument = HydratedDocument<Track>;
 
@@ -31,9 +30,11 @@ export class Track {
   @Prop({
     type: [
       {
+        _id: false,
         url: { type: String, required: true },
         height: { type: Number, required: true },
         width: { type: Number, required: true },
+        key: { type: String, required: true },
       },
     ],
   })
@@ -68,6 +69,23 @@ export class Track {
     default: [],
   })
   genres: string[];
+
+  @Prop({
+    type: {
+      _id: false,
+      url: { type: String, required: true },
+      key: { type: String, required: true },
+      size: { type: Number, required: true },
+      mimetype: { type: String, required: true },
+    },
+    required: true,
+  })
+  file: {
+    url: string;
+    key: string;
+    size: number;
+    mimetype: string;
+  };
 }
 
 export const TrackSchema = SchemaFactory.createForClass(Track);

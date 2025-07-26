@@ -1,11 +1,4 @@
-import {
-  ArrayNotEmpty,
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  Min,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { TrackStatus } from '../enum/track-status.enum';
 
 export class CreateTrackDto {
@@ -13,20 +6,17 @@ export class CreateTrackDto {
   @IsNotEmpty()
   title: string;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  @Min(0)
-  duration_ms: number;
+  duration_ms: string;
 
-  @IsNotEmpty()
   @IsEnum(TrackStatus)
-  status: string;
+  status: string = TrackStatus.HIDDEN;
 
   @IsNotEmpty()
   @IsString()
   artistId: string;
 
   @IsString({ each: true })
-  @ArrayNotEmpty()
   genres: string[];
 }

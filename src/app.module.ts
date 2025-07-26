@@ -11,6 +11,8 @@ import { ArtistsModule } from './modules/artists/artists.module';
 import { TracksModule } from './modules/tracks/tracks.module';
 import { AlbumsModule } from './modules/albums/albums.module';
 import { PlaylistsModule } from './modules/playlists/playlists.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { PlaylistsModule } from './modules/playlists/playlists.module';
     TracksModule,
     AlbumsModule,
     PlaylistsModule,
+    AuthModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [

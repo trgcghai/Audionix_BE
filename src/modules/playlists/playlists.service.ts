@@ -13,7 +13,6 @@ import mongoose, { Model } from 'mongoose';
 import { UsersService } from '../users/users.service';
 import { TracksService } from '../tracks/tracks.service';
 import { TrackPlaylistDto } from './dto/track-playlist.dto';
-import { Track } from '../tracks/entities/track.entity';
 
 @Injectable()
 export class PlaylistsService extends BaseService<Playlist> {
