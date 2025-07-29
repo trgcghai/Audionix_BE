@@ -207,6 +207,8 @@ export class AuthService {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    await this.redisService.del('refreshToken:' + account._id);
+
     await this.redisService.set(
       'refreshToken:' + account._id,
       refreshToken,
@@ -229,5 +231,22 @@ export class AuthService {
     const { password, ...result } = account.toJSON();
 
     return result;
+  }
+
+  async logout(accountId: string, response: Response) {
+    if (!mongoose.isValidObjectId(accountId)) {
+      throw new BadRequestException('Invalid account ID format');
+    }
+
+    const account = await this.accountModel.findById(accountId).exec();
+
+    if (!account) {
+      throw new NotFoundException(`Account not found`);
+    }
+
+    await this.redisService.del('refreshToken:' + account._id);
+
+    response.clearCookie('Authentication');
+    response.clearCookie('Refresh');
   }
 }
