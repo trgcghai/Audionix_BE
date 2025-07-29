@@ -13,11 +13,18 @@ import { AlbumsModule } from './modules/albums/albums.module';
 import { PlaylistsModule } from './modules/playlists/playlists.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
     UsersModule,
     ArtistsModule,
+    TracksModule,
+    AlbumsModule,
+    PlaylistsModule,
+    AuthModule,
+    UploadModule,
+    RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -28,11 +35,6 @@ import { UploadModule } from './modules/upload/upload.module';
       }),
       inject: [ConfigService],
     }),
-    TracksModule,
-    AlbumsModule,
-    PlaylistsModule,
-    AuthModule,
-    UploadModule,
   ],
   controllers: [AppController],
   providers: [

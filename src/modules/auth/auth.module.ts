@@ -10,11 +10,13 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
+    RedisModule,
     MongooseModule.forFeature([
       {
         name: Account.name,

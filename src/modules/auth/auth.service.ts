@@ -16,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,7 @@ export class AuthService {
     @Inject() private userService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private redisService: RedisService,
   ) {}
 
   async hashPassword(password: string): Promise<string> {
@@ -204,6 +206,12 @@ export class AuthService {
         this.configService.getOrThrow<string>('NODE_ENV') === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
+
+    await this.redisService.set(
+      'refreshToken:' + account._id,
+      refreshToken,
+      7 * 24 * 60 * 60,
+    );
   }
 
   async validateAccount(email: string, pass: string): Promise<any> {
