@@ -8,11 +8,13 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
+  Patch,
 } from '@nestjs/common';
 import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CustomFileValidator } from 'src/common/validators/file.validator';
+import { UpdateTrackDto } from './dto/update-track.dto';
 
 @Controller('tracks')
 export class TracksController {
@@ -30,7 +32,7 @@ export class TracksController {
       { name: 'cover_image', maxCount: 1 },
     ]),
   )
-  uploadFile(
+  createTrack(
     @Body() createTrackDto: CreateTrackDto,
     @UploadedFiles(new CustomFileValidator())
     files: {

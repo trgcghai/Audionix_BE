@@ -6,15 +6,23 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
+  Request,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { RegisterDto } from './dto/auth.dto';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { Account } from './entities/account.entity';
+import { CurrentAccount } from 'src/common/decorators/current-account.decorator';
+import { Response } from 'express';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // get all accounts - retrieve all accounts
   @Get('accounts')
   getAllAccounts(
     @Query() query: Record<string, any>,
@@ -24,63 +32,53 @@ export class AuthController {
     return this.authService.findAll(query, limit, current);
   }
 
-  // get account by id - retrieve a specific account by ID
   @Get('accounts/:id')
   getAccountById(@Param('id') id: string) {
     return this.authService.findOne(id);
   }
 
-  // delete an account - remove an account by ID
   @Delete('accounts/:id')
   deleteAccount(@Param('id') id: string) {
     return this.authService.remove(id);
   }
 
-  // delete many accounts - remove multiple accounts based on ids
   @Delete('accounts')
   deleteManyAccounts(@Body('ids') ids: string[]) {
     return this.authService.remove(...ids);
   }
 
-  // register - create a new account and new user
   @Post('register')
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
-  // login - authenticate user and return access token and refresh token
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(
+    @CurrentAccount() account: Account,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return await this.authService.login(account, response);
   }
 
-  // refresh - refresh access token using refresh token
-  @Post('refresh')
-  refresh() {
-    return 'this endpoint will refresh the access token using the provided refresh token';
-  }
-
-  // authenticate - check if the user is authenticated
-  @Get('authenticate')
-  authenticate() {
-    return 'this endpoint will check if the user is authenticated';
-  }
-
-  // logout - invalidate the access token and refresh token
+  @UseGuards(LocalAuthGuard)
   @Post('logout')
-  logout() {
-    return 'this endpoint will invalidate the access token and refresh token';
+  async logout(@Request() req) {
+    return req.logout();
   }
 
-  // forgotPassword - send reset password email
-  @Post('forgot-password')
-  forgotPassword(@Body('email') email: string) {
-    return `Reset password email sent to ${email}`;
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@CurrentAccount() account: Account) {
+    return account;
   }
 
-  // verify otp - verify the OTP sent to the user
-  @Post('verify-otp')
-  verifyOtp(@Body('otp') otp: string) {
-    return `OTP ${otp} verified successfully`;
+  @UseGuards(JwtRefreshAuthGuard)
+  @Post('refresh-token')
+  async verifyToken(
+    @CurrentAccount() account: Account,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return await this.authService.login(account, response);
   }
 }

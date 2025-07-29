@@ -27,7 +27,13 @@ export class RegisterDto {
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(20)
-  username: string;
+  firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(20)
+  lastName: string;
 }
 
 export class LoginDto {

@@ -64,6 +64,7 @@ export class TracksService extends BaseService<Track> {
     } = await this.uploadService.uploadTrack({
       fileName: audioFile[0].originalname,
       file: audioFile[0],
+      author: artistId,
     });
 
     const {
@@ -75,6 +76,7 @@ export class TracksService extends BaseService<Track> {
       fileName: coverImageFile[0].originalname,
       file: coverImageFile[0],
       path: 'cover_images',
+      author: artistId,
     });
 
     const result = await this.trackModel.create({

@@ -1,12 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
-import { UploadService } from './upload.service';
+import { Controller } from '@nestjs/common';
 
 @Controller('upload')
 export class UploadController {
-  constructor(private readonly uploadService: UploadService) {}
-
-  @Get()
-  findAll() {
-    return `This action returns all upload resources`;
-  }
+  constructor() {}
 }

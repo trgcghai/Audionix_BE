@@ -40,15 +40,17 @@ export class UploadService {
     fileName,
     file,
     path = 'cover_images',
+    author,
   }: {
     fileName: string;
     file: Express.Multer.File;
     path?: 'cover_images' | 'user_avatars';
+    author: string;
   }) {
     try {
       const region = this.configService.getOrThrow('AWS_S3_REGION');
 
-      const key = `${path}/${Date.now().toString()}-${fileName}`;
+      const key = `${path}/${fileName}-${author}`;
       await this.client.send(
         new PutObjectCommand({
           Bucket: this.bucketName,
@@ -81,14 +83,16 @@ export class UploadService {
   async uploadTrack({
     fileName,
     file,
+    author,
   }: {
     fileName: string;
     file: Express.Multer.File;
+    author: string;
   }) {
     try {
       const region = this.configService.getOrThrow('AWS_S3_REGION');
 
-      const key = `tracks/${Date.now().toString()}-${fileName}`;
+      const key = `tracks/${fileName}-${author}`;
       await this.client.send(
         new PutObjectCommand({
           Bucket: this.bucketName,

@@ -15,17 +15,23 @@ export class Account {
   @Prop({ required: true, unique: true, type: String, trim: true })
   email: string;
 
-  @Prop({ required: true, type: String, trim: true })
+  @Prop({ required: true, type: String, trim: true, select: false })
   password: string;
 
   @Prop({ required: true, type: String, trim: true })
-  username: string;
+  firstName: string;
+
+  @Prop({ required: true, type: String, trim: true })
+  lastName: string;
 
   @Prop({ type: [String], trim: true, enum: Role, default: [Role.User] })
   role: Role[];
 
-  @Prop({ type: Boolean, trim: true, default: false })
-  is_verified: boolean;
+  @Prop({
+    type: Boolean,
+    default: false,
+  })
+  isVerified: boolean;
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);

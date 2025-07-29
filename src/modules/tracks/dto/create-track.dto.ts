@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { TrackStatus } from '../enum/track-status.enum';
 
 export class CreateTrackDto {
@@ -10,6 +10,7 @@ export class CreateTrackDto {
   @IsNotEmpty()
   duration_ms: string;
 
+  @IsOptional()
   @IsEnum(TrackStatus)
   status: string = TrackStatus.HIDDEN;
 

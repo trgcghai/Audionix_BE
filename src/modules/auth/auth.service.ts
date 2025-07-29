@@ -3,20 +3,70 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { RegisterDto } from './dto/auth.dto';
 import { UsersService } from '../users/users.service';
 import { Account } from './entities/account.entity';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
+import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(Account.name) private accountModel: Model<Account>,
     @Inject() private userService: UsersService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
+
+  async hashPassword(password: string): Promise<string> {
+    try {
+      const salt = await bcrypt.genSalt();
+      const hash = await bcrypt.hash(password, salt);
+      return hash;
+    } catch (error) {
+      throw new BadRequestException('Error hashing password');
+    }
+  }
+
+  async comparePassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    try {
+      return await bcrypt.compare(password, hashedPassword);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid password');
+    }
+  }
+
+  async generateTokens(payload: TokenPayload) {
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET_KEY'),
+      expiresIn: this.configService.getOrThrow<string>(
+        'JWT_ACCESS_TOKEN_EXPIRED',
+      ),
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET_KEY'),
+      expiresIn: this.configService.getOrThrow<string>(
+        'JWT_REFRESH_TOKEN_EXPIRED',
+      ),
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
 
   async findAll(
     query: Record<string, any>,
@@ -103,7 +153,7 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const { email, password, username } = registerDto;
+    const { email, password, firstName, lastName } = registerDto;
 
     const isEmailExists = await this.accountModel.exists({ email });
 
@@ -111,15 +161,18 @@ export class AuthService {
       throw new BadRequestException('Email already exists');
     }
 
+    const hashedPassword = await this.hashPassword(password);
+
     const createAccountResult = await this.accountModel.create({
       email,
-      password,
-      username,
+      password: hashedPassword,
+      firstName,
+      lastName,
     });
 
     const createUserResult = await this.userService.create({
       email,
-      username,
+      username: firstName + ' ' + lastName,
       avatar: [],
     });
 
@@ -131,10 +184,42 @@ export class AuthService {
     };
   }
 
-  login(loginDto: LoginDto) {
-    return {
-      message: 'User logged in successfully',
-      user: loginDto,
-    };
+  async login(account: Account, response: Response) {
+    const { accessToken, refreshToken } = await this.generateTokens({
+      sub: account._id.toString(),
+      email: account.email,
+      role: account.role,
+    });
+
+    response.cookie('Authentication', accessToken, {
+      httpOnly: true,
+      secure:
+        this.configService.getOrThrow<string>('NODE_ENV') === 'production',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    response.cookie('Refresh', refreshToken, {
+      httpOnly: true,
+      secure:
+        this.configService.getOrThrow<string>('NODE_ENV') === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+  }
+
+  async validateAccount(email: string, pass: string): Promise<any> {
+    const account = await this.accountModel
+      .findOne({ email })
+      .select('+password')
+      .exec();
+
+    if (!account) return null;
+
+    const isPasswordValid = await this.comparePassword(pass, account.password);
+
+    if (!isPasswordValid) return null;
+
+    const { password, ...result } = account.toJSON();
+
+    return result;
   }
 }
