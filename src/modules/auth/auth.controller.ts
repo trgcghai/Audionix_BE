@@ -18,6 +18,7 @@ import { Account } from './entities/account.entity';
 import { CurrentAccount } from 'src/common/decorators/current-account.decorator';
 import { Response } from 'express';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
+import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -58,13 +59,22 @@ export class AuthController {
     @CurrentAccount() account: Account,
     @Res({ passthrough: true }) response: Response,
   ) {
-    return await this.authService.login(account, response);
+    await this.authService.login(account, response);
+    return {
+      message: 'Log in successfully',
+    };
   }
 
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Request() req) {
-    return req.logout();
+  async logout(
+    @CurrentAccount() account: Account,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.logout(account._id.toString(), response);
+    return {
+      message: 'Logged out successfully',
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -79,6 +89,9 @@ export class AuthController {
     @CurrentAccount() account: Account,
     @Res({ passthrough: true }) response: Response,
   ) {
-    return await this.authService.login(account, response);
+    await this.authService.login(account, response);
+    return {
+      message: 'Token refreshed successfully',
+    };
   }
 }
