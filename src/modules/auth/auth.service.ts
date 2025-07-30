@@ -241,6 +241,10 @@ export class AuthService {
     );
 
     await this.redisService.set(key, refreshToken, 7 * 24 * 60 * 60);
+
+    return {
+      account,
+    };
   }
 
   async refreshToken(account: Account, request: Request, response: Response) {
@@ -320,5 +324,24 @@ export class AuthService {
       message: 'Account verified successfully',
       result,
     };
+  }
+
+  async sendOtp(email: string) {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    const activationCode = await this.otpService.generateOtp(email);
+
+    await this.mailerService.sendMail({
+      to: email,
+      from: 'noreply@nestjs.com',
+      subject: 'Verify your account',
+      template: 'register',
+      context: {
+        name: email,
+        activationCode: activationCode,
+      },
+    });
   }
 }

@@ -58,10 +58,7 @@ export class AuthController {
     @CurrentAccount() account: Account,
     @Res({ passthrough: true }) response: Response,
   ) {
-    await this.authService.login(account, response);
-    return {
-      message: 'Log in successfully',
-    };
+    return await this.authService.login(account, response);
   }
 
   @Post('logout')
@@ -104,5 +101,10 @@ export class AuthController {
   @Post('verify-otp')
   verifyOtp(@Body('email') email: string, @Body('code') code: string) {
     return this.authService.verifyOtp(email, code);
+  }
+
+  @Post('send-otp')
+  resendOtp(@Body('email') email: string) {
+    return this.authService.sendOtp(email);
   }
 }
