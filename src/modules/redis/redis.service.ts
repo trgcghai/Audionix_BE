@@ -1,11 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisClientType } from '@redis/client';
+import { RedisItemName, RedisServiceName } from './redis-key.enum';
+import { createRedisKey } from './redis.helper';
 
 @Injectable()
 export class RedisService {
   constructor(
     @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
   ) {}
+
+  async createKey(service: RedisServiceName, item: RedisItemName, id: string) {
+    return createRedisKey(service, item, id);
+  }
 
   // Lưu dữ liệu vào Redis
   async set(key: string, value: string, ttl?: number): Promise<void> {

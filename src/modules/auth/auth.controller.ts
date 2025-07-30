@@ -16,9 +16,8 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Account } from './entities/account.entity';
 import { CurrentAccount } from 'src/common/decorators/current-account.decorator';
-import { Response } from 'express';
+import { Request as ExpressRequest, Response } from 'express';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
-import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -65,15 +64,21 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('logout')
+  @UseGuards(JwtAuthGuard)
   async logout(
     @CurrentAccount() account: Account,
+    @Request() request: ExpressRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
-    await this.authService.logout(account._id.toString(), response);
+    if (account) {
+      await this.authService.logout(account._id.toString(), request, response);
+      return {
+        message: 'Log out successfully',
+      };
+    }
     return {
-      message: 'Logged out successfully',
+      message: 'No account found to log out',
     };
   }
 
@@ -87,9 +92,10 @@ export class AuthController {
   @Post('refresh-token')
   async verifyToken(
     @CurrentAccount() account: Account,
+    @Request() request: ExpressRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
-    await this.authService.login(account, response);
+    await this.authService.refreshToken(account, request, response);
     return {
       message: 'Token refreshed successfully',
     };

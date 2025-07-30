@@ -1,12 +1,15 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RedisService } from './modules/redis/redis.service';
+import { Public } from './common/decorators/is-public.decorator';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly redisService: RedisService,
+    private readonly mailerService: MailerService, // Ensure MailerService is imported
   ) {}
 
   @Get()
@@ -24,5 +27,28 @@ export class AppController {
   async getData(@Param('key') key: string) {
     const data = await this.redisService.getJson(key);
     return { key, data };
+  }
+
+  @Get('/mail')
+  @Public()
+  async testMail(): Promise<string> {
+    try {
+      await this.mailerService.sendMail({
+        to: 'conghai.tpma@gmail.com',
+        from: 'noreply@nestjs.com',
+        subject: 'Testing Nest MailerModule ✔',
+        text: 'welcome',
+        template: 'register',
+        context: {
+          name: 'Cong Hai',
+          activationCode: '123456',
+        },
+      });
+
+      return 'Mail sent successfully';
+    } catch (error) {
+      console.error('Error sending mail:', error);
+      return 'Failed to send mail';
+    }
   }
 }

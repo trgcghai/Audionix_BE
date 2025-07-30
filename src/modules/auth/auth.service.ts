@@ -14,9 +14,12 @@ import aqp from 'api-query-params';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../redis/redis.service';
+import { MailerService } from '@nestjs-modules/mailer';
+import { RedisItemName, RedisServiceName } from '../redis/redis-key.enum';
+import * as crypto from 'crypto-js';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +29,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private redisService: RedisService,
+    private mailerService: MailerService,
   ) {}
 
   async hashPassword(password: string): Promise<string> {
@@ -178,6 +182,17 @@ export class AuthService {
       avatar: [],
     });
 
+    await this.mailerService.sendMail({
+      to: email,
+      from: 'noreply@nestjs.com',
+      subject: 'Verify your account',
+      template: 'register',
+      context: {
+        name: `${firstName} ${lastName}`,
+        activationCode: '123456',
+      },
+    });
+
     return {
       result: {
         account: createAccountResult._id,
@@ -187,6 +202,10 @@ export class AuthService {
   }
 
   async login(account: Account, response: Response) {
+    if (!account) {
+      throw new BadRequestException('Invalid account credentials');
+    }
+
     const { accessToken, refreshToken } = await this.generateTokens({
       sub: account._id.toString(),
       email: account.email,
@@ -207,13 +226,27 @@ export class AuthService {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    await this.redisService.del('refreshToken:' + account._id);
-
-    await this.redisService.set(
-      'refreshToken:' + account._id,
-      refreshToken,
-      7 * 24 * 60 * 60,
+    const key = await this.redisService.createKey(
+      RedisServiceName.AUTH,
+      RedisItemName.REFRESH_TOKEN,
+      account._id.toString() + ':' + crypto.SHA256(refreshToken).toString(),
     );
+
+    await this.redisService.set(key, refreshToken, 7 * 24 * 60 * 60);
+  }
+
+  async refreshToken(account: Account, request: Request, response: Response) {
+    const refreshToken = request.cookies?.Refresh;
+
+    const key = await this.redisService.createKey(
+      RedisServiceName.AUTH,
+      RedisItemName.REFRESH_TOKEN,
+      account._id.toString() + ':' + crypto.SHA256(refreshToken).toString(),
+    );
+
+    await this.redisService.del(key);
+
+    await this.login(account, response);
   }
 
   async validateAccount(email: string, pass: string): Promise<any> {
@@ -233,7 +266,7 @@ export class AuthService {
     return result;
   }
 
-  async logout(accountId: string, response: Response) {
+  async logout(accountId: string, request: Request, response: Response) {
     if (!mongoose.isValidObjectId(accountId)) {
       throw new BadRequestException('Invalid account ID format');
     }
@@ -244,7 +277,15 @@ export class AuthService {
       throw new NotFoundException(`Account not found`);
     }
 
-    await this.redisService.del('refreshToken:' + account._id);
+    const refreshToken = request.cookies?.Refresh;
+
+    const key = await this.redisService.createKey(
+      RedisServiceName.AUTH,
+      RedisItemName.REFRESH_TOKEN,
+      account._id.toString() + ':' + crypto.SHA256(refreshToken).toString(),
+    );
+
+    await this.redisService.del(key);
 
     response.clearCookie('Authentication');
     response.clearCookie('Refresh');

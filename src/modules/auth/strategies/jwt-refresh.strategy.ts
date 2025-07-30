@@ -10,6 +10,11 @@ import { Request } from 'express';
 import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
 import { AuthService } from '../auth.service';
 import { RedisService } from 'src/modules/redis/redis.service';
+import {
+  RedisItemName,
+  RedisServiceName,
+} from 'src/modules/redis/redis-key.enum';
+import * as crypto from 'crypto-js';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -47,9 +52,13 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
       const { item } = await this.authService.findOne(payload.sub);
 
-      const redisToken = await this.redisService.get(
-        'refreshToken:' + item._id,
+      const key = await this.redisService.createKey(
+        RedisServiceName.AUTH,
+        RedisItemName.REFRESH_TOKEN,
+        item._id.toString() + ':' + crypto.SHA256(refreshToken).toString(),
       );
+
+      const redisToken = await this.redisService.get(key);
 
       if (!redisToken) {
         throw new UnauthorizedException('Invalid refresh token');

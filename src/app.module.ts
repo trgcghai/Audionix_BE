@@ -14,6 +14,8 @@ import { PlaylistsModule } from './modules/playlists/playlists.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -32,6 +34,30 @@ import { RedisModule } from './modules/redis/redis.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
+      }),
+      inject: [ConfigService],
+    }),
+    MailerModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            user: configService.get<string>('MAILDEV_INCOMING_USER'),
+            pass: configService.get<string>('MAILDEV_INCOMING_PASS'),
+          },
+        },
+        defaults: {
+          from: '"No Reply" <no-reply@localhost>',
+        },
+        template: {
+          dir: process.cwd() + '/src/common/templates/',
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
       }),
       inject: [ConfigService],
     }),
