@@ -100,4 +100,9 @@ export class AuthController {
       message: 'Token refreshed successfully',
     };
   }
+
+  @Post('verify-otp')
+  verifyOtp(@Body('email') email: string, @Body('code') code: string) {
+    return this.authService.verifyOtp(email, code);
+  }
 }

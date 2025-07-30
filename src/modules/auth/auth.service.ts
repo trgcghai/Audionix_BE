@@ -20,6 +20,7 @@ import { RedisService } from '../redis/redis.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { RedisItemName, RedisServiceName } from '../redis/redis-key.enum';
 import * as crypto from 'crypto-js';
+import { OtpService } from './otp.service';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +31,7 @@ export class AuthService {
     private configService: ConfigService,
     private redisService: RedisService,
     private mailerService: MailerService,
+    private otpService: OtpService,
   ) {}
 
   async hashPassword(password: string): Promise<string> {
@@ -182,14 +184,16 @@ export class AuthService {
       avatar: [],
     });
 
+    const activationCode = await this.otpService.generateOtp(email);
+
     await this.mailerService.sendMail({
       to: email,
       from: 'noreply@nestjs.com',
       subject: 'Verify your account',
       template: 'register',
       context: {
-        name: `${firstName} ${lastName}`,
-        activationCode: '123456',
+        name: firstName + ' ' + lastName,
+        activationCode: activationCode,
       },
     });
 
@@ -204,6 +208,10 @@ export class AuthService {
   async login(account: Account, response: Response) {
     if (!account) {
       throw new BadRequestException('Invalid account credentials');
+    }
+
+    if (!account.isVerified) {
+      throw new BadRequestException('Account is not verified');
     }
 
     const { accessToken, refreshToken } = await this.generateTokens({
@@ -289,5 +297,28 @@ export class AuthService {
 
     response.clearCookie('Authentication');
     response.clearCookie('Refresh');
+  }
+
+  async verifyOtp(email: string, code: string) {
+    const result = await this.otpService.verifyOtp(email, code);
+
+    if (!result) {
+      throw new BadRequestException('Invalid or expired OTP code');
+    }
+
+    const account = await this.accountModel.findOne({ email }).exec();
+
+    if (!account) {
+      throw new NotFoundException(`Account not found for email: ${email}`);
+    }
+
+    await account.updateOne({
+      isVerified: true,
+    });
+
+    return {
+      message: 'Account verified successfully',
+      result,
+    };
   }
 }
