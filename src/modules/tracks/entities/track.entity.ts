@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Image } from '@common/interfaces/entity.interface';
-import { TrackStatus } from '../enum/track-status.enum';
+import { TrackStatus } from '@tracks/enum/track-status.enum';
 
 export type TrackDocument = HydratedDocument<Track>;
 

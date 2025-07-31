@@ -8,13 +8,11 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
-  Patch,
 } from '@nestjs/common';
-import { TracksService } from './tracks.service';
-import { CreateTrackDto } from './dto/create-track.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CustomFileValidator } from '@common/validators/file.validator';
-import { UpdateTrackDto } from './dto/update-track.dto';
+import { TracksService } from '@tracks/tracks.service';
+import { CreateTrackDto } from '@tracks/dto/create-track.dto';
 
 @Controller('tracks')
 export class TracksController {

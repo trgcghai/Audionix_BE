@@ -1,11 +1,11 @@
+import { AlbumsModule } from '@albums/albums.module';
+import { ArtistsModule } from '@artists/artists.module';
 import { forwardRef, Module } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './entities/user.entity';
-import { ArtistsModule } from '../artists/artists.module';
-import { AlbumsModule } from '../albums/albums.module';
-import { PlaylistsModule } from '../playlists/playlists.module';
+import { PlaylistsModule } from '@playlists/playlists.module';
+import { User, UserSchema } from '@users/entities/user.entity';
+import { UsersController } from '@users/users.controller';
+import { UsersService } from '@users/users.service';
 
 @Module({
   imports: [

@@ -4,21 +4,36 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './entities/user.entity';
+import { BaseService } from '@utils/service.util';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { ArtistsService } from '../artists/artists.service';
+import { User } from '@users/entities/user.entity';
+import { ArtistsService } from '@artists/artists.service';
+import { AlbumsService } from '@albums/albums.service';
+import { PlaylistsService } from '@playlists/playlists.service';
+import { CreateUserDto } from '@users/dto/create-user.dto';
 import {
   CheckFollowingArtistsDto,
   FollowArtistDto,
-} from './dto/artist-user.dto';
-import { BaseService } from '@utils/service.util';
-import { CheckFollowingAlbumsDto, FollowAlbumDto } from './dto/album-user.dto';
-import { AlbumsService } from '../albums/albums.service';
-import { PlaylistsService } from '../playlists/playlists.service';
-import { Artist } from '../artists/entities/artist.entity';
-import { Album } from '../albums/entities/album.entity';
+} from '@users/dto/artist-user.dto';
+import {
+  CheckFollowingAlbumsDto,
+  FollowAlbumDto,
+} from '@users/dto/album-user.dto';
+import { Album } from '@albums/entities/album.entity';
+import { Artist } from '@artists/entities/artist.entity';
+// import { CreateUserDto } from './dto/create-user.dto';
+// import { User } from './entities/user.entity';
+// import { ArtistsService } from '../artists/artists.service';
+// import {
+//   CheckFollowingArtistsDto,
+//   FollowArtistDto,
+// } from './dto/artist-user.dto';
+// import { CheckFollowingAlbumsDto, FollowAlbumDto } from './dto/album-user.dto';
+// import { AlbumsService } from '../albums/albums.service';
+// import { PlaylistsService } from '../playlists/playlists.service';
+// import { Artist } from '../artists/entities/artist.entity';
+// import { Album } from '../albums/entities/album.entity';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
