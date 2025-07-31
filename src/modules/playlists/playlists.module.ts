@@ -1,10 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { PlaylistsService } from './playlists.service';
-import { PlaylistsController } from './playlists.controller';
-import { Playlist, PlaylistSchema } from './entities/playlist.entity';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersModule } from '../users/users.module';
-import { TracksModule } from '../tracks/tracks.module';
+import { Playlist, PlaylistSchema } from '@playlists/entities/playlist.entity';
+import { PlaylistsController } from '@playlists/playlists.controller';
+import { PlaylistsService } from '@playlists/playlists.service';
+import { TracksModule } from '@tracks/tracks.module';
+import { UsersModule } from '@users/users.module';
 
 @Module({
   imports: [
