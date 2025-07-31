@@ -1,3 +1,5 @@
+import { AlbumsService } from '@albums/albums.service';
+import { CreateAlbumDto } from '@albums/dto/create-album.dto';
 import {
   Controller,
   Get,
@@ -8,8 +10,6 @@ import {
   Query,
   Put,
 } from '@nestjs/common';
-import { AlbumsService } from './albums.service';
-import { CreateAlbumDto } from './dto/create-album.dto';
 
 @Controller('albums')
 export class AlbumsController {

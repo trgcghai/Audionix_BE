@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { AlbumStatus } from '../enum/album-status.enum';
 import { Image } from '@common/interfaces/entity.interface';
+import { AlbumStatus } from '@albums/enum/album-status.enum';
 
 export type AlbumDocument = HydratedDocument<Album>;
 
