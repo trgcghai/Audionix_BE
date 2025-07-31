@@ -12,12 +12,12 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/auth.dto';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LocalAuthGuard } from '../../common/guards/local-auth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Account } from './entities/account.entity';
 import { CurrentAccount } from 'src/common/decorators/current-account.decorator';
 import { Request as ExpressRequest, Response } from 'express';
-import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
+import { JwtRefreshAuthGuard } from '../../common/guards/jwt-refresh-auth.guard';
 
 @Controller('auth')
 export class AuthController {

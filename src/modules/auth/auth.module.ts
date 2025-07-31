@@ -7,9 +7,9 @@ import { Account, AccountSchema } from './entities/account.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
-import { LocalStrategy } from './strategies/local.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { LocalStrategy } from '../../common/guards/strategies/local.strategy';
+import { JwtStrategy } from '../../common/guards/strategies/jwt.strategy';
+import { JwtRefreshStrategy } from '../../common/guards/strategies/jwt-refresh.strategy';
 import { RedisModule } from '../redis/redis.module';
 import { OtpService } from './otp.service';
 

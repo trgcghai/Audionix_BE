@@ -1,6 +1,6 @@
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Role } from '../enum/role.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Role } from 'src/common/enums/role.enum';
 
 export type AccountDocument = HydratedDocument<Account>;
 
@@ -24,7 +24,7 @@ export class Account {
   @Prop({ required: true, type: String, trim: true })
   lastName: string;
 
-  @Prop({ type: [String], trim: true, enum: Role, default: [Role.User] })
+  @Prop({ type: [String], trim: true, enum: Role, default: [Role.USER] })
   role: Role[];
 
   @Prop({

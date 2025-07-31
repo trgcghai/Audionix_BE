@@ -1,8 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RedisService } from './modules/redis/redis.service';
 import { Public } from './common/decorators/is-public.decorator';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Roles } from './common/decorators/roles.decorator';
+import { Role } from './common/enums/role.enum';
+import { JwtRoleGuard } from './common/guards/jwt-role.guard';
 
 @Controller()
 export class AppController {
@@ -50,5 +53,26 @@ export class AppController {
       console.error('Error sending mail:', error);
       return 'Failed to send mail';
     }
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtRoleGuard)
+  @Get('admin')
+  async getAdmin() {
+    return 'You are an admin';
+  }
+
+  @Roles(Role.USER)
+  @UseGuards(JwtRoleGuard)
+  @Get('user')
+  async getUser() {
+    return 'You are a user';
+  }
+
+  @Roles(Role.ARTIST, Role.USER)
+  @UseGuards(JwtRoleGuard)
+  @Get('artist')
+  async getArtist() {
+    return 'You are an artist';
   }
 }

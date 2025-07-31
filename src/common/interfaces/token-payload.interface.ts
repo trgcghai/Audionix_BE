@@ -1,5 +1,4 @@
-import { ObjectId } from 'mongoose';
-import { Role } from 'src/modules/auth/enum/role.enum';
+import { Role } from '../enums/role.enum';
 
 export interface TokenPayload {
   sub: string;

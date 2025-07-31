@@ -7,14 +7,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
-import { AuthService } from '../auth.service';
-import { RedisService } from 'src/modules/redis/redis.service';
-import {
-  RedisItemName,
-  RedisServiceName,
-} from 'src/modules/redis/redis-key.enum';
-import * as crypto from 'crypto-js';
+import { TokenPayload } from '@common/interfaces/token-payload.interface';
+import { AuthService } from '@modules/auth/auth.service';
+import { RedisService } from '@modules/redis/redis.service';
+import { RedisItemName, RedisServiceName } from '@modules/redis/redis-key.enum';
+import crypto from 'crypto-js';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
