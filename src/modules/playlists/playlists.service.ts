@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
-import { BaseService } from 'src/utils/service.util';
+import { BaseService } from '@utils/service.util';
 import { Playlist } from './entities/playlist.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';

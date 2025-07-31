@@ -9,7 +9,7 @@ import { CreateTrackDto } from './dto/create-track.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Track } from './entities/track.entity';
 import mongoose, { Model } from 'mongoose';
-import { BaseService } from 'src/utils/service.util';
+import { BaseService } from '@utils/service.util';
 import { ArtistsService } from '../artists/artists.service';
 import { UploadService } from '../upload/upload.service';
 import aqp from 'api-query-params';

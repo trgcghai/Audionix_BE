@@ -1,6 +1,6 @@
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Role } from 'src/common/enums/role.enum';
+import { Role } from '@common/enums/role.enum';
 
 export type AccountDocument = HydratedDocument<Account>;
 

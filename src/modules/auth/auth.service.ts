@@ -13,7 +13,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
+import { TokenPayload } from '@common/interfaces/token-payload.interface';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../redis/redis.service';

@@ -3,8 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
-import { AuthService } from 'src/modules/auth/auth.service';
+import { TokenPayload } from '@common/interfaces/token-payload.interface';
+import { AuthService } from '@modules/auth/auth.service';
 
 @Injectable()
 export class RoleStrategy extends PassportStrategy(Strategy, 'role') {

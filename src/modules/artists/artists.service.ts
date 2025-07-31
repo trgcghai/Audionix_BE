@@ -9,7 +9,7 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Artist } from './entities/artist.entity';
 import mongoose, { Model } from 'mongoose';
-import { BaseService } from 'src/utils/service.util';
+import { BaseService } from '@utils/service.util';
 import { TracksService } from '../tracks/tracks.service';
 import { AlbumsService } from '../albums/albums.service';
 

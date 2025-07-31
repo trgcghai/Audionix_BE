@@ -13,7 +13,7 @@ import {
 import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { CustomFileValidator } from 'src/common/validators/file.validator';
+import { CustomFileValidator } from '@common/validators/file.validator';
 import { UpdateTrackDto } from './dto/update-track.dto';
 
 @Controller('tracks')

@@ -15,7 +15,7 @@ import { RegisterDto } from './dto/auth.dto';
 import { LocalAuthGuard } from '../../common/guards/local-auth.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Account } from './entities/account.entity';
-import { CurrentAccount } from 'src/common/decorators/current-account.decorator';
+import { CurrentAccount } from '@common/decorators/current-account.decorator';
 import { Request as ExpressRequest, Response } from 'express';
 import { JwtRefreshAuthGuard } from '../../common/guards/jwt-refresh-auth.guard';
 

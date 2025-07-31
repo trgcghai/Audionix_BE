@@ -13,7 +13,7 @@ import {
   CheckFollowingArtistsDto,
   FollowArtistDto,
 } from './dto/artist-user.dto';
-import { BaseService } from 'src/utils/service.util';
+import { BaseService } from '@utils/service.util';
 import { CheckFollowingAlbumsDto, FollowAlbumDto } from './dto/album-user.dto';
 import { AlbumsService } from '../albums/albums.service';
 import { PlaylistsService } from '../playlists/playlists.service';

@@ -1,6 +1,6 @@
 import mongoose, { HydratedDocument } from 'mongoose';
 import { PlaylistStatus } from '../enum/playlist-status.enum';
-import { Image } from 'src/common/interfaces/entity.interface';
+import { Image } from '@common/interfaces/entity.interface';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type PlaylistDocument = HydratedDocument<Playlist>;
