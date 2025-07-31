@@ -5,9 +5,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { RegisterDto } from './dto/auth.dto';
-import { UsersService } from '../users/users.service';
-import { Account } from './entities/account.entity';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
@@ -16,12 +13,14 @@ import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from '@common/interfaces/token-payload.interface';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { RedisService } from '../redis/redis.service';
 import { MailerService } from '@nestjs-modules/mailer';
-import { RedisItemName, RedisServiceName } from '../redis/redis-key.enum';
-import * as crypto from 'crypto-js';
-import { OtpService } from './otp.service';
-
+import crypto from 'crypto-js';
+import { Account } from '@auth/entities/account.entity';
+import { UsersService } from '@users/users.service';
+import { RedisService } from '@redis/redis.service';
+import { OtpService } from '@auth/otp.service';
+import { RegisterDto } from '@auth/dto/auth.dto';
+import { RedisItemName, RedisServiceName } from '@redis/redis-key.enum';
 @Injectable()
 export class AuthService {
   constructor(

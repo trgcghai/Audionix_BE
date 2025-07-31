@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { RedisService } from '../redis/redis.service';
-import { RedisItemName, RedisServiceName } from '../redis/redis-key.enum';
+import { RedisItemName, RedisServiceName } from '@redis/redis-key.enum';
+import { RedisService } from '@redis/redis.service';
 
 @Injectable()
 export class OtpService {

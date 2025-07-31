@@ -10,14 +10,14 @@ import {
   Request,
   Res,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/auth.dto';
-import { LocalAuthGuard } from '../../common/guards/local-auth.guard';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { Account } from './entities/account.entity';
-import { CurrentAccount } from '@common/decorators/current-account.decorator';
 import { Request as ExpressRequest, Response } from 'express';
-import { JwtRefreshAuthGuard } from '../../common/guards/jwt-refresh-auth.guard';
+import { CurrentAccount } from '@common/decorators/current-account.decorator';
+import { AuthService } from '@auth/auth.service';
+import { RegisterDto } from '@auth/dto/auth.dto';
+import { LocalAuthGuard } from '@guards/local-auth.guard';
+import { Account } from '@auth/entities/account.entity';
+import { JwtAuthGuard } from '@guards/jwt-auth.guard';
+import { JwtRefreshAuthGuard } from '@guards/jwt-refresh-auth.guard';
 
 @Controller('auth')
 export class AuthController {
