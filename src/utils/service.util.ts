@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import mongoose, { Model } from 'mongoose';
 import aqp from 'api-query-params';
-import { PaginatedResponse } from 'src/common/interfaces/response.interface';
+import { PaginatedResponse } from '@common/interfaces/response.interface';
 
 @Injectable()
 export class BaseService<T> {

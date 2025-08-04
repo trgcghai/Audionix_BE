@@ -8,8 +8,8 @@ import {
   Query,
   Put,
 } from '@nestjs/common';
-import { PlaylistsService } from './playlists.service';
-import { CreatePlaylistDto } from './dto/create-playlist.dto';
+import { CreatePlaylistDto } from '@playlists/dto/create-playlist.dto';
+import { PlaylistsService } from '@playlists/playlists.service';
 
 @Controller('playlists')
 export class PlaylistsController {

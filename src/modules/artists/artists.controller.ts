@@ -1,3 +1,5 @@
+import { ArtistsService } from '@artists/artists.service';
+import { CreateArtistDto } from '@artists/dto/create-artist.dto';
 import {
   Controller,
   Get,
@@ -7,8 +9,6 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ArtistsService } from './artists.service';
-import { CreateArtistDto } from './dto/create-artist.dto';
 
 @Controller('artists')
 export class ArtistsController {

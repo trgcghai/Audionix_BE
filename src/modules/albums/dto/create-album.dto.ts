@@ -1,3 +1,4 @@
+import { AlbumStatus } from '@albums/enum/album-status.enum';
 import {
   ArrayNotEmpty,
   IsEnum,
@@ -5,7 +6,6 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { AlbumStatus } from '../enum/album-status.enum';
 
 export class CreateAlbumDto {
   @IsNotEmpty()

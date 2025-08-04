@@ -1,3 +1,7 @@
+import { CreateAlbumDto } from '@albums/dto/create-album.dto';
+import { TrackAlbumDto } from '@albums/dto/track-album.dto';
+import { Album } from '@albums/entities/album.entity';
+import { ArtistsService } from '@artists/artists.service';
 import {
   BadRequestException,
   forwardRef,
@@ -5,15 +9,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateAlbumDto } from './dto/create-album.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Album } from './entities/album.entity';
+import { TracksService } from '@tracks/tracks.service';
+import { BaseService } from '@utils/service.util';
 import mongoose, { Model } from 'mongoose';
-import { BaseService } from 'src/utils/service.util';
-import { ArtistsService } from '../artists/artists.service';
-import { TrackAlbumDto } from './dto/track-album.dto';
-import { Track } from '../tracks/entities/track.entity';
-import { TracksService } from '../tracks/tracks.service';
 
 @Injectable()
 export class AlbumsService extends BaseService<Album> {

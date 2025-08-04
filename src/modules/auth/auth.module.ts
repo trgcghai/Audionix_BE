@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { UsersModule } from '../users/users.module';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Account, AccountSchema } from './entities/account.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
-import { LocalStrategy } from './strategies/local.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
-import { RedisModule } from '../redis/redis.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { UsersModule } from '@users/users.module';
+import { RedisModule } from '@redis/redis.module';
+import { AuthController } from '@auth/auth.controller';
+import { AuthService } from '@auth/auth.service';
+import { OtpService } from '@auth/otp.service';
+import { LocalStrategy } from '@guards/strategies/local.strategy';
+import { JwtStrategy } from '@guards/strategies/jwt.strategy';
+import { JwtRefreshStrategy } from '@guards/strategies/jwt-refresh.strategy';
+import { Account, AccountSchema } from '@auth/entities/account.entity';
 
 @Module({
   imports: [
@@ -38,6 +39,12 @@ import { RedisModule } from '../redis/redis.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
+  providers: [
+    AuthService,
+    OtpService,
+    LocalStrategy,
+    JwtStrategy,
+    JwtRefreshStrategy,
+  ],
 })
 export class AuthModule {}

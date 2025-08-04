@@ -5,15 +5,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreatePlaylistDto } from './dto/create-playlist.dto';
-import { BaseService } from 'src/utils/service.util';
-import { Playlist } from './entities/playlist.entity';
+import { BaseService } from '@utils/service.util';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { UsersService } from '../users/users.service';
-import { TracksService } from '../tracks/tracks.service';
-import { TrackPlaylistDto } from './dto/track-playlist.dto';
-
+import { Playlist } from '@playlists/entities/playlist.entity';
+import { UsersService } from '@users/users.service';
+import { TracksService } from '@tracks/tracks.service';
+import { CreatePlaylistDto } from '@playlists/dto/create-playlist.dto';
+import { TrackPlaylistDto } from '@playlists/dto/track-playlist.dto';
 @Injectable()
 export class PlaylistsService extends BaseService<Playlist> {
   constructor(

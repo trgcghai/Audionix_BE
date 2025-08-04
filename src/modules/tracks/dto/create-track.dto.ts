@@ -1,5 +1,5 @@
+import { TrackStatus } from '@tracks/enum/track-status.enum';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { TrackStatus } from '../enum/track-status.enum';
 
 export class CreateTrackDto {
   @IsString()

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from 'src/common/decorators/is-public.decorator';
+import { IS_PUBLIC_KEY } from '@common/decorators/is-public.decorator';
 
 @Injectable()
 export class JwtRefreshAuthGuard extends AuthGuard('jwt-refresh') {
@@ -28,7 +28,7 @@ export class JwtRefreshAuthGuard extends AuthGuard('jwt-refresh') {
   handleRequest(err, user): any {
     if (err || !user) {
       throw (
-        err || new UnauthorizedException('Access token is invalid or expired')
+        err || new UnauthorizedException('Refresh token is invalid or expired')
       );
     }
     return user;

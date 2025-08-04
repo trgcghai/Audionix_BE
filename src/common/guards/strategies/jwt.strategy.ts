@@ -1,10 +1,10 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
-import { AuthService } from '../auth.service';
+import { TokenPayload } from '@common/interfaces/token-payload.interface';
+import { AuthService } from '@modules/auth/auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -25,6 +25,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: TokenPayload) {
     const { item } = await this.authService.findOne(payload.sub);
-    return item;
+
+    if (!item) {
+      throw new NotFoundException('User not found');
+    }
+
+    return payload;
   }
 }

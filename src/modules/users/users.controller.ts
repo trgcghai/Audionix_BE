@@ -8,10 +8,10 @@ import {
   Query,
   Put,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { FollowArtistDto } from './dto/artist-user.dto';
-import { FollowAlbumDto } from './dto/album-user.dto';
+import { FollowAlbumDto } from '@users/dto/album-user.dto';
+import { FollowArtistDto } from '@users/dto/artist-user.dto';
+import { CreateUserDto } from '@users/dto/create-user.dto';
+import { UsersService } from '@users/users.service';
 
 @Controller('users')
 export class UsersController {

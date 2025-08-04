@@ -10,15 +10,17 @@ import {
   Request,
   Res,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/auth.dto';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { Account } from './entities/account.entity';
-import { CurrentAccount } from 'src/common/decorators/current-account.decorator';
-import { Response } from 'express';
-import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
-import { TokenPayload } from 'src/common/interfaces/token-payload.interface';
+import { Request as ExpressRequest, Response } from 'express';
+import { CurrentAccount } from '@common/decorators/current-account.decorator';
+import { AuthService } from '@auth/auth.service';
+import { RegisterDto } from '@auth/dto/auth.dto';
+import { LocalAuthGuard } from '@guards/local-auth.guard';
+import { Account } from '@auth/entities/account.entity';
+import { JwtAuthGuard } from '@guards/jwt-auth.guard';
+import { JwtRefreshAuthGuard } from '@guards/jwt-refresh-auth.guard';
+import { TokenPayload } from '@interfaces/token-payload.interface';
+import { Public } from '@decorators/is-public.decorator';
+import { JwtLogoutGuard } from '@guards/jwt-logout.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -59,27 +61,30 @@ export class AuthController {
     @CurrentAccount() account: Account,
     @Res({ passthrough: true }) response: Response,
   ) {
-    await this.authService.login(account, response);
-    return {
-      message: 'Log in successfully',
-    };
+    return await this.authService.login(account, response);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('logout')
+  @UseGuards(JwtLogoutGuard)
   async logout(
-    @CurrentAccount() account: Account,
+    @CurrentAccount() account: TokenPayload,
+    @Request() request: ExpressRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
-    await this.authService.logout(account._id.toString(), response);
+    if (account) {
+      await this.authService.logout(account.sub, request, response);
+      return {
+        message: 'Log out successfully',
+      };
+    }
     return {
-      message: 'Logged out successfully',
+      message: 'No account found to log out or token is invalid',
     };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@CurrentAccount() account: Account) {
+  getProfile(@CurrentAccount() account: TokenPayload) {
     return account;
   }
 
@@ -87,11 +92,22 @@ export class AuthController {
   @Post('refresh-token')
   async verifyToken(
     @CurrentAccount() account: Account,
+    @Request() request: ExpressRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
-    await this.authService.login(account, response);
+    await this.authService.refreshToken(account, request, response);
     return {
       message: 'Token refreshed successfully',
     };
+  }
+
+  @Post('verify-otp')
+  verifyOtp(@Body('email') email: string, @Body('code') code: string) {
+    return this.authService.verifyOtp(email, code);
+  }
+
+  @Post('send-otp')
+  resendOtp(@Body('email') email: string) {
+    return this.authService.sendOtp(email);
   }
 }
