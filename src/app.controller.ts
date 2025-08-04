@@ -6,6 +6,9 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Roles } from './common/decorators/roles.decorator';
 import { Role } from './common/enums/role.enum';
 import { JwtRoleGuard } from './common/guards/jwt-role.guard';
+import { CurrentAccount } from '@decorators/current-account.decorator';
+import { Account } from '@auth/entities/account.entity';
+import { TokenPayload } from '@interfaces/token-payload.interface';
 
 @Controller()
 export class AppController {
@@ -58,21 +61,21 @@ export class AppController {
   @Roles(Role.ADMIN)
   @UseGuards(JwtRoleGuard)
   @Get('admin')
-  async getAdmin() {
-    return 'You are an admin';
+  async getAdmin(@CurrentAccount() account: TokenPayload) {
+    return { account };
   }
 
   @Roles(Role.USER)
   @UseGuards(JwtRoleGuard)
   @Get('user')
-  async getUser() {
-    return 'You are a user';
+  async getUser(@CurrentAccount() account: TokenPayload) {
+    return { account };
   }
 
-  @Roles(Role.ARTIST, Role.USER)
+  @Roles(Role.ARTIST)
   @UseGuards(JwtRoleGuard)
   @Get('artist')
-  async getArtist() {
-    return 'You are an artist';
+  async getArtist(@CurrentAccount() account: TokenPayload) {
+    return { account };
   }
 }

@@ -14,7 +14,7 @@ import { TokenPayload } from '@common/interfaces/token-payload.interface';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
-import crypto from 'crypto-js';
+import * as crypto from 'crypto-js';
 import { Account } from '@auth/entities/account.entity';
 import { UsersService } from '@users/users.service';
 import { RedisService } from '@redis/redis.service';

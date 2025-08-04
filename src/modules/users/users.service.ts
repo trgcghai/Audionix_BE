@@ -22,18 +22,6 @@ import {
 } from '@users/dto/album-user.dto';
 import { Album } from '@albums/entities/album.entity';
 import { Artist } from '@artists/entities/artist.entity';
-// import { CreateUserDto } from './dto/create-user.dto';
-// import { User } from './entities/user.entity';
-// import { ArtistsService } from '../artists/artists.service';
-// import {
-//   CheckFollowingArtistsDto,
-//   FollowArtistDto,
-// } from './dto/artist-user.dto';
-// import { CheckFollowingAlbumsDto, FollowAlbumDto } from './dto/album-user.dto';
-// import { AlbumsService } from '../albums/albums.service';
-// import { PlaylistsService } from '../playlists/playlists.service';
-// import { Artist } from '../artists/entities/artist.entity';
-// import { Album } from '../albums/entities/album.entity';
 
 @Injectable()
 export class UsersService extends BaseService<User> {

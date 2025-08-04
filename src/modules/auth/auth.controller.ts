@@ -18,6 +18,9 @@ import { LocalAuthGuard } from '@guards/local-auth.guard';
 import { Account } from '@auth/entities/account.entity';
 import { JwtAuthGuard } from '@guards/jwt-auth.guard';
 import { JwtRefreshAuthGuard } from '@guards/jwt-refresh-auth.guard';
+import { TokenPayload } from '@interfaces/token-payload.interface';
+import { Public } from '@decorators/is-public.decorator';
+import { JwtLogoutGuard } from '@guards/jwt-logout.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -62,26 +65,26 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtLogoutGuard)
   async logout(
-    @CurrentAccount() account: Account,
+    @CurrentAccount() account: TokenPayload,
     @Request() request: ExpressRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
     if (account) {
-      await this.authService.logout(account._id.toString(), request, response);
+      await this.authService.logout(account.sub, request, response);
       return {
         message: 'Log out successfully',
       };
     }
     return {
-      message: 'No account found to log out',
+      message: 'No account found to log out or token is invalid',
     };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@CurrentAccount() account: Account) {
+  getProfile(@CurrentAccount() account: TokenPayload) {
     return account;
   }
 

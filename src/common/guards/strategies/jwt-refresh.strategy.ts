@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -11,7 +12,7 @@ import { TokenPayload } from '@common/interfaces/token-payload.interface';
 import { AuthService } from '@modules/auth/auth.service';
 import { RedisService } from '@modules/redis/redis.service';
 import { RedisItemName, RedisServiceName } from '@modules/redis/redis-key.enum';
-import crypto from 'crypto-js';
+import * as crypto from 'crypto-js';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -49,10 +50,14 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
       const { item } = await this.authService.findOne(payload.sub);
 
+      if (!item) {
+        throw new NotFoundException('User not found');
+      }
+
       const key = await this.redisService.createKey(
         RedisServiceName.AUTH,
         RedisItemName.REFRESH_TOKEN,
-        item._id.toString() + ':' + crypto.SHA256(refreshToken).toString(),
+        payload.sub + ':' + crypto.SHA256(refreshToken).toString(),
       );
 
       const redisToken = await this.redisService.get(key);
