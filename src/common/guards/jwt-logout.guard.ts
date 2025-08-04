@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { ExecutionContext, Injectable } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class JwtLogoutGuard extends JwtAuthGuard {
-  constructor(protected readonly reflector: Reflector) {
-    super(reflector);
+export class JwtLogoutGuard extends AuthGuard('jwt') {
+  constructor() {
+    super();
+  }
+
+  canActivate(context: ExecutionContext) {
+    return super.canActivate(context);
   }
 
   handleRequest(err, user): any {
