@@ -11,10 +11,6 @@ export class CreatePlaylistDto {
   description: string;
 
   @IsString()
-  @IsNotEmpty()
-  userId: string;
-
-  @IsString()
   @IsOptional()
   @IsEnum(PlaylistStatus)
   status: string;

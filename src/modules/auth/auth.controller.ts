@@ -16,11 +16,10 @@ import { AuthService } from '@auth/auth.service';
 import { RegisterDto } from '@auth/dto/auth.dto';
 import { LocalAuthGuard } from '@guards/local-auth.guard';
 import { Account } from '@auth/entities/account.entity';
-import { JwtAuthGuard } from '@guards/jwt-auth.guard';
 import { JwtRefreshAuthGuard } from '@guards/jwt-refresh-auth.guard';
 import { TokenPayload } from '@interfaces/token-payload.interface';
-import { Public } from '@decorators/is-public.decorator';
 import { JwtLogoutGuard } from '@guards/jwt-logout.guard';
+import { Public } from '@decorators/is-public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -51,12 +50,14 @@ export class AuthController {
   }
 
   @Post('register')
+  @Public()
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @Public()
   async login(
     @CurrentAccount() account: Account,
     @Res({ passthrough: true }) response: Response,
@@ -66,6 +67,7 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JwtLogoutGuard)
+  @Public()
   async logout(
     @CurrentAccount() account: TokenPayload,
     @Request() request: ExpressRequest,
@@ -82,13 +84,13 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@CurrentAccount() account: TokenPayload) {
     return account;
   }
 
   @UseGuards(JwtRefreshAuthGuard)
+  @Public()
   @Post('refresh-token')
   async verifyToken(
     @CurrentAccount() account: Account,

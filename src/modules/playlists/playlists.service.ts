@@ -13,6 +13,8 @@ import { UsersService } from '@users/users.service';
 import { TracksService } from '@tracks/tracks.service';
 import { CreatePlaylistDto } from '@playlists/dto/create-playlist.dto';
 import { TrackPlaylistDto } from '@playlists/dto/track-playlist.dto';
+import { TokenPayload } from '@interfaces/token-payload.interface';
+import { PaginatedResponse } from '@interfaces/response.interface';
 @Injectable()
 export class PlaylistsService extends BaseService<Playlist> {
   constructor(
@@ -45,13 +47,17 @@ export class PlaylistsService extends BaseService<Playlist> {
     return !!isPlaylistExists;
   }
 
-  async create(createPlaylistDto: CreatePlaylistDto) {
-    const { description, title, userId } = createPlaylistDto;
+  async create(createPlaylistDto: CreatePlaylistDto, payload: TokenPayload) {
+    const { description, title } = createPlaylistDto;
 
-    const { item: user } = await this.userService.findOne(userId);
+    const { item: user } = await this.userService.findOne(payload.sub);
+
+    const countUserPlaylist = await this.playlistModel.countDocuments({
+      owner: user._id,
+    });
 
     const result = await this.playlistModel.create({
-      title,
+      title: title || `Untitled Playlist #${countUserPlaylist + 1}`,
       description,
       owner: user,
       cover_images: [],
@@ -63,22 +69,22 @@ export class PlaylistsService extends BaseService<Playlist> {
     };
   }
 
-  async findByUser(userId: string, query: Record<string, any>) {
+  async findByUser(
+    userId: string,
+    query: Record<string, any>,
+  ): Promise<PaginatedResponse<Playlist>> {
     query.owner = userId;
-    const {
-      items: playlists,
-      totalItems,
-      totalPages,
-      current,
-      limit,
-    } = await this.findAll(
-      query,
-      query.limit as number,
-      query.current as number,
-    );
+    const { items, totalItems, totalPages, current, limit } =
+      await this.findAll(
+        query,
+        query.limit as number,
+        query.current as number,
+        '',
+        'owner',
+      );
 
     return {
-      playlists,
+      items,
       totalItems,
       totalPages,
       current,

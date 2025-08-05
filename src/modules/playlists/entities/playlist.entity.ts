@@ -17,7 +17,6 @@ export class Playlist {
     type: String,
     required: true,
     trim: true,
-    default: 'Unitled Playlist',
   })
   title: string;
 
@@ -62,6 +61,13 @@ export class Playlist {
     _id: mongoose.Schema.Types.ObjectId;
     time_added: mongoose.Schema.Types.Date;
   }[];
+
+  @Prop({
+    default: 'playlist',
+    required: true,
+    trim: true,
+  })
+  type: string;
 }
 
 export const PlaylistSchema = SchemaFactory.createForClass(Playlist);

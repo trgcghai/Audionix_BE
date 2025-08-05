@@ -1,3 +1,5 @@
+import { CurrentAccount } from '@decorators/current-account.decorator';
+import { TokenPayload } from '@interfaces/token-payload.interface';
 import {
   Controller,
   Get,
@@ -21,8 +23,11 @@ export class PlaylistsController {
    * Returns the id of the created playlist.
    */
   @Post()
-  create(@Body() createPlaylistDto: CreatePlaylistDto) {
-    return this.playlistsService.create(createPlaylistDto);
+  create(
+    @Body() createPlaylistDto: CreatePlaylistDto,
+    @CurrentAccount() payload: TokenPayload,
+  ) {
+    return this.playlistsService.create(createPlaylistDto, payload);
   }
 
   /**

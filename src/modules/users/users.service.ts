@@ -62,7 +62,7 @@ export class UsersService extends BaseService<User> {
     return false;
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, _id?: string) {
     const { email } = createUserDto;
 
     const isEmailExists = await this.userModel.exists({ email }).exec();
@@ -72,6 +72,7 @@ export class UsersService extends BaseService<User> {
     }
 
     const result = await this.userModel.create({
+      _id,
       username: createUserDto.username,
       email: createUserDto.email,
       avatar: createUserDto.avatar || [],

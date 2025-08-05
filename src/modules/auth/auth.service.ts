@@ -177,11 +177,14 @@ export class AuthService {
       lastName,
     });
 
-    const createUserResult = await this.userService.create({
-      email,
-      username: firstName + ' ' + lastName,
-      avatar: [],
-    });
+    const createUserResult = await this.userService.create(
+      {
+        email,
+        username: firstName + ' ' + lastName,
+        avatar: [],
+      },
+      createAccountResult._id.toString(),
+    );
 
     const activationCode = await this.otpService.generateOtp(email);
 

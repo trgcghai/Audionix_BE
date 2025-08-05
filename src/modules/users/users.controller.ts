@@ -1,3 +1,5 @@
+import { CurrentAccount } from '@decorators/current-account.decorator';
+import { TokenPayload } from '@interfaces/token-payload.interface';
 import {
   Controller,
   Get,
@@ -7,6 +9,7 @@ import {
   Delete,
   Query,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { FollowAlbumDto } from '@users/dto/album-user.dto';
 import { FollowArtistDto } from '@users/dto/artist-user.dto';
@@ -164,6 +167,20 @@ export class UsersController {
       userId: id,
       albumIds: albumIds.split(','),
     });
+  }
+
+  /* 
+    Get method to retrieve playlists of a current user.
+    @CurrentAccount() payload: TokenPayload - Jwt payload containing user information.
+    @Query() query: Record<string, any> - Optional query parameters for filtering.
+    Returns a list of playlists associated with the user.
+  */
+  @Get('me/playlists')
+  findMyPlaylists(
+    @CurrentAccount() payload: TokenPayload,
+    @Query() query: Record<string, any>,
+  ) {
+    return this.usersService.findPlaylist(payload.sub, query);
   }
 
   /* 
