@@ -23,6 +23,7 @@ export class Playlist {
   @Prop({
     type: String,
     trim: true,
+    default: '',
   })
   description: string;
 

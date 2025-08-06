@@ -1,7 +1,7 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
-export class CustomFileValidator implements PipeTransform {
+export class UploadTrackFilesValidator implements PipeTransform {
   private readonly MAX_SIZES = {
     image: 10 * 1024 * 1024, // 10 MB
     audio: 15 * 1024 * 1024, // 15 MB
@@ -54,12 +54,47 @@ export class CustomFileValidator implements PipeTransform {
       );
     }
   }
+}
 
-  private formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+@Injectable()
+export class UpdatePlaylistFileValidator implements PipeTransform {
+  private readonly MAX_SIZES = {
+    image: 10 * 1024 * 1024, // 10 MB
+  };
+
+  private readonly ALLOWED_TYPES = {
+    image: /^image\/(jpeg|jpg|png|gif|webp|bmp|svg\+xml)$/,
+  };
+
+  private readonly ALLOWED_EXTENSIONS = {
+    image: ['jpeg', 'jpg', 'png', 'gif'],
+  };
+
+  transform(file: Express.Multer.File) {
+    if (file) {
+      this.validateFile(file);
+    }
+
+    return file;
+  }
+
+  private validateFile(file: Express.Multer.File): void {
+    // Validate file type
+    if (!this.ALLOWED_TYPES['image'].test(file.mimetype)) {
+      throw new BadRequestException(
+        `Invalid image file type. Allowed formats: ${this.ALLOWED_EXTENSIONS['image'].join(', ')}`,
+      );
+    }
+
+    // Validate file size
+    if (file.size > this.MAX_SIZES['image']) {
+      const maxSizeMB = this.MAX_SIZES['image'] / (1024 * 1024);
+      const currentSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+      throw new BadRequestException(
+        `Image file size exceeds limit. ` +
+          `Current size: ${currentSizeMB}MB, Maximum allowed: ${maxSizeMB}MB`,
+      );
+    }
   }
 }

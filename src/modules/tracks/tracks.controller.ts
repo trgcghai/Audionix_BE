@@ -10,7 +10,7 @@ import {
   UploadedFiles,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { CustomFileValidator } from '@common/validators/file.validator';
+import { UploadTrackFilesValidator } from '@common/validators/file.validator';
 import { TracksService } from '@tracks/tracks.service';
 import { CreateTrackDto } from '@tracks/dto/create-track.dto';
 
@@ -32,7 +32,7 @@ export class TracksController {
   )
   createTrack(
     @Body() createTrackDto: CreateTrackDto,
-    @UploadedFiles(new CustomFileValidator())
+    @UploadedFiles(new UploadTrackFilesValidator())
     files: {
       audio?: Express.Multer.File[];
       cover_image?: Express.Multer.File[];

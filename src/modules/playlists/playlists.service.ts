@@ -11,16 +11,22 @@ import mongoose, { Model } from 'mongoose';
 import { Playlist } from '@playlists/entities/playlist.entity';
 import { UsersService } from '@users/users.service';
 import { TracksService } from '@tracks/tracks.service';
-import { CreatePlaylistDto } from '@playlists/dto/create-playlist.dto';
+import {
+  CreatePlaylistDto,
+  UpdatePlaylistDto,
+} from '@playlists/dto/create-playlist.dto';
 import { TrackPlaylistDto } from '@playlists/dto/track-playlist.dto';
 import { TokenPayload } from '@interfaces/token-payload.interface';
 import { PaginatedResponse } from '@interfaces/response.interface';
+import { UploadService } from '@upload/upload.service';
 @Injectable()
 export class PlaylistsService extends BaseService<Playlist> {
   constructor(
     @InjectModel(Playlist.name) private readonly playlistModel: Model<Playlist>,
     @Inject(forwardRef(() => UsersService)) private userService: UsersService,
     @Inject() private trackService: TracksService,
+    @Inject(UploadService)
+    private uploadService: UploadService,
   ) {
     super(playlistModel);
   }
@@ -67,6 +73,51 @@ export class PlaylistsService extends BaseService<Playlist> {
     return {
       _id: result._id,
     };
+  }
+
+  async update(
+    id: string,
+    updatePlaylistDto: UpdatePlaylistDto,
+    file?: Express.Multer.File,
+  ) {
+    if (!mongoose.isValidObjectId(id)) {
+      throw new BadRequestException('Invalid playlist ID');
+    }
+
+    const { item: playlist } = await this.findOne(id);
+
+    if (!playlist) {
+      throw new NotFoundException('Playlist not found');
+    }
+
+    const { title, description } = updatePlaylistDto;
+
+    if (title) {
+      playlist.title = title;
+    }
+
+    if (description) {
+      playlist.description = description;
+    }
+
+    if (file) {
+      const { url, key, height, width } = await this.uploadService.uploadImage({
+        fileName: file.originalname,
+        file,
+        author: playlist.owner.toString(),
+      });
+
+      playlist.cover_images.push({
+        height,
+        width,
+        url,
+        key,
+      });
+    }
+
+    await playlist.save();
+
+    return playlist;
   }
 
   async findByUser(

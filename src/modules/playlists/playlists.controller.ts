@@ -9,9 +9,16 @@ import {
   Delete,
   Query,
   Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { CreatePlaylistDto } from '@playlists/dto/create-playlist.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  CreatePlaylistDto,
+  UpdatePlaylistDto,
+} from '@playlists/dto/create-playlist.dto';
 import { PlaylistsService } from '@playlists/playlists.service';
+import { UpdatePlaylistFileValidator } from '@validators/file.validator';
 
 @Controller('playlists')
 export class PlaylistsController {
@@ -28,6 +35,17 @@ export class PlaylistsController {
     @CurrentAccount() payload: TokenPayload,
   ) {
     return this.playlistsService.create(createPlaylistDto, payload);
+  }
+
+  @Put(':id')
+  @UseInterceptors(FileInterceptor('file'))
+  update(
+    @Param('id') id: string,
+    @Body() updatePlaylistDto: UpdatePlaylistDto,
+    @UploadedFile(new UpdatePlaylistFileValidator())
+    file: Express.Multer.File,
+  ) {
+    return this.playlistsService.update(id, updatePlaylistDto, file);
   }
 
   /**
