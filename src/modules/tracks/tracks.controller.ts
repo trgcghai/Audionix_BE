@@ -13,6 +13,10 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UploadTrackFilesValidator } from '@common/validators/file.validator';
 import { TracksService } from '@tracks/tracks.service';
 import { CreateTrackDto } from '@tracks/dto/create-track.dto';
+import { CurrentAccount } from '@decorators/current-account.decorator';
+import { TokenPayload } from '@interfaces/token-payload.interface';
+import { Roles } from '@decorators/roles.decorator';
+import { Role } from '@enums/role.enum';
 
 @Controller('tracks')
 export class TracksController {
@@ -23,6 +27,7 @@ export class TracksController {
    * @Body() createTrackDto: CreateTrackDto - The data transfer object containing track details.
    * Returns the id of the created track.
    */
+  @Roles(Role.ARTIST)
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -32,6 +37,7 @@ export class TracksController {
   )
   createTrack(
     @Body() createTrackDto: CreateTrackDto,
+    @CurrentAccount() token: TokenPayload,
     @UploadedFiles(new UploadTrackFilesValidator())
     files: {
       audio?: Express.Multer.File[];
@@ -42,6 +48,7 @@ export class TracksController {
       createTrackDto,
       audioFile: files.audio || [],
       coverImageFile: files.cover_image || [],
+      artistId: token.sub,
     });
   }
 

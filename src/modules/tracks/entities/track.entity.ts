@@ -21,7 +21,7 @@ export class Track {
   title: string;
 
   @Prop({
-    type: String,
+    type: Number,
     required: true,
     trim: true,
   })
@@ -45,6 +45,7 @@ export class Track {
     trim: true,
     required: true,
     enum: TrackStatus,
+    default: TrackStatus.HIDDEN,
   })
   status: string;
 
@@ -66,6 +67,7 @@ export class Track {
 
   @Prop({
     type: [String],
+    required: true,
     default: [],
   })
   genres: string[];
@@ -86,6 +88,13 @@ export class Track {
     size: number;
     mimetype: string;
   };
+
+  @Prop({
+    default: 'track',
+    required: true,
+    trim: true,
+  })
+  type: string;
 }
 
 export const TrackSchema = SchemaFactory.createForClass(Track);

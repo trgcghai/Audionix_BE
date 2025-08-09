@@ -9,7 +9,7 @@ import { AlbumsController } from '@albums/albums.controller';
 @Module({
   imports: [
     forwardRef(() => ArtistsModule),
-    TracksModule,
+    forwardRef(() => TracksModule),
     MongooseModule.forFeature([
       {
         name: Album.name,

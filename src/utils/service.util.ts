@@ -27,11 +27,22 @@ export class BaseService<T> {
     current: number = 1,
     populate?: string | string[],
     except?: string | string[],
+    regexFields?: string[],
   ): Promise<PaginatedResponse<T>> {
     const { filter, sort } = aqp(query);
 
     if (filter.limit) delete filter.limit;
     if (filter.current) delete filter.current;
+
+    if (regexFields) {
+      for (const field of regexFields) {
+        if (filter[field]) {
+          filter[field] = {
+            $regex: new RegExp(filter[field], 'i'),
+          };
+        }
+      }
+    }
 
     const totalItems = await this.model.countDocuments(filter).exec();
     const totalPages = Math.ceil(totalItems / limit);

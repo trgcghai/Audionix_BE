@@ -39,11 +39,11 @@ export class ArtistsService extends BaseService<Artist> {
   }
 
   async create(createArtistDto: CreateArtistDto) {
-    const { name, cover_images } = createArtistDto;
+    const { name } = createArtistDto;
 
     const result = await this.artistModel.create({
       name,
-      cover_images: cover_images || [],
+      cover_images: [],
       genres: [],
     });
 

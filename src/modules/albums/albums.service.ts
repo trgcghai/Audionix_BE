@@ -20,6 +20,7 @@ export class AlbumsService extends BaseService<Album> {
     @InjectModel(Album.name) private albumModel: Model<Album>,
     @Inject(forwardRef(() => ArtistsService))
     private artistService: ArtistsService,
+    @Inject(forwardRef(() => TracksService))
     private trackService: TracksService,
   ) {
     super(albumModel);

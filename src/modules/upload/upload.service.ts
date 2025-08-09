@@ -6,6 +6,8 @@ import {
 import { BadGatewayException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as sharp from 'sharp';
+import { parseFile } from 'music-metadata';
+import { getAudioDuration, getImageDimensions } from '@utils/file.util';
 
 @Injectable()
 export class UploadService {
@@ -23,17 +25,6 @@ export class UploadService {
       },
     });
     this.bucketName = configService.getOrThrow('AWS_S3_BUCKET_NAME');
-  }
-
-  async getImageDimensions(
-    file: Express.Multer.File,
-  ): Promise<{ width: number; height: number }> {
-    const image = sharp(file.buffer); // use buffer from multer
-    const metadata = await image.metadata();
-    return {
-      width: metadata.width ?? 0,
-      height: metadata.height ?? 0,
-    };
   }
 
   async uploadImage({
@@ -66,7 +57,7 @@ export class UploadService {
         key,
         size: file.size,
         mimetype: file.mimetype,
-        ...(await this.getImageDimensions(file)),
+        ...(await getImageDimensions(file)),
       };
     } catch (error) {
       console.error('S3 upload error', error.stack || error.message, {
@@ -108,6 +99,7 @@ export class UploadService {
         key,
         size: file.size,
         mimetype: file.mimetype,
+        ...(await getAudioDuration(file, 'ms')),
       };
     } catch (error) {
       console.error('S3 upload error', error.stack || error.message, {

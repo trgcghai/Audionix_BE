@@ -14,6 +14,7 @@ import { Track } from '@tracks/entities/track.entity';
 import { ArtistsService } from '@artists/artists.service';
 import { UploadService } from '@upload/upload.service';
 import { Artist } from '@artists/entities/artist.entity';
+import { AlbumsService } from '@albums/albums.service';
 
 @Injectable()
 export class TracksService extends BaseService<Track> {
@@ -23,6 +24,8 @@ export class TracksService extends BaseService<Track> {
     private artistService: ArtistsService,
     @Inject(UploadService)
     private uploadService: UploadService,
+    @Inject(forwardRef(() => AlbumsService))
+    private albumService: AlbumsService,
   ) {
     super(trackModel);
   }
@@ -31,12 +34,24 @@ export class TracksService extends BaseService<Track> {
     createTrackDto,
     audioFile,
     coverImageFile,
+    artistId,
   }: {
     createTrackDto: CreateTrackDto;
     audioFile: Express.Multer.File[];
     coverImageFile: Express.Multer.File[];
+    artistId: string;
   }) {
-    const { artistId, genres, duration_ms, title, status } = createTrackDto;
+    const { albumIds, genres, title } = createTrackDto;
+
+    let albumIdsParsed: string[] = [];
+
+    if (albumIds) {
+      albumIdsParsed = JSON.parse(albumIds);
+    }
+
+    for (const albumId of albumIdsParsed) {
+      await this.albumService.findOne(albumId);
+    }
 
     if (!mongoose.isValidObjectId(artistId)) {
       throw new BadRequestException('Invalid artist ID');
@@ -61,6 +76,7 @@ export class TracksService extends BaseService<Track> {
       key: audioKey,
       size: audioSize,
       mimetype: audioMimetype,
+      duration: audioDuration,
     } = await this.uploadService.uploadTrack({
       fileName: audioFile[0].originalname,
       file: audioFile[0],
@@ -81,11 +97,10 @@ export class TracksService extends BaseService<Track> {
 
     const result = await this.trackModel.create({
       title,
-      duration_ms,
-      genres,
-      status,
+      duration_ms: audioDuration,
       artist,
-      albums: [],
+      genres: genres ? JSON.parse(genres) : [],
+      albums: albumIdsParsed,
       cover_images: [
         {
           url: coverImageUrl,
@@ -138,6 +153,12 @@ export class TracksService extends BaseService<Track> {
     if (filter.limit) delete filter.limit;
     if (filter.current) delete filter.current;
 
+    if (filter.title) {
+      filter.title = {
+        $regex: new RegExp(filter.title, 'i'),
+      };
+    }
+
     const totalItems = await this.trackModel.countDocuments(filter).exec();
     const totalPages = Math.ceil(totalItems / limit);
     const skip = (current - 1) * limit;
@@ -151,7 +172,7 @@ export class TracksService extends BaseService<Track> {
       .exec();
 
     return {
-      result,
+      items: result,
       totalItems,
       totalPages,
       current: parseInt(current.toString()),

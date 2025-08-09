@@ -1,3 +1,4 @@
+import { AlbumsModule } from '@albums/albums.module';
 import { ArtistsModule } from '@artists/artists.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -9,6 +10,7 @@ import { UploadModule } from '@upload/upload.module';
   imports: [
     UploadModule,
     forwardRef(() => ArtistsModule),
+    forwardRef(() => AlbumsModule),
     MongooseModule.forFeature([
       {
         name: Track.name,
