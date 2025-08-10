@@ -143,6 +143,14 @@ export class PlaylistsService extends BaseService<Playlist> {
     };
   }
 
+  async findById(id: string) {
+    const { item: playlist } = await this.findOne(id);
+
+    await playlist.populate('tracks._id');
+
+    return playlist;
+  }
+
   async addTracksToPlaylist(trackPlaylistDto: TrackPlaylistDto) {
     const { playlistId, trackIds } = trackPlaylistDto;
 

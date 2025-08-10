@@ -71,7 +71,7 @@ export class PlaylistsController {
    */
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.playlistsService.findOne(id);
+    return this.playlistsService.findById(id);
   }
 
   /**
