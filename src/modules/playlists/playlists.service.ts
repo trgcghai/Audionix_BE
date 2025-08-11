@@ -92,13 +92,8 @@ export class PlaylistsService extends BaseService<Playlist> {
 
     const { title, description } = updatePlaylistDto;
 
-    if (title) {
-      playlist.title = title;
-    }
-
-    if (description) {
-      playlist.description = description;
-    }
+    playlist.title = title;
+    playlist.description = description;
 
     if (file) {
       const { url, key, height, width } = await this.uploadService.uploadImage({
@@ -146,7 +141,15 @@ export class PlaylistsService extends BaseService<Playlist> {
   async findById(id: string) {
     const { item: playlist } = await this.findOne(id);
 
-    await playlist.populate('tracks._id');
+    await playlist.populate({
+      path: 'tracks.artist',
+      select: '_id name',
+    });
+
+    await playlist.populate({
+      path: 'tracks.albums',
+      select: '_id title',
+    });
 
     return playlist;
   }
@@ -170,16 +173,23 @@ export class PlaylistsService extends BaseService<Playlist> {
 
     const { items: tracks } = await this.trackService.findMany(trackIds);
 
-    const result = await playlist.updateOne({
-      $addToSet: {
-        tracks: tracks,
-      },
+    tracks.forEach((track) => {
+      playlist.tracks.push({
+        _id: track._id,
+        title: track.title,
+        duration_ms: track.duration_ms,
+        cover_images: track.cover_images,
+        artist: track.artist,
+        file: track.file,
+        type: track.type,
+        albums: track.albums,
+        timeAdded: new Date(),
+      });
     });
 
-    return {
-      _id: playlist._id,
-      result,
-    };
+    const result = await playlist.save();
+
+    return result;
   }
 
   async removeTracksFromPlaylist(trackPlaylistDto: TrackPlaylistDto) {
@@ -189,25 +199,17 @@ export class PlaylistsService extends BaseService<Playlist> {
       throw new BadRequestException('Invalid playlist ID');
     }
 
-    const { item: playlist } = await this.findOne(playlistId);
-
-    if (!playlist) {
-      throw new NotFoundException('Playlist not found');
-    }
-
     if (!this.checkIdsValid(...trackIds)) {
       throw new BadRequestException('Invalid track IDs');
     }
 
-    const result = await playlist.updateOne({
-      $pull: {
-        tracks: {
-          _id: {
-            $in: trackIds,
-          },
-        },
-      },
-    });
+    const { item: playlist } = await this.findOne(playlistId);
+
+    playlist.tracks = playlist.tracks.filter(
+      (track) => !trackIds.includes(track._id.toString()),
+    );
+
+    const result = await playlist.save();
 
     return {
       _id: playlist._id,

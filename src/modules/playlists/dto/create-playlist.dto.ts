@@ -1,5 +1,5 @@
 import { PlaylistStatus } from '@playlists/enum/playlist-status.enum';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreatePlaylistDto {
   @IsString()
@@ -18,7 +18,7 @@ export class CreatePlaylistDto {
 
 export class UpdatePlaylistDto {
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   title: string;
 
   @IsString()
