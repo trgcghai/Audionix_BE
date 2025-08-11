@@ -8,6 +8,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
+  Patch,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UploadTrackFilesValidator } from '@common/validators/file.validator';
@@ -17,6 +18,7 @@ import { CurrentAccount } from '@decorators/current-account.decorator';
 import { TokenPayload } from '@interfaces/token-payload.interface';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from '@enums/role.enum';
+import { TrackStatus } from '@tracks/enum/track-status.enum';
 
 @Controller('tracks')
 export class TracksController {
@@ -95,6 +97,19 @@ export class TracksController {
    */
   @Delete()
   removeMultiple(@Body('ids') ids: string[]) {
-    return this.tracksService.remove(...ids);
+    return this.tracksService.deleteMultipleTracks(...ids);
+  }
+
+  @Patch(':id/status')
+  updateStatus(@Param('id') id: string, @Body('status') status: TrackStatus) {
+    return this.tracksService.updateStatus({ id, status });
+  }
+
+  @Patch('status')
+  updateMultipleStatus(
+    @Body('ids') ids: string[],
+    @Body('status') status: TrackStatus,
+  ) {
+    return this.tracksService.updateMultipleStatus({ ids, status });
   }
 }

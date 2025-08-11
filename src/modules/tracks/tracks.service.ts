@@ -15,6 +15,11 @@ import { ArtistsService } from '@artists/artists.service';
 import { UploadService } from '@upload/upload.service';
 import { Artist } from '@artists/entities/artist.entity';
 import { AlbumsService } from '@albums/albums.service';
+import {
+  UpdateManyTracksStatusDto,
+  UpdateOneTrackStatusDto,
+} from '@tracks/dto/status-track.dto';
+import { TrackStatus } from '@tracks/enum/track-status.enum';
 
 @Injectable()
 export class TracksService extends BaseService<Track> {
@@ -197,6 +202,158 @@ export class TracksService extends BaseService<Track> {
 
     return {
       track,
+    };
+  }
+
+  async deleteMultipleTracks(...ids: string[]) {
+    for (const id of ids) {
+      if (!mongoose.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+    }
+
+    const results: {
+      successfulDeletions: { id: string; title: string }[];
+      failedDeletions: { id: string; reason: string }[];
+      fileKeys: string[];
+    } = {
+      successfulDeletions: [],
+      failedDeletions: [],
+      fileKeys: [], // Collect all file keys to delete
+    };
+    for (const id of ids) {
+      try {
+        const track = await this.trackModel.findByIdAndDelete(id).exec();
+
+        if (!track) {
+          results.failedDeletions.push({
+            id,
+            reason: 'Track not found',
+          });
+          continue;
+        }
+
+        const trackFileKeys = [
+          track.file.key,
+          ...track.cover_images.map((img) => img.key),
+        ];
+
+        results.fileKeys.push(...trackFileKeys);
+        results.successfulDeletions.push({
+          id,
+          title: track.title,
+        });
+      } catch (error) {
+        results.failedDeletions.push({
+          id,
+          reason: error.message || 'Unknown error',
+        });
+      }
+    }
+
+    if (results.fileKeys.length > 0) {
+      try {
+        await this.uploadService.deleteFiles({
+          keys: results.fileKeys,
+        });
+      } catch (error) {
+        console.error('Error deleting files:', error);
+      }
+    }
+
+    return {
+      deletedCount: results.successfulDeletions.length,
+      message:
+        results.successfulDeletions.length > 0
+          ? `Track deleted successfully`
+          : `Track not found`,
+    };
+  }
+
+  async updateStatus({ id, status }: UpdateOneTrackStatusDto) {
+    try {
+      const { item: track } = await this.findOne(id);
+
+      track.status = status;
+
+      const result = await track.save();
+      return result;
+    } catch (error) {
+      throw new BadRequestException(`Update track status failed`);
+    }
+  }
+
+  async updateMultipleStatus({ ids, status }: UpdateManyTracksStatusDto) {
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      throw new BadRequestException('Valid IDs array is required');
+    }
+
+    // Validate all IDs first
+    for (const id of ids) {
+      if (!mongoose.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+    }
+
+    const results: {
+      successfulUpdates: {
+        id: string;
+        title: string;
+        newStatus: TrackStatus;
+      }[];
+      failedUpdates: { id: string; reason: string }[];
+      fileKeys: string[];
+    } = {
+      successfulUpdates: [],
+      failedUpdates: [],
+      fileKeys: [], // Collect all file keys to delete
+    };
+
+    try {
+      for (const id of ids) {
+        try {
+          // Find the track using existing findOne method
+          const { item: track } = await this.findOne(id);
+
+          if (!track) {
+            results.failedUpdates.push({
+              id,
+              reason: 'Track not found',
+            });
+            continue;
+          }
+
+          // Update status
+          track.status = status;
+          const updatedTrack = await track.save();
+
+          // Add to successful updates
+          results.successfulUpdates.push({
+            id,
+            title: updatedTrack.title,
+            newStatus: status,
+          });
+        } catch (error) {
+          results.failedUpdates.push({
+            id,
+            reason: error.message || 'Update failed',
+          });
+        }
+      }
+    } catch (error) {
+      throw new BadRequestException(`Update track status failed`);
+    }
+
+    return {
+      totalProcessed: ids.length,
+      successCount: results.successfulUpdates.length,
+      failCount: results.failedUpdates.length,
+      successfulUpdates: results.successfulUpdates,
+      failedUpdates: results.failedUpdates,
+      message:
+        results.successfulUpdates.length > 0
+          ? `Successfully updated ${results.successfulUpdates.length} track(s)`
+          : 'No tracks were updated',
     };
   }
 }
