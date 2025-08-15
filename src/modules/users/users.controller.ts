@@ -87,6 +87,16 @@ export class UsersController {
   }
 
   /* 
+    Get method to retrieve artists followed by current user.
+    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
+    Returns a list of artists followed by the user.
+  */
+  @Get('me/following/artists')
+  findMyFollowedArtists(@CurrentAccount() payload: TokenPayload) {
+    return this.usersService.findFollowedArtists(payload.sub);
+  }
+
+  /* 
     Put method to follow an artist.
     @Body() followArtistDto: FollowArtistDto - The data transfer object containing user ID and artist ID.
     Returns a confirmation message or the updated user object.
@@ -130,6 +140,16 @@ export class UsersController {
   @Get(':id/following/albums')
   findFollowedAlbums(@Param('id') id: string) {
     return this.usersService.findFollowedAlbums(id);
+  }
+
+  /* 
+    Get method to retrieve artists followed by current user.
+    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
+    Returns a list of artists followed by the user.
+  */
+  @Get('me/following/albums')
+  findMyFollowedAlbums(@CurrentAccount() payload: TokenPayload) {
+    return this.usersService.findFollowedAlbums(payload.sub);
   }
 
   /* 
@@ -194,13 +214,3 @@ export class UsersController {
     return this.usersService.findPlaylist(id, query);
   }
 }
-
-// -crud: xong
-// -follow / unfollow artist: xong
-// -kiểm tra follow artist hay không: xong
-
-// -follow album: put: xong
-// -unfollow album: delete: xong
-// -kiểm tra follow album hay không: xong
-
-// -lấy ra playlist của người dùng: xong

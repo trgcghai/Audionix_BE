@@ -1,5 +1,10 @@
 import { AlbumsService } from '@albums/albums.service';
 import { CreateAlbumDto } from '@albums/dto/create-album.dto';
+import { AlbumStatus } from '@albums/enum/album-status.enum';
+import { CurrentAccount } from '@decorators/current-account.decorator';
+import { Roles } from '@decorators/roles.decorator';
+import { Role } from '@enums/role.enum';
+import { TokenPayload } from '@interfaces/token-payload.interface';
 import {
   Controller,
   Get,
@@ -9,7 +14,12 @@ import {
   Delete,
   Query,
   Put,
+  UseInterceptors,
+  UploadedFile,
+  Patch,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateAlbumFileValidator } from '@validators/file.validator';
 
 @Controller('albums')
 export class AlbumsController {
@@ -21,8 +31,15 @@ export class AlbumsController {
    * Returns the id of the created album.
    */
   @Post()
-  create(@Body() createAlbumDto: CreateAlbumDto) {
-    return this.albumsService.create(createAlbumDto);
+  @Roles(Role.ARTIST)
+  @UseInterceptors(FileInterceptor('cover_images'))
+  create(
+    @Body() createAlbumDto: CreateAlbumDto,
+    @CurrentAccount() payload: TokenPayload,
+    @UploadedFile(new CreateAlbumFileValidator())
+    cover_image: Express.Multer.File,
+  ) {
+    return this.albumsService.create(payload.sub, createAlbumDto, cover_image);
   }
 
   /**
@@ -38,7 +55,7 @@ export class AlbumsController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
-    return this.albumsService.findAll(query, limit, current);
+    return this.albumsService.findAll(query, limit, current, '', '', ['title']);
   }
 
   /**
@@ -58,7 +75,7 @@ export class AlbumsController {
    */
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.albumsService.remove(id);
+    return this.albumsService.deleteAlbum(id);
   }
 
   /**
@@ -68,7 +85,7 @@ export class AlbumsController {
    */
   @Delete()
   removeMultiple(@Body('ids') ids: string[]) {
-    return this.albumsService.remove(...ids);
+    return this.albumsService.deleteMultipleAlbums(...ids);
   }
 
   @Get(':id/tracks')
@@ -90,5 +107,21 @@ export class AlbumsController {
     @Body('trackIds') trackIds: string[] = [],
   ) {
     return this.albumsService.removeTracksFromAlbum({ albumId, trackIds });
+  }
+
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id') albumId: string,
+    @Body('status') status: AlbumStatus,
+  ) {
+    return this.albumsService.updateStatus({ id: albumId, status });
+  }
+
+  @Patch('status')
+  updateMultipleStatus(
+    @Body('ids') albumIds: string[],
+    @Body('status') status: AlbumStatus,
+  ) {
+    return this.albumsService.updateMultipleStatus({ ids: albumIds, status });
   }
 }

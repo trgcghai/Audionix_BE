@@ -127,6 +127,7 @@ export class PlaylistsService extends BaseService<Playlist> {
         query.current as number,
         '',
         'owner',
+        ['title'],
       );
 
     return {

@@ -31,6 +31,14 @@ export class BaseService<T> {
   ): Promise<PaginatedResponse<T>> {
     const { filter, sort } = aqp(query);
 
+    if (current < 1) {
+      current = 1;
+    }
+
+    if (limit < 1) {
+      limit = 10;
+    }
+
     if (filter.limit) delete filter.limit;
     if (filter.current) delete filter.current;
 

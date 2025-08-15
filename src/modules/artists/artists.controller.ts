@@ -37,7 +37,7 @@ export class ArtistsController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
-    return this.artistsService.findAll(query, limit, current);
+    return this.artistsService.findAll(query, limit, current, '', '', ['name']);
   }
 
   /**

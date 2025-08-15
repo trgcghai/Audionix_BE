@@ -5,11 +5,13 @@ import { ArtistsModule } from '@artists/artists.module';
 import { TracksModule } from '@tracks/tracks.module';
 import { Album, AlbumSchema } from '@albums/entities/album.entity';
 import { AlbumsController } from '@albums/albums.controller';
+import { UploadModule } from '@upload/upload.module';
 
 @Module({
   imports: [
     forwardRef(() => ArtistsModule),
     forwardRef(() => TracksModule),
+    UploadModule,
     MongooseModule.forFeature([
       {
         name: Album.name,

@@ -137,6 +137,9 @@ export class TracksService extends BaseService<Track> {
       query,
       query.limit as number,
       query.current as number,
+      '',
+      '',
+      ['title'],
     );
 
     return {
@@ -154,6 +157,14 @@ export class TracksService extends BaseService<Track> {
     current: number = 1,
   ) {
     const { filter, sort } = aqp(query);
+
+    if (limit < 1) {
+      limit = 10;
+    }
+
+    if (current < 1) {
+      current = 1;
+    }
 
     if (filter.limit) delete filter.limit;
     if (filter.current) delete filter.current;

@@ -1,5 +1,5 @@
 export enum AlbumStatus {
-  Published = 'published',
-  Hidden = 'hidden',
-  Deleted = 'deleted',
+  PUBLISHED = 'published',
+  HIDDEN = 'hidden',
+  DELETED = 'deleted',
 }

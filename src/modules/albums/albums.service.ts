@@ -1,6 +1,11 @@
-import { CreateAlbumDto } from '@albums/dto/create-album.dto';
+import {
+  CreateAlbumDto,
+  UpdateMultipleStatusDto,
+  UpdateStatusDto,
+} from '@albums/dto/create-album.dto';
 import { TrackAlbumDto } from '@albums/dto/track-album.dto';
 import { Album } from '@albums/entities/album.entity';
+import { AlbumStatus } from '@albums/enum/album-status.enum';
 import { ArtistsService } from '@artists/artists.service';
 import {
   BadRequestException,
@@ -11,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { TracksService } from '@tracks/tracks.service';
+import { UploadService } from '@upload/upload.service';
 import { BaseService } from '@utils/service.util';
 import mongoose, { Model } from 'mongoose';
 
@@ -22,6 +28,7 @@ export class AlbumsService extends BaseService<Album> {
     private artistService: ArtistsService,
     @Inject(forwardRef(() => TracksService))
     private trackService: TracksService,
+    private uploadService: UploadService,
   ) {
     super(albumModel);
   }
@@ -35,8 +42,16 @@ export class AlbumsService extends BaseService<Album> {
     }
   }
 
-  async create(createAlbumDto: CreateAlbumDto) {
-    const { artistId, description, status, title, genres } = createAlbumDto;
+  async create(
+    artistId: string,
+    createAlbumDto: CreateAlbumDto,
+    cover_images: Express.Multer.File,
+  ) {
+    const { description, title, genres } = createAlbumDto;
+
+    if (!cover_images) {
+      throw new BadRequestException('Cover image is required');
+    }
 
     if (!mongoose.isValidObjectId(artistId)) {
       throw new BadRequestException('Artist ID is invalid');
@@ -48,19 +63,30 @@ export class AlbumsService extends BaseService<Album> {
       throw new NotFoundException('Artist not found');
     }
 
+    const { url, height, width, key } = await this.uploadService.uploadImage({
+      fileName: cover_images.originalname,
+      file: cover_images,
+      path: 'cover_images',
+      author: artistId,
+    });
+
     const result = await this.albumModel.create({
       title,
       description,
       artist,
-      status,
-      cover_images: [],
+      cover_images: [
+        {
+          url,
+          height,
+          width,
+          key,
+        },
+      ],
       tracks: [],
-      genres,
+      genres: genres ? JSON.parse(genres) : [],
     });
 
-    return {
-      _id: result._id,
-    };
+    return result;
   }
 
   async updateAlbumFollowCount(albumId: string, number_of_increment: number) {
@@ -88,6 +114,9 @@ export class AlbumsService extends BaseService<Album> {
       query,
       query.limit as number,
       query.current as number,
+      '',
+      '',
+      ['title'],
     );
 
     return {
@@ -175,6 +204,175 @@ export class AlbumsService extends BaseService<Album> {
     return {
       _id: album._id,
       result,
+    };
+  }
+
+  async deleteAlbum(id: string) {
+    if (!mongoose.isValidObjectId(id)) {
+      throw new BadRequestException(`Invalid ID format: ${id}`);
+    }
+
+    const album = await this.albumModel.findByIdAndDelete(id).exec();
+
+    if (!album) {
+      throw new NotFoundException('Album not found');
+    }
+
+    await this.uploadService.deleteFiles({
+      keys: [...album.cover_images.map((img) => img.key)],
+    });
+
+    return {
+      album,
+    };
+  }
+
+  async deleteMultipleAlbums(...ids: string[]) {
+    for (const id of ids) {
+      if (!mongoose.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+    }
+
+    const results: {
+      successfulDeletions: { id: string; title: string }[];
+      failedDeletions: { id: string; reason: string }[];
+      fileKeys: string[];
+    } = {
+      successfulDeletions: [],
+      failedDeletions: [],
+      fileKeys: [], // Collect all file keys to delete
+    };
+    for (const id of ids) {
+      try {
+        const album = await this.albumModel.findByIdAndDelete(id).exec();
+
+        if (!album) {
+          results.failedDeletions.push({
+            id,
+            reason: 'Album not found',
+          });
+          continue;
+        }
+
+        const albumFileKeys = [...album.cover_images.map((img) => img.key)];
+
+        results.fileKeys.push(...albumFileKeys);
+        results.successfulDeletions.push({
+          id,
+          title: album.title,
+        });
+      } catch (error) {
+        results.failedDeletions.push({
+          id,
+          reason: error.message || 'Unknown error',
+        });
+      }
+    }
+
+    if (results.fileKeys.length > 0) {
+      try {
+        await this.uploadService.deleteFiles({
+          keys: results.fileKeys,
+        });
+      } catch (error) {
+        console.error('Error deleting files:', error);
+      }
+    }
+
+    return {
+      deletedCount: results.successfulDeletions.length,
+      message:
+        results.successfulDeletions.length > 0
+          ? `Album deleted successfully`
+          : `Album not found`,
+    };
+  }
+
+  async updateStatus({ id, status }: UpdateStatusDto) {
+    try {
+      const { item: album } = await this.findOne(id);
+
+      album.status = status;
+
+      const result = await album.save();
+      return result;
+    } catch (error) {
+      throw new BadRequestException(`Update album status failed`);
+    }
+  }
+
+  async updateMultipleStatus({ ids, status }: UpdateMultipleStatusDto) {
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      throw new BadRequestException('Valid IDs array is required');
+    }
+
+    // Validate all IDs first
+    for (const id of ids) {
+      if (!mongoose.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+    }
+
+    const results: {
+      successfulUpdates: {
+        id: string;
+        title: string;
+        newStatus: AlbumStatus;
+      }[];
+      failedUpdates: { id: string; reason: string }[];
+      fileKeys: string[];
+    } = {
+      successfulUpdates: [],
+      failedUpdates: [],
+      fileKeys: [], // Collect all file keys to delete
+    };
+
+    try {
+      for (const id of ids) {
+        try {
+          // Find the album using existing findOne method
+          const { item: album } = await this.findOne(id);
+
+          if (!album) {
+            results.failedUpdates.push({
+              id,
+              reason: 'Album not found',
+            });
+            continue;
+          }
+
+          // Update status
+          album.status = status;
+          const updatedAlbum = await album.save();
+
+          // Add to successful updates
+          results.successfulUpdates.push({
+            id,
+            title: updatedAlbum.title,
+            newStatus: status,
+          });
+        } catch (error) {
+          results.failedUpdates.push({
+            id,
+            reason: error.message || 'Update failed',
+          });
+        }
+      }
+    } catch (error) {
+      throw new BadRequestException(`Update Album status failed`);
+    }
+
+    return {
+      totalProcessed: ids.length,
+      successCount: results.successfulUpdates.length,
+      failCount: results.failedUpdates.length,
+      successfulUpdates: results.successfulUpdates,
+      failedUpdates: results.failedUpdates,
+      message:
+        results.successfulUpdates.length > 0
+          ? `Successfully updated ${results.successfulUpdates.length} Album(s)`
+          : 'No Albums were updated',
     };
   }
 }

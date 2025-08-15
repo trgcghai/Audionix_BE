@@ -1,11 +1,5 @@
 import { AlbumStatus } from '@albums/enum/album-status.enum';
-import {
-  ArrayNotEmpty,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateAlbumDto {
   @IsNotEmpty()
@@ -16,15 +10,27 @@ export class CreateAlbumDto {
   @IsOptional()
   description: string;
 
+  @IsString()
+  @IsNotEmpty()
+  genres: string;
+}
+
+export class UpdateStatusDto {
   @IsNotEmpty()
   @IsString()
-  artistId: string;
+  id: string;
 
-  @IsEnum(AlbumStatus)
   @IsNotEmpty()
-  status: string;
+  @IsString()
+  status: AlbumStatus;
+}
 
-  @ArrayNotEmpty()
+export class UpdateMultipleStatusDto {
+  @IsNotEmpty()
   @IsString({ each: true })
-  genres: string[];
+  ids: string[];
+
+  @IsNotEmpty()
+  @IsString()
+  status: AlbumStatus;
 }

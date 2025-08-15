@@ -83,6 +83,9 @@ export class ArtistsService extends BaseService<Artist> {
       query,
       query.limit as number,
       query.current as number,
+      '',
+      '',
+      ['name'],
     );
   }
 }

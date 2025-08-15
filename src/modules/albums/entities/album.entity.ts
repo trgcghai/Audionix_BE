@@ -38,15 +38,18 @@ export class Album {
     trim: true,
     required: true,
     enum: AlbumStatus,
+    default: AlbumStatus.HIDDEN,
   })
   status: AlbumStatus;
 
   @Prop({
     type: [
       {
+        _id: false,
         url: { type: String, required: true },
         height: { type: Number, required: true },
         width: { type: Number, required: true },
+        key: { type: String, required: true },
       },
     ],
   })
