@@ -35,6 +35,12 @@ export class Artist {
     default: [],
   })
   genres: string[];
+
+  @Prop({
+    type: String,
+    default: 'artist',
+  })
+  type: string;
 }
 
 export const ArtistSchema = SchemaFactory.createForClass(Artist);

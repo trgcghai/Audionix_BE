@@ -1,5 +1,7 @@
 import { ArtistsService } from '@artists/artists.service';
 import { CreateArtistDto } from '@artists/dto/create-artist.dto';
+import { CurrentAccount } from '@decorators/current-account.decorator';
+import { TokenPayload } from '@interfaces/token-payload.interface';
 import {
   Controller,
   Get,
@@ -38,6 +40,11 @@ export class ArtistsController {
     @Query('current') current: number = 1,
   ) {
     return this.artistsService.findAll(query, limit, current, '', '', ['name']);
+  }
+
+  @Get('popular')
+  findPopularArtists(@Query('limit') limit: number = 10) {
+    return this.artistsService.findPopularArtists(limit);
   }
 
   /**
@@ -87,6 +94,20 @@ export class ArtistsController {
    * @Query() query: Record<string, any> - Optional query parameters for filtering.
    * Returns a paginated list of albums for the specified artist.
    */
+  @Get('me/albums')
+  findMyAlbums(
+    @CurrentAccount() payload: TokenPayload,
+    @Query() query: Record<string, any>,
+  ) {
+    return this.artistsService.findAllAlbums(payload.sub, query);
+  }
+
+  /**
+   * Get method to retrieve all albums of an artist.
+   * @Param('id') id: string - The ID of the artist.
+   * @Query() query: Record<string, any> - Optional query parameters for filtering.
+   * Returns a paginated list of albums for the specified artist.
+   */
   @Get(':id/albums')
   findAllAlbums(@Param('id') id: string, @Query() query: Record<string, any>) {
     return this.artistsService.findAllAlbums(id, query);
@@ -106,8 +127,3 @@ export class ArtistsController {
     return this.artistsService.findRelatedArtists(id, query);
   }
 }
-
-// -crud: xong
-// -lấy ra tracks của artist: /:id/tracks: xong
-// -lấy ra albums của artist: /:id/albums: xong
-// -lấy ra artist tương tự based on genres /:id/related-artists: xong

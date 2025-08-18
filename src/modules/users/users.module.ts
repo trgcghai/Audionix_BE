@@ -10,8 +10,8 @@ import { UsersService } from '@users/users.service';
 @Module({
   imports: [
     ArtistsModule,
-    AlbumsModule,
     forwardRef(() => PlaylistsModule),
+    forwardRef(() => AlbumsModule),
     MongooseModule.forFeature([
       {
         name: User.name,

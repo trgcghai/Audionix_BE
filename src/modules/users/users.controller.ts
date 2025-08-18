@@ -77,16 +77,6 @@ export class UsersController {
   }
 
   /* 
-    Get method to retrieve artists followed by a user.
-    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
-    Returns a list of artists followed by the user.
-  */
-  @Get(':id/following/artists')
-  findFollowedArtists(@Param('id') id: string) {
-    return this.usersService.findFollowedArtists(id);
-  }
-
-  /* 
     Get method to retrieve artists followed by current user.
     @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
     Returns a list of artists followed by the user.
@@ -94,6 +84,16 @@ export class UsersController {
   @Get('me/following/artists')
   findMyFollowedArtists(@CurrentAccount() payload: TokenPayload) {
     return this.usersService.findFollowedArtists(payload.sub);
+  }
+
+  /* 
+    Get method to retrieve artists followed by a user.
+    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
+    Returns a list of artists followed by the user.
+  */
+  @Get(':id/following/artists')
+  findFollowedArtists(@Param('id') id: string) {
+    return this.usersService.findFollowedArtists(id);
   }
 
   /* 
@@ -133,16 +133,6 @@ export class UsersController {
   }
 
   /* 
-    Get method to retrieve artists followed by a user.
-    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
-    Returns a list of artists followed by the user.
-  */
-  @Get(':id/following/albums')
-  findFollowedAlbums(@Param('id') id: string) {
-    return this.usersService.findFollowedAlbums(id);
-  }
-
-  /* 
     Get method to retrieve artists followed by current user.
     @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
     Returns a list of artists followed by the user.
@@ -150,6 +140,16 @@ export class UsersController {
   @Get('me/following/albums')
   findMyFollowedAlbums(@CurrentAccount() payload: TokenPayload) {
     return this.usersService.findFollowedAlbums(payload.sub);
+  }
+
+  /* 
+    Get method to retrieve artists followed by a user.
+    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
+    Returns a list of artists followed by the user.
+  */
+  @Get(':id/following/albums')
+  findFollowedAlbums(@Param('id') id: string) {
+    return this.usersService.findFollowedAlbums(id);
   }
 
   /* 

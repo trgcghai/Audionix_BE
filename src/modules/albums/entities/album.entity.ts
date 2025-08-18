@@ -80,6 +80,12 @@ export class Album {
     min: 0,
   })
   number_of_followers: number;
+
+  @Prop({
+    type: String,
+    default: 'album',
+  })
+  type: String;
 }
 
 export const AlbumSchema = SchemaFactory.createForClass(Album);

@@ -88,4 +88,47 @@ export class ArtistsService extends BaseService<Artist> {
       ['name'],
     );
   }
+
+  async findPopularArtists(limit: number) {
+    const result = this.artistModel.aggregate([
+      {
+        $lookup: {
+          from: 'albums', // tên collection albums
+          localField: '_id',
+          foreignField: 'artist',
+          as: 'albums',
+        },
+      },
+      {
+        $addFields: {
+          totalFollowers: {
+            $sum: '$albums.number_of_followers',
+          },
+        },
+      },
+      {
+        $sort: {
+          totalFollowers: -1,
+        },
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          cover_images: 1,
+          genres: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          __v: 1,
+          type: 1,
+          totalFollowers: 1,
+        },
+      },
+    ]);
+
+    return result;
+  }
 }

@@ -28,6 +28,7 @@ export class UsersService extends BaseService<User> {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly artistService: ArtistsService,
+    @Inject(forwardRef(() => AlbumsService))
     private readonly albumService: AlbumsService,
     @Inject(forwardRef(() => PlaylistsService))
     private playlistsService: PlaylistsService,
@@ -237,14 +238,16 @@ export class UsersService extends BaseService<User> {
     return await this.playlistsService.findByUser(id, query);
   }
 
-  async findFollowedArtists(id: string) {
+  async findFollowedArtists(id: string, needPopulate: boolean = true) {
     if (!this.checkIdsValid(id)) {
       throw new BadRequestException('Invalid ID format');
     }
 
     const { item: user } = await this.findOne(id);
 
-    await user.populate<{ followed_artists: Artist }>('followed_artists');
+    if (needPopulate) {
+      await user.populate<{ followed_artists: Artist }>('followed_artists');
+    }
 
     return {
       artists: user.followed_artists,

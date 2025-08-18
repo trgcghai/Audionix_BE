@@ -59,6 +59,21 @@ export class AlbumsController {
   }
 
   /**
+   * Get method to retrieve latest albums by user's followed artists, if user has no followed artist, just return latest albums.
+   * @Query() query: Record<string, any> - Optional query parameters for filtering.
+   * @Query('limit') limit: number - The maximum number of albums to return (default is 10).
+   * @Query('current') current: number - The current page number (default is 1).
+   * Returns a paginated list of albums.
+   */
+  @Get('latest')
+  findLatestAlbums(
+    @CurrentAccount() payload: TokenPayload,
+    @Query() query: Record<string, any>,
+  ) {
+    return this.albumsService.findLatestAlbums(payload.sub, query);
+  }
+
+  /**
    * Get method to retrieve an album by ID.
    * @Param('id') id: string - The ID of the album to retrieve.
    * Returns the album object if found.
@@ -88,11 +103,22 @@ export class AlbumsController {
     return this.albumsService.deleteMultipleAlbums(...ids);
   }
 
+  /**
+   * Get method to retrieve tracks in an album.
+   * @Param('id') id: string - The ID of the album whose tracks are to be retrieved.
+   * Returns a list of tracks in the album.
+   */
   @Get(':id/tracks')
   findTracksInAlbum(@Param('id') id: string) {
     return this.albumsService.findTracksInAlbum(id);
   }
 
+  /**
+   * Put method to add tracks to an album.
+   * @Param('id') id: string - The ID of the album to which tracks are to be added.
+   * @Body('trackIds') trackIds: string[] - An array of track IDs to add to the album.
+   * Returns a confirmation message or the updated album object.
+   */
   @Put(':id/tracks')
   addTracksToAlbum(
     @Param('id') albumId: string,
@@ -101,6 +127,12 @@ export class AlbumsController {
     return this.albumsService.addTracksToAlbum({ albumId, trackIds });
   }
 
+  /**
+   * Delete method to remove tracks from an album.
+   * @Param('id') id: string - The ID of the album from which tracks are to be removed.
+   * @Body('trackIds') trackIds: string[] - An array of track IDs to remove from the album.
+   * Returns a confirmation message or the updated album object.
+   */
   @Delete(':id/tracks')
   removeTracksFromAlbum(
     @Param('id') albumId: string,
@@ -109,6 +141,12 @@ export class AlbumsController {
     return this.albumsService.removeTracksFromAlbum({ albumId, trackIds });
   }
 
+  /**
+   * Patch method to update the status of an album.
+   * @Param('id') id: string - The ID of the album to update.
+   * @Body('status') status: AlbumStatus - The new status to set for the album.
+   * Returns the updated album object.
+   */
   @Patch(':id/status')
   updateStatus(
     @Param('id') albumId: string,
@@ -117,6 +155,12 @@ export class AlbumsController {
     return this.albumsService.updateStatus({ id: albumId, status });
   }
 
+  /**
+   * Patch method to update the status of multiple albums.
+   * @Body('ids') ids: string[] - The IDs of the albums to update.
+   * @Body('status') status: AlbumStatus - The new status to set for the albums.
+   * Returns the updated album objects.
+   */
   @Patch('status')
   updateMultipleStatus(
     @Body('ids') albumIds: string[],

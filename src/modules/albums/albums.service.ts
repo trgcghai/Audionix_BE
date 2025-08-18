@@ -17,6 +17,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { TracksService } from '@tracks/tracks.service';
 import { UploadService } from '@upload/upload.service';
+import { UsersService } from '@users/users.service';
 import { BaseService } from '@utils/service.util';
 import mongoose, { Model } from 'mongoose';
 
@@ -28,6 +29,8 @@ export class AlbumsService extends BaseService<Album> {
     private artistService: ArtistsService,
     @Inject(forwardRef(() => TracksService))
     private trackService: TracksService,
+    @Inject(forwardRef(() => UsersService))
+    private userService: UsersService,
     private uploadService: UploadService,
   ) {
     super(albumModel);
@@ -102,25 +105,20 @@ export class AlbumsService extends BaseService<Album> {
     return album;
   }
 
-  async findByArtist(artistId: string, query: Record<string, any>) {
+  async findByArtist(artistId: string | string[], query: Record<string, any>) {
     query.artist = artistId;
-    const {
-      items: albums,
-      totalItems,
-      totalPages,
-      current,
-      limit,
-    } = await this.findAll(
-      query,
-      query.limit as number,
-      query.current as number,
-      '',
-      '',
-      ['title'],
-    );
+    const { items, totalItems, totalPages, current, limit } =
+      await this.findAll(
+        query,
+        query.limit as number,
+        query.current as number,
+        '',
+        'artist',
+        ['title'],
+      );
 
     return {
-      albums,
+      items,
       totalItems,
       totalPages,
       current,
@@ -374,5 +372,29 @@ export class AlbumsService extends BaseService<Album> {
           ? `Successfully updated ${results.successfulUpdates.length} Album(s)`
           : 'No Albums were updated',
     };
+  }
+
+  async findLatestAlbums(userId: string, query: Record<string, any>) {
+    // find user's followed artist
+    const { artists } = await this.userService.findFollowedArtists(
+      userId,
+      false,
+    );
+
+    // if user has no followed artist - find latest albums
+    if (artists.length === 0) {
+      query.sort = '-createdAt';
+      const result = await this.findAll(query, query.limit);
+
+      return result;
+    }
+
+    // find latest albums of user's followed artist
+    const result = await this.findByArtist(
+      artists.map((artist) => artist.toString()),
+      query,
+    );
+
+    return result;
   }
 }
