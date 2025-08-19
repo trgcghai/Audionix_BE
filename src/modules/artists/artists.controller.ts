@@ -83,6 +83,20 @@ export class ArtistsController {
    * @Query() query: Record<string, any> - Optional query parameters for filtering.
    * Returns a paginated list of tracks for the specified artist.
    */
+  @Get('me/tracks')
+  findMyTracks(
+    @CurrentAccount() payload: TokenPayload,
+    @Query() query: Record<string, any>,
+  ) {
+    return this.artistsService.findAllTracks(payload.sub, query);
+  }
+
+  /**
+   * Get method to retrieve all tracks of an artist.
+   * @Param('id') id: string - The ID of the artist.
+   * @Query() query: Record<string, any> - Optional query parameters for filtering.
+   * Returns a paginated list of tracks for the specified artist.
+   */
   @Get(':id/tracks')
   findAllTracks(@Param('id') id: string, @Query() query: Record<string, any>) {
     return this.artistsService.findAllTracks(id, query);

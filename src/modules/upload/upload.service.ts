@@ -5,8 +5,6 @@ import {
 } from '@aws-sdk/client-s3';
 import { BadGatewayException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as sharp from 'sharp';
-import { parseFile } from 'music-metadata';
 import { getAudioDuration, getImageDimensions } from '@utils/file.util';
 
 @Injectable()

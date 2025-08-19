@@ -125,25 +125,26 @@ export class TracksService extends BaseService<Track> {
     return { result };
   }
 
+  async findById(id: string) {
+    const { item } = await this.findOne(id);
+    await item.populate<{ artist: Artist }>('artist', '_id name cover_images');
+    return item;
+  }
+
   async findByArtist(artistId: string, query: Record<string, any>) {
     query.artist = artistId;
-    const {
-      items: tracks,
-      totalItems,
-      totalPages,
-      current,
-      limit,
-    } = await this.findAll(
-      query,
-      query.limit as number,
-      query.current as number,
-      '',
-      '',
-      ['title'],
-    );
+    const { items, totalItems, totalPages, current, limit } =
+      await this.findAll(
+        query,
+        query.limit as number,
+        query.current as number,
+        '',
+        '',
+        ['title'],
+      );
 
     return {
-      tracks,
+      items,
       totalItems,
       totalPages,
       current,
@@ -365,6 +366,37 @@ export class TracksService extends BaseService<Track> {
         results.successfulUpdates.length > 0
           ? `Successfully updated ${results.successfulUpdates.length} track(s)`
           : 'No tracks were updated',
+    };
+  }
+
+  async findSimilarTrack({
+    id,
+    limit = 10,
+    current = 1,
+  }: {
+    id: string;
+    limit?: number;
+    current?: number;
+  }) {
+    const { item } = await this.findOne(id);
+
+    const filter = { _id: { $ne: id }, genres: { $in: item.genres } };
+
+    const totalItems = await this.trackModel.countDocuments(filter).exec();
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const result = await this.trackModel
+      .find(filter)
+      .skip((current - 1) * limit)
+      .limit(limit)
+      .exec();
+
+    return {
+      items: result,
+      totalItems,
+      totalPages,
+      current: parseInt(current.toString()),
+      limit: parseInt(limit.toString()),
     };
   }
 }

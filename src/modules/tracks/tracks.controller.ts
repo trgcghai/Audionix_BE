@@ -77,7 +77,16 @@ export class TracksController {
    */
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.tracksService.findOne(id);
+    return this.tracksService.findById(id);
+  }
+
+  @Get(':id/similar')
+  findSimilar(
+    @Param('id') id: string,
+    @Query('limit') limit: number = 10,
+    @Query('current') current: number = 1,
+  ) {
+    return this.tracksService.findSimilarTrack({ id, limit, current });
   }
 
   /**
