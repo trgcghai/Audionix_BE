@@ -17,6 +17,10 @@ import { RedisModule } from './modules/redis/redis.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { JwtRoleGuard } from '@guards/jwt-role.guard';
+import { SeedService } from '@modules/seeds/seed.service';
+import { Account, AccountSchema } from '@auth/entities/account.entity';
+import { User, UserSchema } from '@users/entities/user.entity';
+import { Artist, ArtistSchema } from '@artists/entities/artist.entity';
 
 @Module({
   imports: [
@@ -38,6 +42,20 @@ import { JwtRoleGuard } from '@guards/jwt-role.guard';
       }),
       inject: [ConfigService],
     }),
+    MongooseModule.forFeature([
+      {
+        name: Account.name,
+        schema: AccountSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
+      {
+        name: Artist.name,
+        schema: ArtistSchema,
+      },
+    ]),
     MailerModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         transport: {
@@ -65,6 +83,7 @@ import { JwtRoleGuard } from '@guards/jwt-role.guard';
   ],
   controllers: [AppController],
   providers: [
+    SeedService,
     AppService,
     {
       provide: APP_INTERCEPTOR,

@@ -4,10 +4,14 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SeedService } from '@modules/seeds/seed.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const seedService = app.get(SeedService);
+
+  await seedService.seedDefaultAccountAndUser();
 
   app.enableCors({
     origin: ['http://localhost:3000'],
