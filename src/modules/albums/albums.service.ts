@@ -397,4 +397,12 @@ export class AlbumsService extends BaseService<Album> {
 
     return result;
   }
+
+  async findById(id: string) {
+    const { item } = await this.findOne(id);
+
+    await item.populate('artist', '_id name cover_images');
+
+    return item;
+  }
 }

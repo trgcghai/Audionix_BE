@@ -131,4 +131,9 @@ export class ArtistsService extends BaseService<Artist> {
 
     return result;
   }
+
+  async findById(id: string) {
+    const { item } = await this.findOne(id);
+    return item;
+  }
 }

@@ -54,7 +54,7 @@ export class ArtistsController {
    */
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.artistsService.findOne(id);
+    return this.artistsService.findById(id);
   }
 
   /**

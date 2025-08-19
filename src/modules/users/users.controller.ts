@@ -102,8 +102,11 @@ export class UsersController {
     Returns a confirmation message or the updated user object.
   */
   @Put('me/following/artists')
-  followArtist(@Body() followArtistDto: FollowArtistDto) {
-    return this.usersService.followArtist(followArtistDto);
+  followArtist(
+    @CurrentAccount() payload: TokenPayload,
+    @Body('artistId') artistId: string,
+  ) {
+    return this.usersService.followArtist({ userId: payload.sub, artistId });
   }
 
   /* 
