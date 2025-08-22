@@ -374,17 +374,19 @@ export class AlbumsService extends BaseService<Album> {
     };
   }
 
-  async findLatestAlbums(userId: string, query: Record<string, any>) {
+  async findLatestAlbums(
+    userId: string,
+    query: Record<string, any>,
+    limit: number,
+    current: number,
+  ) {
     // find user's followed artist
-    const { artists } = await this.userService.findFollowedArtists(
-      userId,
-      false,
-    );
+    const { artists } = await this.userService.findFollowedArtists(userId);
 
-    // if user has no followed artist - find latest albums
+    // if user has no followed artist - just find latest albums
     if (artists.length === 0) {
       query.sort = '-createdAt';
-      const result = await this.findAll(query, query.limit);
+      const result = await this.findAll(query, limit, current);
 
       return result;
     }

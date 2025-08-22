@@ -69,8 +69,15 @@ export class AlbumsController {
   findLatestAlbums(
     @CurrentAccount() payload: TokenPayload,
     @Query() query: Record<string, any>,
+    @Query('limit') limit: number = 10,
+    @Query('current') current: number = 1,
   ) {
-    return this.albumsService.findLatestAlbums(payload.sub, query);
+    return this.albumsService.findLatestAlbums(
+      payload.sub,
+      query,
+      limit,
+      current,
+    );
   }
 
   /**

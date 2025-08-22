@@ -89,7 +89,19 @@ export class ArtistsService extends BaseService<Artist> {
     );
   }
 
-  async findPopularArtists(limit: number) {
+  async findPopularArtists(
+    query: Record<string, any>,
+    limit: number,
+    current: number,
+  ) {
+    if (query.limit) delete query.limit;
+    if (query.current) delete query.current;
+    if (query.name) {
+      query.name = {
+        $regex: new RegExp(query.name, 'i'),
+      };
+    }
+
     const result = this.artistModel.aggregate([
       {
         $lookup: {
@@ -107,9 +119,15 @@ export class ArtistsService extends BaseService<Artist> {
         },
       },
       {
+        $match: query,
+      },
+      {
         $sort: {
           totalFollowers: -1,
         },
+      },
+      {
+        $skip: (current - 1) * limit,
       },
       {
         $limit: limit,

@@ -369,18 +369,27 @@ export class TracksService extends BaseService<Track> {
     };
   }
 
-  async findSimilarTrack({
-    id,
-    limit = 10,
-    current = 1,
-  }: {
-    id: string;
-    limit?: number;
-    current?: number;
-  }) {
+  async findSimilarTrack(
+    id: string,
+    query: Record<string, any>,
+    limit: number,
+    current: number,
+  ) {
     const { item } = await this.findOne(id);
 
-    const filter = { _id: { $ne: id }, genres: { $in: item.genres } };
+    if (query.title) {
+      query.title = {
+        $regex: new RegExp(query.title, 'i'),
+      };
+    }
+
+    if (query.limit) delete query.limit;
+    if (query.current) delete query.current;
+
+    if (limit < 1) limit = 10;
+    if (current < 1) current = 1;
+
+    const filter = { _id: { $ne: id }, genres: { $in: item.genres }, ...query };
 
     const totalItems = await this.trackModel.countDocuments(filter).exec();
     const totalPages = Math.ceil(totalItems / limit);

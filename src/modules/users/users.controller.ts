@@ -46,6 +46,12 @@ export class UsersController {
     return this.usersService.findAll(query, limit, current);
   }
 
+  /* Get method to retrieve the current user's information. */
+  @Get('me')
+  findMe(@CurrentAccount() payload: TokenPayload) {
+    return this.usersService.findOne(payload.sub);
+  }
+
   /* 
     Get method to retrieve a user by ID.
     @Param('id') id: string - The ID of the user to retrieve.
@@ -82,8 +88,18 @@ export class UsersController {
     Returns a list of artists followed by the user.
   */
   @Get('me/following/artists')
-  findMyFollowedArtists(@CurrentAccount() payload: TokenPayload) {
-    return this.usersService.findFollowedArtists(payload.sub);
+  findMyFollowedArtists(
+    @CurrentAccount() payload: TokenPayload,
+    @Query() query: Record<string, any>,
+    @Query('limit') limit: number = 10,
+    @Query('current') current: number = 1,
+  ) {
+    return this.usersService.findFollowedArtists(
+      payload.sub,
+      query,
+      limit,
+      current,
+    );
   }
 
   /* 
@@ -92,8 +108,13 @@ export class UsersController {
     Returns a list of artists followed by the user.
   */
   @Get(':id/following/artists')
-  findFollowedArtists(@Param('id') id: string) {
-    return this.usersService.findFollowedArtists(id);
+  findFollowedArtists(
+    @Param('id') id: string,
+    @Query() query: Record<string, any>,
+    @Query('limit') limit: number = 10,
+    @Query('current') current: number = 1,
+  ) {
+    return this.usersService.findFollowedArtists(id, query, limit, current);
   }
 
   /* 
@@ -115,8 +136,11 @@ export class UsersController {
     Returns a confirmation message or the updated user object.
   */
   @Delete('me/following/artists')
-  unfollowArtist(@Body() followArtistDto: FollowArtistDto) {
-    return this.usersService.unfollowArtist(followArtistDto);
+  unfollowArtist(
+    @CurrentAccount() payload: TokenPayload,
+    @Body('artistId') artistId: string,
+  ) {
+    return this.usersService.unfollowArtist({ userId: payload.sub, artistId });
   }
 
   /* 
@@ -124,13 +148,13 @@ export class UsersController {
     @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
     Returns a list of objects with 2 properties: artistId and isFollowing.
   */
-  @Get(':id/following/artists/contains')
+  @Get('me/following/artists/contains')
   checkIfUserIsFollowingArtists(
-    @Param('id') id: string,
+    @CurrentAccount() payload: TokenPayload,
     @Query('artistIds') artistIds: string,
   ) {
     return this.usersService.checkIfUserIsFollowingArtists({
-      userId: id,
+      userId: payload.sub,
       artistIds: artistIds.split(','),
     });
   }
@@ -141,8 +165,18 @@ export class UsersController {
     Returns a list of artists followed by the user.
   */
   @Get('me/following/albums')
-  findMyFollowedAlbums(@CurrentAccount() payload: TokenPayload) {
-    return this.usersService.findFollowedAlbums(payload.sub);
+  findMyFollowedAlbums(
+    @CurrentAccount() payload: TokenPayload,
+    @Query() query: Record<string, any>,
+    @Query('limit') limit: number = 10,
+    @Query('current') current: number = 1,
+  ) {
+    return this.usersService.findFollowedAlbums(
+      payload.sub,
+      query,
+      limit,
+      current,
+    );
   }
 
   /* 
@@ -151,8 +185,13 @@ export class UsersController {
     Returns a list of artists followed by the user.
   */
   @Get(':id/following/albums')
-  findFollowedAlbums(@Param('id') id: string) {
-    return this.usersService.findFollowedAlbums(id);
+  findFollowedAlbums(
+    @Param('id') id: string,
+    @Query() query: Record<string, any>,
+    @Query('limit') limit: number = 10,
+    @Query('current') current: number = 1,
+  ) {
+    return this.usersService.findFollowedAlbums(id, query, limit, current);
   }
 
   /* 
@@ -161,8 +200,11 @@ export class UsersController {
     Returns a confirmation message or the updated user object.
   */
   @Put('me/following/albums')
-  followAlbum(@Body() followAlbumDto: FollowAlbumDto) {
-    return this.usersService.followAlbum(followAlbumDto);
+  followAlbum(
+    @CurrentAccount() payload: TokenPayload,
+    @Body('albumId') albumId: string,
+  ) {
+    return this.usersService.followAlbum({ userId: payload.sub, albumId });
   }
 
   /* 
@@ -171,8 +213,11 @@ export class UsersController {
     Returns a confirmation message or the updated user object.
   */
   @Delete('me/following/albums')
-  unfollowAlbum(@Body() followAlbumDto: FollowAlbumDto) {
-    return this.usersService.unfollowAlbum(followAlbumDto);
+  unfollowAlbum(
+    @CurrentAccount() payload: TokenPayload,
+    @Body('albumId') albumId: string,
+  ) {
+    return this.usersService.unfollowAlbum({ userId: payload.sub, albumId });
   }
 
   /* 
@@ -181,13 +226,13 @@ export class UsersController {
     @Query('albumIds') albumIds: string - Comma-separated list of album IDs to check.
     Returns a list of objects with 2 properties: albumId and isFollowing.
   */
-  @Get(':id/following/albums/contains')
+  @Get('me/following/albums/contains')
   checkIfUserIsFollowingAlbum(
-    @Param('id') id: string,
+    @CurrentAccount() payload: TokenPayload,
     @Query('albumIds') albumIds: string,
   ) {
     return this.usersService.checkIfUserIsFollowingAlbums({
-      userId: id,
+      userId: payload.sub,
       albumIds: albumIds.split(','),
     });
   }

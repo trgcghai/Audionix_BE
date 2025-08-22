@@ -83,10 +83,11 @@ export class TracksController {
   @Get(':id/similar')
   findSimilar(
     @Param('id') id: string,
+    @Query() query: Record<string, any>,
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
-    return this.tracksService.findSimilarTrack({ id, limit, current });
+    return this.tracksService.findSimilarTrack(id, query, limit, current);
   }
 
   /**

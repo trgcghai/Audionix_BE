@@ -43,8 +43,12 @@ export class ArtistsController {
   }
 
   @Get('popular')
-  findPopularArtists(@Query('limit') limit: number = 10) {
-    return this.artistsService.findPopularArtists(limit);
+  findPopularArtists(
+    @Query() query: Record<string, any>,
+    @Query('limit') limit: number = 10,
+    @Query('current') current: number = 1,
+  ) {
+    return this.artistsService.findPopularArtists(query, limit, current);
   }
 
   /**

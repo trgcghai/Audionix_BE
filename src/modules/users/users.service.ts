@@ -238,33 +238,84 @@ export class UsersService extends BaseService<User> {
     return await this.playlistsService.findByUser(id, query);
   }
 
-  async findFollowedArtists(id: string, needPopulate: boolean = true) {
+  async findFollowedArtists(
+    id: string,
+    query: Record<string, any> = {},
+    limit: number = 10,
+    current: number = 1,
+  ) {
     if (!this.checkIdsValid(id)) {
       throw new BadRequestException('Invalid ID format');
     }
 
     const { item: user } = await this.findOne(id);
 
-    if (needPopulate) {
-      await user.populate<{ followed_artists: Artist }>('followed_artists');
+    if (!user.followed_artists || user.followed_artists.length === 0) {
+      return {
+        artists: [],
+        totalItems: 0,
+        totalPages: 0,
+        current,
+        limit,
+      };
     }
 
+    query._id = { $in: user.followed_artists };
+
+    const {
+      items: artists,
+      totalItems,
+      totalPages,
+    } = await this.artistService.findAll(query, limit, current, '', '', [
+      'name',
+    ]);
+
     return {
-      artists: user.followed_artists,
+      artists,
+      totalItems,
+      totalPages,
+      current,
+      limit,
     };
   }
 
-  async findFollowedAlbums(id: string) {
+  async findFollowedAlbums(
+    id: string,
+    query: Record<string, any> = {},
+    limit: number = 10,
+    current: number = 1,
+  ) {
     if (!this.checkIdsValid(id)) {
       throw new BadRequestException('Invalid ID format');
     }
 
     const { item: user } = await this.findOne(id);
 
-    await user.populate<{ followed_albums: Album }>('followed_albums');
+    if (!user.followed_albums || user.followed_albums.length === 0) {
+      return {
+        albums: [],
+        totalItems: 0,
+        totalPages: 0,
+        current,
+        limit,
+      };
+    }
+    query._id = { $in: user.followed_albums };
+
+    const {
+      items: albums,
+      totalItems,
+      totalPages,
+    } = await this.albumService.findAll(query, limit, current, '', '', [
+      'title',
+    ]);
 
     return {
-      albums: user.followed_albums,
+      albums,
+      totalItems,
+      totalPages,
+      current,
+      limit,
     };
   }
 }
