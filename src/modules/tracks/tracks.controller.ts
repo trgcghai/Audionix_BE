@@ -19,6 +19,7 @@ import { TokenPayload } from '@interfaces/token-payload.interface';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from '@enums/role.enum';
 import { TrackStatus } from '@tracks/enum/track-status.enum';
+import { Public } from '@decorators/is-public.decorator';
 
 @Controller('tracks')
 export class TracksController {
@@ -62,6 +63,7 @@ export class TracksController {
    * Returns a paginated list of tracks.
    */
   @Get()
+  @Public()
   findAll(
     @Query() query: Record<string, any>,
     @Query('limit') limit: number = 10,

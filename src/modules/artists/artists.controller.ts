@@ -1,6 +1,7 @@
 import { ArtistsService } from '@artists/artists.service';
 import { CreateArtistDto } from '@artists/dto/create-artist.dto';
 import { CurrentAccount } from '@decorators/current-account.decorator';
+import { Public } from '@decorators/is-public.decorator';
 import { TokenPayload } from '@interfaces/token-payload.interface';
 import {
   Controller,
@@ -43,6 +44,7 @@ export class ArtistsController {
   }
 
   @Get('popular')
+  @Public()
   findPopularArtists(
     @Query() query: Record<string, any>,
     @Query('limit') limit: number = 10,

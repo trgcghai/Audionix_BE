@@ -2,6 +2,7 @@ import { AlbumsService } from '@albums/albums.service';
 import { CreateAlbumDto } from '@albums/dto/create-album.dto';
 import { AlbumStatus } from '@albums/enum/album-status.enum';
 import { CurrentAccount } from '@decorators/current-account.decorator';
+import { Public } from '@decorators/is-public.decorator';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from '@enums/role.enum';
 import { TokenPayload } from '@interfaces/token-payload.interface';
@@ -66,6 +67,7 @@ export class AlbumsController {
    * Returns a paginated list of albums.
    */
   @Get('latest')
+  @Public()
   findLatestAlbums(
     @CurrentAccount() payload: TokenPayload,
     @Query() query: Record<string, any>,
@@ -73,10 +75,10 @@ export class AlbumsController {
     @Query('current') current: number = 1,
   ) {
     return this.albumsService.findLatestAlbums(
-      payload.sub,
       query,
       limit,
       current,
+      payload?.sub,
     );
   }
 

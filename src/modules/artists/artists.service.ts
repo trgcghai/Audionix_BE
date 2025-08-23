@@ -11,7 +11,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { TracksService } from '@tracks/tracks.service';
 import { BaseService } from '@utils/service.util';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Model, PipelineStage } from 'mongoose';
 
 @Injectable()
 export class ArtistsService extends BaseService<Artist> {
@@ -102,7 +102,7 @@ export class ArtistsService extends BaseService<Artist> {
       };
     }
 
-    const result = this.artistModel.aggregate([
+    const pipeline: PipelineStage[] = [
       {
         $lookup: {
           from: 'albums', // tên collection albums
@@ -122,32 +122,41 @@ export class ArtistsService extends BaseService<Artist> {
         $match: query,
       },
       {
-        $sort: {
-          totalFollowers: -1,
+        $facet: {
+          metadata: [{ $count: 'totalItems' }],
+          data: [
+            { $sort: { totalFollowers: -1 } },
+            { $skip: (current - 1) * limit },
+            { $limit: limit },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                cover_images: 1,
+                genres: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                type: 1,
+                totalFollowers: 1,
+              },
+            },
+          ],
         },
       },
-      {
-        $skip: (current - 1) * limit,
-      },
-      {
-        $limit: limit,
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          cover_images: 1,
-          genres: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          __v: 1,
-          type: 1,
-          totalFollowers: 1,
-        },
-      },
-    ]);
+    ];
+    const result = await this.artistModel.aggregate(pipeline);
 
-    return result;
+    const items = result[0].data;
+    const totalItems = result[0].metadata[0]?.totalItems || 0;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      items,
+      totalPages,
+      totalItems,
+      limit,
+      current,
+    };
   }
 
   async findById(id: string) {
