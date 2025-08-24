@@ -37,17 +37,6 @@ export class PlaylistsController {
     return this.playlistsService.create(createPlaylistDto, payload);
   }
 
-  @Put(':id')
-  @UseInterceptors(FileInterceptor('file'))
-  update(
-    @Param('id') id: string,
-    @Body() updatePlaylistDto: UpdatePlaylistDto,
-    @UploadedFile(new UpdatePlaylistFileValidator())
-    file: Express.Multer.File,
-  ) {
-    return this.playlistsService.update(id, updatePlaylistDto, file);
-  }
-
   /**
    * Get method to retrieve all playlists.
    * @Query() query: Record<string, any> - Optional query parameters for filtering.
@@ -77,6 +66,58 @@ export class PlaylistsController {
   }
 
   /**
+   * Put method to add tracks to multiple playlists.
+   * @param playlistIds - An array of playlist IDs to update.
+   * @param trackIds - An array of track IDs to add to the playlists.
+   * @returns The result of the update operation.
+   */
+  @Put('tracks')
+  addTracksToPlaylists(
+    @Body('playlistIds') playlistIds: string[],
+    @Body('trackIds') trackIds: string[],
+  ) {
+    return this.playlistsService.addTracksToPlaylists({
+      playlistIds,
+      trackIds,
+    });
+  }
+
+  /**
+   * Put method to remove tracks from multiple playlists.
+   * @param playlistIds - An array of playlist IDs to update.
+   * @param trackIds - An array of track IDs to remove from the playlists.
+   * @returns The result of the update operation.
+   */
+  @Delete('tracks')
+  removeTracksFromPlaylists(
+    @Body('playlistIds') playlistIds: string[],
+    @Body('trackIds') trackIds: string[],
+  ) {
+    return this.playlistsService.removeTracksFromPlaylists({
+      playlistIds,
+      trackIds,
+    });
+  }
+
+  /**
+   * Put method to update a playlist.
+   * @param id - The ID of the playlist to update.
+   * @param updatePlaylistDto - The data transfer object containing updated playlist details.
+   * @param file - The uploaded file (cover image) for the playlist.
+   * @returns The updated playlist object.
+   */
+  @Put(':id')
+  @UseInterceptors(FileInterceptor('file'))
+  update(
+    @Param('id') id: string,
+    @Body() updatePlaylistDto: UpdatePlaylistDto,
+    @UploadedFile(new UpdatePlaylistFileValidator())
+    file: Express.Multer.File,
+  ) {
+    return this.playlistsService.update(id, updatePlaylistDto, file);
+  }
+
+  /**
    * Delete method to remove a playlist by ID.
    * @Param('id') id: string - The ID of the playlist to remove.
    * Returns a confirmation message or the removed playlist object.
@@ -96,30 +137,47 @@ export class PlaylistsController {
     return this.playlistsService.remove(...ids);
   }
 
+  /**
+   * Put method to add tracks to a playlist.
+   * @Param('id') playlistId: string - The ID of the playlist to update.
+   * @Body('trackIds') trackIds: string[] - An array of track IDs to add to the playlist.
+   * Returns the updated playlist object.
+   */
   @Put(':id/tracks')
   addTracksToPlaylist(
     @Param('id') playlistId: string,
     @Body('trackIds') trackIds: string[] = [],
   ) {
-    return this.playlistsService.addTracksToPlaylist({ playlistId, trackIds });
+    return this.playlistsService.addTracksToPlaylists({
+      playlistIds: [playlistId],
+      trackIds,
+    });
   }
 
+  /**
+   * Delete method to remove tracks from a playlist.
+   * @Param('id') playlistId: string - The ID of the playlist to update.
+   * @Body('trackIds') trackIds: string[] - An array of track IDs to remove from the playlist.
+   * Returns the updated playlist object.
+   */
   @Delete(':id/tracks')
   removeTracksFromPlaylist(
     @Param('id') playlistId: string,
     @Body('trackIds') trackIds: string[] = [],
   ) {
-    return this.playlistsService.removeTracksFromPlaylist({
-      playlistId,
+    return this.playlistsService.removeTracksFromPlaylists({
+      playlistIds: [playlistId],
       trackIds,
     });
   }
 
+  /**
+   * Get method to retrieve all tracks in a playlist.
+   * @Param('id') playlistId: string - The ID of the playlist to retrieve tracks from.
+   * Returns an array of track objects.
+   */
   @Get(':id/tracks')
   findTracksInPlaylist(@Param('id') playlistId: string) {
     return this.playlistsService.findTracksInPlaylist(playlistId);
   }
 }
-
-// thêm 1 / nhiều bài hát vào 1 / nhiều playlist(s)
-// xóa 1 / nhiều bài hát khỏi 1 / nhiều playlist(s)

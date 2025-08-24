@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 export class EmbeddedTrack {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    auto: true,
+    auto: false,
   })
   _id: mongoose.Schema.Types.ObjectId;
 

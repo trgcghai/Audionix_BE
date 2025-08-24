@@ -100,7 +100,7 @@ export class UsersService extends BaseService<User> {
     const result = await user
       .updateOne({
         $addToSet: {
-          followed_artists: artist,
+          followed_artists: artist._id,
         },
       })
       .exec();
@@ -124,7 +124,7 @@ export class UsersService extends BaseService<User> {
 
     const result = await user.updateOne({
       $pull: {
-        followed_artists: { _id: artistId },
+        followed_artists: artistId,
       },
     });
 
@@ -169,7 +169,7 @@ export class UsersService extends BaseService<User> {
     const result = await user
       .updateOne({
         $addToSet: {
-          followed_albums: album,
+          followed_albums: album._id,
         },
       })
       .exec();
@@ -196,7 +196,7 @@ export class UsersService extends BaseService<User> {
     const result = await user
       .updateOne({
         $pull: {
-          followed_albums: { _id: albumId },
+          followed_albums: albumId,
         },
       })
       .exec();
@@ -260,7 +260,9 @@ export class UsersService extends BaseService<User> {
       };
     }
 
-    query._id = { $in: user.followed_artists };
+    query._id = user.followed_artists
+      .map((artist) => artist.toString())
+      .join(',');
 
     const {
       items: artists,
@@ -300,7 +302,7 @@ export class UsersService extends BaseService<User> {
         limit,
       };
     }
-    query._id = { $in: user.followed_albums };
+    query._id = user.followed_albums.map((album) => album.toString()).join(',');
 
     const {
       items: albums,

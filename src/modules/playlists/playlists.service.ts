@@ -155,66 +155,87 @@ export class PlaylistsService extends BaseService<Playlist> {
     return playlist;
   }
 
-  async addTracksToPlaylist(trackPlaylistDto: TrackPlaylistDto) {
-    const { playlistId, trackIds } = trackPlaylistDto;
+  async addTracksToPlaylists(trackPlaylistDto: TrackPlaylistDto) {
+    const { playlistIds, trackIds } = trackPlaylistDto;
 
-    if (!mongoose.isValidObjectId(playlistId)) {
-      throw new BadRequestException('Invalid playlist ID');
+    if (!this.checkIdsValid(...playlistIds, ...trackIds)) {
+      throw new BadRequestException('Invalid playlist or track IDs');
     }
 
-    const { item: playlist } = await this.findOne(playlistId);
+    const playlists = await this.playlistModel.find({
+      _id: { $in: playlistIds },
+    });
 
-    if (!playlist) {
-      throw new NotFoundException('Playlist not found');
-    }
-
-    if (!this.checkIdsValid(...trackIds)) {
-      throw new BadRequestException('Invalid track IDs');
+    if (playlists.length === 0) {
+      throw new NotFoundException('No playlists found with the provided IDs');
     }
 
     const { items: tracks } = await this.trackService.findMany(trackIds);
 
-    tracks.forEach((track) => {
-      playlist.tracks.push({
-        _id: track._id,
-        title: track.title,
-        duration_ms: track.duration_ms,
-        cover_images: track.cover_images,
-        artist: track.artist,
-        file: track.file,
-        type: track.type,
-        albums: track.albums,
-        timeAdded: new Date(),
-      });
-    });
-
-    const result = await playlist.save();
-
-    return result;
-  }
-
-  async removeTracksFromPlaylist(trackPlaylistDto: TrackPlaylistDto) {
-    const { playlistId, trackIds } = trackPlaylistDto;
-
-    if (!mongoose.isValidObjectId(playlistId)) {
-      throw new BadRequestException('Invalid playlist ID');
+    if (tracks.length === 0) {
+      throw new NotFoundException('No tracks found with the provided IDs');
     }
 
-    if (!this.checkIdsValid(...trackIds)) {
-      throw new BadRequestException('Invalid track IDs');
-    }
+    const bulkOps = playlistIds.map((playlistId) => ({
+      updateOne: {
+        filter: { _id: playlistId },
+        update: {
+          $addToSet: {
+            tracks: { $each: tracks },
+          },
+        },
+      },
+    }));
 
-    const { item: playlist } = await this.findOne(playlistId);
-
-    playlist.tracks = playlist.tracks.filter(
-      (track) => !trackIds.includes(track._id.toString()),
-    );
-
-    const result = await playlist.save();
+    const bulkResult = await this.playlistModel.bulkWrite(bulkOps);
 
     return {
-      _id: playlist._id,
-      result,
+      success: bulkResult.modifiedCount > 0,
+      message: `Added ${tracks.length} track(s) to ${bulkResult.modifiedCount} playlist(s)`,
+      stats: {
+        tracksAdded: tracks.length,
+        playlistsModified: bulkResult.modifiedCount,
+        playlistsAttempted: playlistIds.length,
+      },
+    };
+  }
+
+  async removeTracksFromPlaylists(trackPlaylistDto: TrackPlaylistDto) {
+    const { playlistIds, trackIds } = trackPlaylistDto;
+
+    if (!this.checkIdsValid(...playlistIds, ...trackIds)) {
+      throw new BadRequestException('Invalid playlist or track IDs');
+    }
+
+    const playlists = await this.playlistModel.find({
+      _id: { $in: playlistIds },
+    });
+
+    if (playlists.length === 0) {
+      throw new NotFoundException('No playlists found with the provided IDs');
+    }
+
+    const bulkOps = playlistIds.map((playlistId) => ({
+      updateOne: {
+        filter: { _id: playlistId },
+        update: {
+          $pull: {
+            tracks: { _id: { $in: trackIds } },
+          },
+        },
+      },
+    }));
+
+    const bulkResult = await this.playlistModel.bulkWrite(bulkOps);
+
+    return {
+      success: bulkResult.modifiedCount > 0,
+      message: `Removed ${trackIds.length} track(s) from ${bulkResult.modifiedCount} playlist(s)`,
+      stats: {
+        tracksRemoved: trackIds.length,
+        playlistsModified: bulkResult.modifiedCount,
+        playlistsAttempted: playlistIds.length,
+      },
     };
   }
 
@@ -224,10 +245,6 @@ export class PlaylistsService extends BaseService<Playlist> {
     }
 
     const { item: playlist } = await this.findOne(playlistId);
-
-    if (!playlist) {
-      throw new NotFoundException('Playlist not found');
-    }
 
     await playlist.populate('tracks._id');
 

@@ -6,7 +6,6 @@ import {
   EmbeddedTrack,
   EmbeddedTrackSchema,
 } from '@tracks/entities/embeddedTrack.entity';
-import { UserSchema } from '@users/entities/user.entity';
 
 export type PlaylistDocument = HydratedDocument<Playlist>;
 
