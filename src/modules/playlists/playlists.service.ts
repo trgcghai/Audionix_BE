@@ -16,7 +16,6 @@ import {
   UpdatePlaylistDto,
 } from '@playlists/dto/create-playlist.dto';
 import { TrackPlaylistDto } from '@playlists/dto/track-playlist.dto';
-import { TokenPayload } from '@interfaces/token-payload.interface';
 import { PaginatedResponse } from '@interfaces/response.interface';
 import { UploadService } from '@upload/upload.service';
 @Injectable()
@@ -53,10 +52,10 @@ export class PlaylistsService extends BaseService<Playlist> {
     return !!isPlaylistExists;
   }
 
-  async create(createPlaylistDto: CreatePlaylistDto, payload: TokenPayload) {
+  async create(createPlaylistDto: CreatePlaylistDto, userId: string) {
     const { description, title } = createPlaylistDto;
 
-    const { item: user } = await this.userService.findOne(payload.sub);
+    const { item: user } = await this.userService.findOne(userId);
 
     const countUserPlaylist = await this.playlistModel.countDocuments({
       owner: user._id,
@@ -85,10 +84,6 @@ export class PlaylistsService extends BaseService<Playlist> {
     }
 
     const { item: playlist } = await this.findOne(id);
-
-    if (!playlist) {
-      throw new NotFoundException('Playlist not found');
-    }
 
     const { title, description } = updatePlaylistDto;
 
@@ -153,6 +148,16 @@ export class PlaylistsService extends BaseService<Playlist> {
     });
 
     return playlist;
+  }
+
+  async findUserLikedSongs(userId: string) {
+    if (!this.checkIdsValid(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
+    const { item: user } = await this.userService.findOne(userId);
+
+    return await this.findById(user.liked_songs.toString());
   }
 
   async addTracksToPlaylists(trackPlaylistDto: TrackPlaylistDto) {
@@ -252,5 +257,76 @@ export class PlaylistsService extends BaseService<Playlist> {
       _id: playlist._id,
       tracks: playlist.tracks,
     };
+  }
+
+  async addTrackToLiked(trackIds: string[], userId: string) {
+    if (!this.checkIdsValid(...trackIds, userId)) {
+      throw new BadRequestException('Invalid provided IDs');
+    }
+
+    const { item: user } = await this.userService.findOne(userId);
+
+    const result = await this.addTracksToPlaylists({
+      playlistIds: [user.liked_songs.toString()],
+      trackIds,
+    });
+
+    return result;
+  }
+
+  async removeTrackFromLiked(trackIds: string[], userId: string) {
+    if (!this.checkIdsValid(...trackIds, userId)) {
+      throw new BadRequestException('Invalid provided IDs');
+    }
+
+    const { item: user } = await this.userService.findOne(userId);
+
+    const result = await this.removeTracksFromPlaylists({
+      playlistIds: [user.liked_songs.toString()],
+      trackIds,
+    });
+
+    return result;
+  }
+
+  async checkTracksInPlaylist(playlistId: string, trackIds: string[]) {
+    if (!this.checkIdsValid(playlistId, ...trackIds)) {
+      throw new BadRequestException('Invalid provided IDs');
+    }
+
+    const { item: playlist } = await this.findOne(playlistId);
+
+    const existingTrackIds = playlist.tracks.map((track) =>
+      track._id.toString(),
+    );
+
+    const results = trackIds.map((trackId) => ({
+      trackId,
+      inPlaylist: existingTrackIds.includes(trackId),
+    }));
+
+    return {
+      playlistId,
+      playlistTitle: playlist.title,
+      results,
+      summary: {
+        total: trackIds.length,
+        inPlaylist: results.filter((item) => item.inPlaylist).length,
+        notInPlaylist: results.filter((item) => !item.inPlaylist).length,
+      },
+    };
+  }
+
+  async checkTracksInLiked(userId: string, trackIds: string[]) {
+    if (!this.checkIdsValid(...trackIds, userId)) {
+      throw new BadRequestException('Invalid provided IDs');
+    }
+
+    const { item: user } = await this.userService.findOne(userId);
+
+    return await this.checkTracksInPlaylist(
+      user.liked_songs.toString(),
+      trackIds,
+    );
   }
 }

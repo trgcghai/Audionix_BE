@@ -34,7 +34,7 @@ export class PlaylistsController {
     @Body() createPlaylistDto: CreatePlaylistDto,
     @CurrentAccount() payload: TokenPayload,
   ) {
-    return this.playlistsService.create(createPlaylistDto, payload);
+    return this.playlistsService.create(createPlaylistDto, payload.sub);
   }
 
   /**
@@ -97,6 +97,34 @@ export class PlaylistsController {
       playlistIds,
       trackIds,
     });
+  }
+
+  /**
+   * Put method to add tracks to the user's liked songs.
+   * @param payload - The current user's token payload.
+   * @param trackIds - An array of track IDs to add to the liked songs.
+   * @returns The result of the operation.
+   */
+  @Put('liked/tracks')
+  addTrackToLiked(
+    @CurrentAccount() payload: TokenPayload,
+    @Body('trackIds') trackIds: string[],
+  ) {
+    return this.playlistsService.addTrackToLiked(trackIds, payload.sub);
+  }
+
+  /**
+   * Delete method to remove tracks from the user's liked songs.
+   * @param payload - The current user's token payload.
+   * @param trackIds - An array of track IDs to remove from the liked songs.
+   * @returns The result of the operation.
+   */
+  @Delete('liked/tracks')
+  removeTrackFromLiked(
+    @CurrentAccount() payload: TokenPayload,
+    @Body('trackIds') trackIds: string[],
+  ) {
+    return this.playlistsService.removeTrackFromLiked(trackIds, payload.sub);
   }
 
   /**
@@ -179,5 +207,39 @@ export class PlaylistsController {
   @Get(':id/tracks')
   findTracksInPlaylist(@Param('id') playlistId: string) {
     return this.playlistsService.findTracksInPlaylist(playlistId);
+  }
+
+  /**
+   * Get method to check if specific tracks are liked by the user.
+   * @param payload - The current user's token payload.
+   * @param trackIds - An array of track IDs to check for in the liked songs.
+   * @returns An array indicating whether each track is liked by the user.
+   */
+  @Get('liked/tracks/contains')
+  checkLikedTracks(
+    @CurrentAccount() payload: TokenPayload,
+    @Query('trackIds') trackIds: string,
+  ) {
+    return this.playlistsService.checkTracksInLiked(
+      payload.sub,
+      trackIds.split(','),
+    );
+  }
+
+  /**
+   * Post method to check if specific tracks are in a playlist.
+   * @param playlistId - The ID of the playlist to check.
+   * @param trackIds - An array of track IDs to check for in the playlist.
+   * @returns An array indicating whether each track is in the playlist.
+   */
+  @Get(':id/tracks/contains')
+  checkTracksInPlaylist(
+    @Param('id') playlistId: string,
+    @Query('trackIds') trackIds: string,
+  ) {
+    return this.playlistsService.checkTracksInPlaylist(
+      playlistId,
+      trackIds.split(','),
+    );
   }
 }

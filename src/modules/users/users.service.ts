@@ -20,8 +20,7 @@ import {
   CheckFollowingAlbumsDto,
   FollowAlbumDto,
 } from '@users/dto/album-user.dto';
-import { Album } from '@albums/entities/album.entity';
-import { Artist } from '@artists/entities/artist.entity';
+import { PlaylistStatus } from '@playlists/enum/playlist-status.enum';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -72,7 +71,7 @@ export class UsersService extends BaseService<User> {
       throw new BadRequestException('Email already exists');
     }
 
-    const result = await this.userModel.create({
+    const userCreated = await this.userModel.create({
       _id,
       username: createUserDto.username,
       email: createUserDto.email,
@@ -81,8 +80,21 @@ export class UsersService extends BaseService<User> {
       followed_albums: [],
     });
 
+    const likedSongsResult = await this.playlistsService.create(
+      {
+        title: 'Liked Songs',
+        description: 'Your favorite songs all in one place',
+        status: PlaylistStatus.PRIVATE,
+      },
+      userCreated._id.toString(),
+    );
+
+    userCreated.liked_songs = likedSongsResult._id;
+
+    await userCreated.save();
+
     return {
-      _id: result._id,
+      _id: userCreated._id,
     };
   }
 

@@ -49,6 +49,12 @@ export class User {
   followed_albums: mongoose.Schema.Types.ObjectId[];
 
   @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Playlist',
+  })
+  liked_songs: mongoose.Schema.Types.ObjectId;
+
+  @Prop({
     type: [
       {
         url: { type: String, required: true },
