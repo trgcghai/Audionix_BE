@@ -60,6 +60,7 @@ export class User {
         url: { type: String, required: true },
         height: { type: Number, required: true },
         width: { type: Number, required: true },
+        key: { type: String, required: true },
       },
     ],
   })

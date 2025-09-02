@@ -97,12 +97,14 @@ export class PlaylistsService extends BaseService<Playlist> {
         author: playlist.owner.toString(),
       });
 
-      playlist.cover_images.push({
-        height,
-        width,
-        url,
-        key,
-      });
+      playlist.cover_images = [
+        {
+          height,
+          width,
+          url,
+          key,
+        },
+      ];
     }
 
     await playlist.save();

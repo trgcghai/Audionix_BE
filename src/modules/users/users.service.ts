@@ -21,7 +21,6 @@ import {
   FollowAlbumDto,
 } from '@users/dto/album-user.dto';
 import { PlaylistStatus } from '@playlists/enum/playlist-status.enum';
-import { UploadModule } from '@upload/upload.module';
 import { UploadService } from '@upload/upload.service';
 
 @Injectable()
@@ -355,12 +354,14 @@ export class UsersService extends BaseService<User> {
         author: user._id.toString(),
       });
 
-      user.avatar.push({
-        height,
-        width,
-        url,
-        key,
-      });
+      user.avatar = [
+        {
+          height,
+          width,
+          url,
+          key,
+        },
+      ];
     }
 
     const result = await user.save();
