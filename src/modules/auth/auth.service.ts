@@ -19,7 +19,7 @@ import { Account } from '@auth/entities/account.entity';
 import { UsersService } from '@users/users.service';
 import { RedisService } from '@redis/redis.service';
 import { OtpService } from '@auth/otp.service';
-import { RegisterDto } from '@auth/dto/auth.dto';
+import { RegisterDto, UpdatePasswordDto } from '@auth/dto/auth.dto';
 import { RedisItemName, RedisServiceName } from '@redis/redis-key.enum';
 @Injectable()
 export class AuthService {
@@ -344,5 +344,36 @@ export class AuthService {
         activationCode: activationCode,
       },
     });
+  }
+
+  async updatePassword(updatePasswordDto: UpdatePasswordDto) {
+    const { email, oldPassword, newPassword } = updatePasswordDto;
+
+    const account = await this.accountModel
+      .findOne({ email })
+      .select('+password')
+      .exec();
+
+    if (!account) {
+      throw new NotFoundException(`Account not found for email: ${email}`);
+    }
+
+    console.log(account);
+
+    const isOldPasswordValid = await this.comparePassword(
+      oldPassword,
+      account.password,
+    );
+
+    if (!isOldPasswordValid) {
+      throw new BadRequestException('Old password is incorrect');
+    }
+
+    account.password = await this.hashPassword(newPassword);
+    await account.save();
+
+    return {
+      message: 'Password updated successfully',
+    };
   }
 }

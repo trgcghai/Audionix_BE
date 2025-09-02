@@ -9,11 +9,12 @@ import {
   UseGuards,
   Request,
   Res,
+  Put,
 } from '@nestjs/common';
 import { Request as ExpressRequest, Response } from 'express';
 import { CurrentAccount } from '@common/decorators/current-account.decorator';
 import { AuthService } from '@auth/auth.service';
-import { RegisterDto } from '@auth/dto/auth.dto';
+import { RegisterDto, UpdatePasswordDto } from '@auth/dto/auth.dto';
 import { LocalAuthGuard } from '@guards/local-auth.guard';
 import { Account } from '@auth/entities/account.entity';
 import { JwtRefreshAuthGuard } from '@guards/jwt-refresh-auth.guard';
@@ -25,6 +26,13 @@ import { Public } from '@decorators/is-public.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  /**
+   * Get all user accounts
+   * @param query Query parameters for filtering
+   * @param limit Number of accounts to return
+   * @param current Current page number
+   * @returns List of user accounts
+   */
   @Get('accounts')
   getAllAccounts(
     @Query() query: Record<string, any>,
@@ -34,27 +42,52 @@ export class AuthController {
     return this.authService.findAll(query, limit, current);
   }
 
+  /**
+   * Get method for retrieving a user account by ID
+   * @param id account ID
+   * @returns User account details
+   */
   @Get('accounts/:id')
   getAccountById(@Param('id') id: string) {
     return this.authService.findOne(id);
   }
 
+  /**
+   * Delete method for removing a user account by ID
+   * @param id account ID
+   * @returns Deletion result
+   */
   @Delete('accounts/:id')
   deleteAccount(@Param('id') id: string) {
     return this.authService.remove(id);
   }
 
+  /**
+   * Delete method for removing multiple user accounts
+   * @param ids array of account IDs
+   * @returns Deletion result
+   */
   @Delete('accounts')
   deleteManyAccounts(@Body('ids') ids: string[]) {
     return this.authService.remove(...ids);
   }
 
+  /**
+   * Register a new user account
+   * @param registerDto Registration data
+   * @returns Created user account
+   */
   @Post('register')
   @Public()
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
+  /**
+   * Login a user account
+   * @param account User account
+   * @returns account detail, with JWT access and refresh tokens in cookies
+   */
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @Public()
@@ -65,6 +98,11 @@ export class AuthController {
     return await this.authService.login(account, response);
   }
 
+  /**
+   * Logout a user account
+   * @param account User account
+   * @returns Logout result
+   */
   @Post('logout')
   @UseGuards(JwtLogoutGuard)
   @Public()
@@ -84,11 +122,21 @@ export class AuthController {
     };
   }
 
+  /**
+   * Get the profile of the current user
+   * @param account User account
+   * @returns User account details
+   */
   @Get('profile')
   getProfile(@CurrentAccount() account: TokenPayload) {
     return account;
   }
 
+  /**
+   * Refresh JWT access token
+   * @param account User account
+   * @returns New JWT access token
+   */
   @UseGuards(JwtRefreshAuthGuard)
   @Public()
   @Post('refresh-token')
@@ -103,13 +151,44 @@ export class AuthController {
     };
   }
 
+  /**
+   * Verify OTP for email
+   * @param email User email
+   * @param code OTP code
+   * @returns Verification result
+   */
   @Post('verify-otp')
   verifyOtp(@Body('email') email: string, @Body('code') code: string) {
     return this.authService.verifyOtp(email, code);
   }
 
+  /**
+   * Resend OTP for email
+   * @param email User email
+   * @returns Resend result
+   */
   @Post('send-otp')
   resendOtp(@Body('email') email: string) {
     return this.authService.sendOtp(email);
+  }
+
+  /**
+   * Update user password
+   * @param newPassword User's new password
+   * @param oldPassword User's old password
+   * @param payload User's token payload
+   * @returns Updated user account
+   */
+  @Put('accounts/password')
+  updatePassword(
+    @Body('newPassword') newPassword: string,
+    @Body('oldPassword') oldPassword: string,
+    @CurrentAccount() payload: TokenPayload,
+  ) {
+    return this.authService.updatePassword({
+      email: payload.email,
+      oldPassword,
+      newPassword,
+    });
   }
 }
