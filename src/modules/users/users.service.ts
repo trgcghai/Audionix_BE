@@ -11,7 +11,7 @@ import { User } from '@users/entities/user.entity';
 import { ArtistsService } from '@artists/artists.service';
 import { AlbumsService } from '@albums/albums.service';
 import { PlaylistsService } from '@playlists/playlists.service';
-import { CreateUserDto } from '@users/dto/create-user.dto';
+import { CreateUserDto, UpdateUserDto } from '@users/dto/create-user.dto';
 import {
   CheckFollowingArtistsDto,
   FollowArtistDto,
@@ -21,6 +21,8 @@ import {
   FollowAlbumDto,
 } from '@users/dto/album-user.dto';
 import { PlaylistStatus } from '@playlists/enum/playlist-status.enum';
+import { UploadModule } from '@upload/upload.module';
+import { UploadService } from '@upload/upload.service';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -31,6 +33,7 @@ export class UsersService extends BaseService<User> {
     private readonly albumService: AlbumsService,
     @Inject(forwardRef(() => PlaylistsService))
     private playlistsService: PlaylistsService,
+    private uploadService: UploadService,
   ) {
     super(userModel);
   }
@@ -75,7 +78,7 @@ export class UsersService extends BaseService<User> {
       _id,
       username: createUserDto.username,
       email: createUserDto.email,
-      avatar: createUserDto.avatar || [],
+      avatar: [],
       followed_artists: [],
       followed_albums: [],
     });
@@ -330,6 +333,41 @@ export class UsersService extends BaseService<User> {
       totalPages,
       current,
       limit,
+    };
+  }
+
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    avatar?: Express.Multer.File,
+  ) {
+    const { item: user } = await this.findOne(id);
+    const { username } = updateUserDto;
+
+    if (username) {
+      user.username = username;
+    }
+
+    if (avatar) {
+      const { url, key, height, width } = await this.uploadService.uploadImage({
+        fileName: avatar.originalname,
+        file: avatar,
+        author: user._id.toString(),
+      });
+
+      user.avatar.push({
+        height,
+        width,
+        url,
+        key,
+      });
+    }
+
+    const result = await user.save();
+
+    return {
+      result,
+      message: 'User updated successfully',
     };
   }
 }

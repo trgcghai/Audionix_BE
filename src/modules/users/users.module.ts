@@ -3,6 +3,7 @@ import { ArtistsModule } from '@artists/artists.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PlaylistsModule } from '@playlists/playlists.module';
+import { UploadModule } from '@upload/upload.module';
 import { User, UserSchema } from '@users/entities/user.entity';
 import { UsersController } from '@users/users.controller';
 import { UsersService } from '@users/users.service';
@@ -10,6 +11,7 @@ import { UsersService } from '@users/users.service';
 @Module({
   imports: [
     ArtistsModule,
+    UploadModule,
     forwardRef(() => PlaylistsModule),
     forwardRef(() => AlbumsModule),
     MongooseModule.forFeature([

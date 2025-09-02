@@ -181,7 +181,6 @@ export class AuthService {
       {
         email,
         username: firstName + ' ' + lastName,
-        avatar: [],
       },
       createAccountResult._id.toString(),
     );

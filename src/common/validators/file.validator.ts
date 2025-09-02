@@ -141,3 +141,6 @@ export class CreateAlbumFileValidator implements PipeTransform {
     }
   }
 }
+
+@Injectable()
+export class UpdateUserAvatarValidator extends CreateAlbumFileValidator {}

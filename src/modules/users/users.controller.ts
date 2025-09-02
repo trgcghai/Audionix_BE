@@ -9,12 +9,13 @@ import {
   Delete,
   Query,
   Put,
-  UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
-import { FollowAlbumDto } from '@users/dto/album-user.dto';
-import { FollowArtistDto } from '@users/dto/artist-user.dto';
-import { CreateUserDto } from '@users/dto/create-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateUserDto, UpdateUserDto } from '@users/dto/create-user.dto';
 import { UsersService } from '@users/users.service';
+import { UpdateUserAvatarValidator } from '@validators/file.validator';
 
 @Controller('users')
 export class UsersController {
@@ -80,6 +81,23 @@ export class UsersController {
   @Delete()
   removeMultiple(@Body('ids') ids: string[]) {
     return this.usersService.remove(...ids);
+  }
+
+  /**
+   * Put method to update a user by ID.
+   * @param currentAccount The current user's account information stored in the request.
+   * @param updateUserDto The data transfer object containing updated user details.
+   * @returns The updated user object.
+   */
+  @Put('me')
+  @UseInterceptors(FileInterceptor('avatar'))
+  updateUser(
+    @CurrentAccount() payload: TokenPayload,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile(new UpdateUserAvatarValidator())
+    avatar: Express.Multer.File,
+  ) {
+    return this.usersService.update(payload.sub, updateUserDto, avatar);
   }
 
   /* 
