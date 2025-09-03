@@ -1,22 +1,15 @@
+import {
+  ALLOWED_AUDIO_EXTENSIONS,
+  ALLOWED_AUDIO_TYPES,
+  ALLOWED_IMAGE_EXTENSIONS,
+  ALLOWED_IMAGE_TYPES,
+  MAX_FILE_SIZE,
+  MAX_FILE_SIZE_MB,
+} from '@common/constants/file.constant';
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class UploadTrackFilesValidator implements PipeTransform {
-  private readonly MAX_SIZES = {
-    image: 10 * 1024 * 1024, // 10 MB
-    audio: 15 * 1024 * 1024, // 15 MB
-  };
-
-  private readonly ALLOWED_TYPES = {
-    image: /^image\/(jpeg|jpg|png|gif|webp|bmp|svg\+xml)$/,
-    audio: /^audio\/(mpeg|mp3|wav|ogg|aac|flac)$/,
-  };
-
-  private readonly ALLOWED_EXTENSIONS = {
-    image: ['jpeg', 'jpg', 'png', 'gif'],
-    audio: ['mp3', 'wav', 'ogg', 'aac', 'flac'],
-  };
-
   transform(files: {
     audio?: Express.Multer.File[];
     cover_image?: Express.Multer.File[];
@@ -37,20 +30,27 @@ export class UploadTrackFilesValidator implements PipeTransform {
     type: 'image' | 'audio',
   ): void {
     // Validate file type
-    if (!this.ALLOWED_TYPES[type].test(file.mimetype)) {
-      throw new BadRequestException(
-        `Invalid ${type} file type. Allowed formats: ${this.ALLOWED_EXTENSIONS[type].join(', ')}`,
-      );
+    if (type === 'image') {
+      if (!ALLOWED_IMAGE_TYPES.test(file.mimetype)) {
+        throw new BadRequestException(
+          `Invalid image file type. Allowed formats: ${ALLOWED_IMAGE_EXTENSIONS.join(', ')}`,
+        );
+      }
+    } else if (type === 'audio') {
+      if (!ALLOWED_AUDIO_TYPES.test(file.mimetype)) {
+        throw new BadRequestException(
+          `Invalid audio file type. Allowed formats: ${ALLOWED_AUDIO_EXTENSIONS.join(', ')}`,
+        );
+      }
     }
 
     // Validate file size
-    if (file.size > this.MAX_SIZES[type]) {
-      const maxSizeMB = this.MAX_SIZES[type] / (1024 * 1024);
+    if (file.size > MAX_FILE_SIZE) {
       const currentSizeMB = (file.size / (1024 * 1024)).toFixed(2);
 
       throw new BadRequestException(
         `${type.charAt(0).toUpperCase() + type.slice(1)} file size exceeds limit. ` +
-          `Current size: ${currentSizeMB}MB, Maximum allowed: ${maxSizeMB}MB`,
+          `Current size: ${currentSizeMB}MB, Maximum allowed: ${MAX_FILE_SIZE_MB}MB`,
       );
     }
   }
@@ -58,18 +58,6 @@ export class UploadTrackFilesValidator implements PipeTransform {
 
 @Injectable()
 export class UpdatePlaylistFileValidator implements PipeTransform {
-  private readonly MAX_SIZES = {
-    image: 10 * 1024 * 1024, // 10 MB
-  };
-
-  private readonly ALLOWED_TYPES = {
-    image: /^image\/(jpeg|jpg|png|gif|webp|bmp|svg\+xml)$/,
-  };
-
-  private readonly ALLOWED_EXTENSIONS = {
-    image: ['jpeg', 'jpg', 'png', 'gif'],
-  };
-
   transform(file: Express.Multer.File) {
     if (file) {
       this.validateFile(file);
@@ -80,20 +68,19 @@ export class UpdatePlaylistFileValidator implements PipeTransform {
 
   private validateFile(file: Express.Multer.File): void {
     // Validate file type
-    if (!this.ALLOWED_TYPES['image'].test(file.mimetype)) {
+    if (!ALLOWED_IMAGE_TYPES.test(file.mimetype)) {
       throw new BadRequestException(
-        `Invalid image file type. Allowed formats: ${this.ALLOWED_EXTENSIONS['image'].join(', ')}`,
+        `Invalid image file type. Allowed formats: ${ALLOWED_IMAGE_EXTENSIONS.join(', ')}`,
       );
     }
 
     // Validate file size
-    if (file.size > this.MAX_SIZES['image']) {
-      const maxSizeMB = this.MAX_SIZES['image'] / (1024 * 1024);
+    if (file.size > MAX_FILE_SIZE) {
       const currentSizeMB = (file.size / (1024 * 1024)).toFixed(2);
 
       throw new BadRequestException(
         `Image file size exceeds limit. ` +
-          `Current size: ${currentSizeMB}MB, Maximum allowed: ${maxSizeMB}MB`,
+          `Current size: ${currentSizeMB}MB, Maximum allowed: ${MAX_FILE_SIZE_MB}MB`,
       );
     }
   }
@@ -101,18 +88,6 @@ export class UpdatePlaylistFileValidator implements PipeTransform {
 
 @Injectable()
 export class CreateAlbumFileValidator implements PipeTransform {
-  private readonly MAX_SIZES = {
-    image: 10 * 1024 * 1024, // 10 MB
-  };
-
-  private readonly ALLOWED_TYPES = {
-    image: /^image\/(jpeg|jpg|png|gif|webp|bmp|svg\+xml)$/,
-  };
-
-  private readonly ALLOWED_EXTENSIONS = {
-    image: ['jpeg', 'jpg', 'png', 'gif'],
-  };
-
   transform(file: Express.Multer.File) {
     if (file) {
       this.validateFile(file);
@@ -123,20 +98,19 @@ export class CreateAlbumFileValidator implements PipeTransform {
 
   private validateFile(file: Express.Multer.File): void {
     // Validate file type
-    if (!this.ALLOWED_TYPES['image'].test(file.mimetype)) {
+    if (!ALLOWED_IMAGE_TYPES.test(file.mimetype)) {
       throw new BadRequestException(
-        `Invalid image file type. Allowed formats: ${this.ALLOWED_EXTENSIONS['image'].join(', ')}`,
+        `Invalid image file type. Allowed formats: ${ALLOWED_IMAGE_EXTENSIONS.join(', ')}`,
       );
     }
 
     // Validate file size
-    if (file.size > this.MAX_SIZES['image']) {
-      const maxSizeMB = this.MAX_SIZES['image'] / (1024 * 1024);
+    if (file.size > MAX_FILE_SIZE) {
       const currentSizeMB = (file.size / (1024 * 1024)).toFixed(2);
 
       throw new BadRequestException(
         `Image file size exceeds limit. ` +
-          `Current size: ${currentSizeMB}MB, Maximum allowed: ${maxSizeMB}MB`,
+          `Current size: ${currentSizeMB}MB, Maximum allowed: ${MAX_FILE_SIZE_MB}MB`,
       );
     }
   }
