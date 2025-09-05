@@ -77,11 +77,21 @@ export class TracksController {
    * @Param('id') id: string - The ID of the track to retrieve.
    * Returns the track object if found.
    */
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tracksService.findById(id);
   }
 
+  /**
+   * Get method to retrieve a track's similar tracks.
+   * @param id trackId
+   * @param query Record<string, any> - Optional query parameters for filtering.
+   * @param limit limit: number - The maximum number of tracks to return.
+   * @param current current: number - The current page number.
+   * @returns A paginated list of similar tracks.
+   */
+  @Public()
   @Get(':id/similar')
   findSimilar(
     @Param('id') id: string,

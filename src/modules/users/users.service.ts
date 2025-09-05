@@ -12,14 +12,8 @@ import { ArtistsService } from '@artists/artists.service';
 import { AlbumsService } from '@albums/albums.service';
 import { PlaylistsService } from '@playlists/playlists.service';
 import { CreateUserDto, UpdateUserDto } from '@users/dto/create-user.dto';
-import {
-  CheckFollowingArtistsDto,
-  FollowArtistDto,
-} from '@users/dto/artist-user.dto';
-import {
-  CheckFollowingAlbumsDto,
-  FollowAlbumDto,
-} from '@users/dto/album-user.dto';
+import { FollowArtistDto } from '@users/dto/artist-user.dto';
+import { FollowAlbumDto } from '@users/dto/album-user.dto';
 import { PlaylistStatus } from '@playlists/enum/playlist-status.enum';
 import { UploadService } from '@upload/upload.service';
 
@@ -149,9 +143,17 @@ export class UsersService extends BaseService<User> {
   }
 
   async checkIfUserIsFollowingArtists(
-    checkFollowingArtistsDto: CheckFollowingArtistsDto,
+    userId: string | null,
+    artistIds: string[],
   ) {
-    const { userId, artistIds } = checkFollowingArtistsDto;
+    if (!userId) {
+      return {
+        result: artistIds.map((artistId) => ({
+          artistId,
+          isFollowing: false,
+        })),
+      };
+    }
 
     if (!this.checkIdsValid(userId, ...artistIds)) {
       throw new BadRequestException('Invalid user ID format');
@@ -224,11 +226,19 @@ export class UsersService extends BaseService<User> {
   }
 
   async checkIfUserIsFollowingAlbums(
-    checkFollowingAlbumsDto: CheckFollowingAlbumsDto,
+    userId: string | null,
+    albumIds: string[],
   ) {
-    const { userId, albumIds } = checkFollowingAlbumsDto;
+    if (!userId) {
+      return {
+        result: albumIds.map((albumId) => ({
+          albumId,
+          isFollowing: false,
+        })),
+      };
+    }
 
-    if (!this.checkIdsValid(userId, ...albumIds)) {
+    if (!this.checkIdsValid(...albumIds, userId)) {
       throw new BadRequestException('Invalid user ID format');
     }
 

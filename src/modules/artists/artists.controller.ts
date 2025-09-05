@@ -58,6 +58,7 @@ export class ArtistsController {
    * @Param('id') id: string - The ID of the artist to retrieve.
    * Returns the artist object if found.
    */
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.artistsService.findById(id);
@@ -103,6 +104,7 @@ export class ArtistsController {
    * @Query() query: Record<string, any> - Optional query parameters for filtering.
    * Returns a paginated list of tracks for the specified artist.
    */
+  @Public()
   @Get(':id/tracks')
   findAllTracks(@Param('id') id: string, @Query() query: Record<string, any>) {
     return this.artistsService.findAllTracks(id, query);
@@ -128,6 +130,7 @@ export class ArtistsController {
    * @Query() query: Record<string, any> - Optional query parameters for filtering.
    * Returns a paginated list of albums for the specified artist.
    */
+  @Public()
   @Get(':id/albums')
   findAllAlbums(@Param('id') id: string, @Query() query: Record<string, any>) {
     return this.artistsService.findAllAlbums(id, query);

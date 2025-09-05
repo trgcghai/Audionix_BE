@@ -1,4 +1,5 @@
 import { CurrentAccount } from '@decorators/current-account.decorator';
+import { Public } from '@decorators/is-public.decorator';
 import { TokenPayload } from '@interfaces/token-payload.interface';
 import {
   Controller,
@@ -166,15 +167,16 @@ export class UsersController {
     @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
     Returns a list of objects with 2 properties: artistId and isFollowing.
   */
+  @Public()
   @Get('me/following/artists/contains')
   checkIfUserIsFollowingArtists(
     @CurrentAccount() payload: TokenPayload,
     @Query('artistIds') artistIds: string,
   ) {
-    return this.usersService.checkIfUserIsFollowingArtists({
-      userId: payload.sub,
-      artistIds: artistIds.split(','),
-    });
+    return this.usersService.checkIfUserIsFollowingArtists(
+      payload ? payload.sub : null,
+      artistIds.split(','),
+    );
   }
 
   /* 
@@ -244,15 +246,16 @@ export class UsersController {
     @Query('albumIds') albumIds: string - Comma-separated list of album IDs to check.
     Returns a list of objects with 2 properties: albumId and isFollowing.
   */
+  @Public()
   @Get('me/following/albums/contains')
   checkIfUserIsFollowingAlbum(
     @CurrentAccount() payload: TokenPayload,
     @Query('albumIds') albumIds: string,
   ) {
-    return this.usersService.checkIfUserIsFollowingAlbums({
-      userId: payload.sub,
-      albumIds: albumIds.split(','),
-    });
+    return this.usersService.checkIfUserIsFollowingAlbums(
+      payload ? payload.sub : null,
+      albumIds.split(','),
+    );
   }
 
   /* 

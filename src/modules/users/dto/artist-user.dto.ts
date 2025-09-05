@@ -9,13 +9,3 @@ export class FollowArtistDto {
   @IsNotEmpty()
   artistId: string;
 }
-
-export class CheckFollowingArtistsDto {
-  @IsString()
-  @IsNotEmpty()
-  userId: string;
-
-  @IsString({ each: true })
-  @IsNotEmpty({ each: true })
-  artistIds: string[];
-}

@@ -87,6 +87,7 @@ export class AlbumsController {
    * @Param('id') id: string - The ID of the album to retrieve.
    * Returns the album object if found.
    */
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.albumsService.findById(id);

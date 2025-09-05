@@ -1,4 +1,5 @@
 import { CurrentAccount } from '@decorators/current-account.decorator';
+import { Public } from '@decorators/is-public.decorator';
 import { TokenPayload } from '@interfaces/token-payload.interface';
 import {
   Controller,
@@ -215,13 +216,14 @@ export class PlaylistsController {
    * @param trackIds - An array of track IDs to check for in the liked songs.
    * @returns An array indicating whether each track is liked by the user.
    */
+  @Public()
   @Get('liked/tracks/contains')
   checkLikedTracks(
     @CurrentAccount() payload: TokenPayload,
     @Query('trackIds') trackIds: string,
   ) {
     return this.playlistsService.checkTracksInLiked(
-      payload.sub,
+      payload ? payload.sub : null,
       trackIds.split(','),
     );
   }
