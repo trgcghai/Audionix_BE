@@ -18,8 +18,6 @@ import {
 import { TrackPlaylistDto } from '@playlists/dto/track-playlist.dto';
 import { PaginatedResponse } from '@interfaces/response.interface';
 import { UploadService } from '@upload/upload.service';
-import { User } from '@users/entities/user.entity';
-import aqp from 'api-query-params';
 @Injectable()
 export class PlaylistsService extends BaseService<Playlist> {
   constructor(
@@ -115,49 +113,15 @@ export class PlaylistsService extends BaseService<Playlist> {
   }
 
   async findByUser(
-    user: User,
+    userId: string,
     query: Record<string, any>,
   ): Promise<PaginatedResponse<Playlist>> {
-    // const { items, totalItems, totalPages, current, limit } =
-    //   await this.findAll(
-    //     query,
-    //     query.limit as number,
-    //     query.current as number,
-    //     '',
-    //     'owner',
-    //     ['title'],
-    //   );
+    query.owner = userId;
 
-    const limit = query.limit || 10;
-    const current = query.current || 1;
-
-    const filter = {
-      owner: user._id,
-      _id: { $ne: user.liked_songs },
-    };
-
-    const { filter: aqpFilter, sort } = aqp(query);
-
-    if (aqpFilter.limit) delete aqpFilter.limit;
-    if (aqpFilter.current) delete aqpFilter.current;
-
-    if (aqpFilter.title) {
-      aqpFilter.title = { $regex: aqpFilter.title, $options: 'i' };
-    }
-
-    const totalItems = await this.playlistModel
-      .countDocuments({ ...filter, ...aqpFilter })
-      .exec();
-    const totalPages = Math.ceil(totalItems / limit);
-    const skip = (current - 1) * limit;
-
-    const items = await this.playlistModel
-      .find({ ...filter, ...aqpFilter })
-      .skip(skip)
-      .limit(limit)
-      .select('-owner') // Loại trừ trường owner
-      .sort(sort as Record<string, 1 | -1>)
-      .exec();
+    const { items, totalItems, totalPages, limit, current } =
+      await this.findAll(query, query.limit, query.current, '', 'owner', [
+        'title',
+      ]);
 
     return {
       items,

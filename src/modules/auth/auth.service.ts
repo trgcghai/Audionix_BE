@@ -243,8 +243,13 @@ export class AuthService {
 
     await this.redisService.set(key, refreshToken, 7 * 24 * 60 * 60);
 
+    const { item: user } = await this.userService.findOne(
+      account._id.toString(),
+    );
+
     return {
       account,
+      user,
     };
   }
 

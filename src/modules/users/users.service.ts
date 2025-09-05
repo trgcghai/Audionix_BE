@@ -254,20 +254,11 @@ export class UsersService extends BaseService<User> {
     };
   }
 
-  async findPlaylist(id: string | null, query: Record<string, any>) {
-    if (!id) {
-      return {
-        items: [],
-        totalItems: 0,
-        totalPages: 0,
-        current: 0,
-        limit: 10,
-      };
+  async findPlaylist(id: string, query: Record<string, any>) {
+    if (!this.checkIdsValid(id)) {
+      throw new BadRequestException('Invalid User ID format');
     }
-
-    const { item: user } = await this.findOne(id);
-
-    return await this.playlistsService.findByUser(user, query);
+    return await this.playlistsService.findByUser(id, query);
   }
 
   async findFollowedArtists(
@@ -388,5 +379,9 @@ export class UsersService extends BaseService<User> {
       result,
       message: 'User updated successfully',
     };
+  }
+
+  async findLikedPlaylists(id: string) {
+    return await this.playlistsService.findUserLikedSongs(id);
   }
 }

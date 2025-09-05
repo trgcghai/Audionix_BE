@@ -22,23 +22,23 @@ import { UpdateUserAvatarValidator } from '@validators/file.validator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  /* 
-    Post method to create a new user.
-    @Body() createUserDto: CreateUserDto - The data transfer object containing user details.
-    Returns the id of the created user.
-  */
+  /**
+   * Post method to create a new user.
+   * @param createUserDto The data transfer object containing user details.
+   * @returns The id of the created user.
+   */
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
-  /* 
-    Get method to retrieve all users.
-    @Query() query: Record<string, any> - Optional query parameters for filtering.
-    @Query('limit') limit: number - The maximum number of users to return (default is 10).
-    @Query('current') current: number - The current page number (default is 1).
-    Returns a paginated list of users.
-  */
+  /**
+   * Get method to retrieve all users.
+   * @param query Optional query parameters for filtering.
+   * @param limit The maximum number of users to return (default is 10).
+   * @param current The current page number (default is 1).
+   * @returns A paginated list of users.
+   */
   @Get()
   findAll(
     @Query() query: Record<string, any>,
@@ -48,37 +48,41 @@ export class UsersController {
     return this.usersService.findAll(query, limit, current);
   }
 
-  /* Get method to retrieve the current user's information. */
+  /**
+   * Get method to retrieve the current user's information.
+   * @param payload The current user's account information.
+   * @returns The current user's information.
+   */
   @Get('me')
   findMe(@CurrentAccount() payload: TokenPayload) {
     return this.usersService.findOne(payload.sub);
   }
 
-  /* 
-    Get method to retrieve a user by ID.
-    @Param('id') id: string - The ID of the user to retrieve.
-    Returns the user object if found.
-  */
+  /**
+   * Get method to retrieve a user by ID.
+   * @param id The ID of the user to retrieve.
+   * @returns The user object if found.
+   */
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
-  /* 
-    Delete method to remove a user by ID.
-    @Param('id') id: string - The ID of the user to remove.
-    Returns a confirmation message or the removed user object.
-  */
+  /**
+   * Delete method to remove a user by ID.
+   * @param id The ID of the user to remove.
+   * @returns A confirmation message or the removed user object.
+   */
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
 
-  /* 
-    Delete method to remove multiple users by their IDs.
-    @Body('ids') ids: string[] - An array of user IDs to remove.
-    Returns a confirmation message or the removed user objects.
-  */
+  /**
+   * Delete method to remove multiple users by their IDs.
+   * @param ids The IDs of the users to remove.
+   * @returns A confirmation message or the removed user objects.
+   */
   @Delete()
   removeMultiple(@Body('ids') ids: string[]) {
     return this.usersService.remove(...ids);
@@ -101,11 +105,14 @@ export class UsersController {
     return this.usersService.update(payload.sub, updateUserDto, avatar);
   }
 
-  /* 
-    Get method to retrieve artists followed by current user.
-    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
-    Returns a list of artists followed by the user.
-  */
+  /**
+   * Get method to retrieve artists followed by current user.
+   * @param payload The current user's account information.
+   * @param query Optional query parameters for filtering.
+   * @param limit The maximum number of artists to return (default is 10).
+   * @param current The current page number (default is 1).
+   * @returns A paginated list of artists followed by the user.
+   */
   @Get('me/following/artists')
   findMyFollowedArtists(
     @CurrentAccount() payload: TokenPayload,
@@ -121,11 +128,14 @@ export class UsersController {
     );
   }
 
-  /* 
-    Get method to retrieve artists followed by a user.
-    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
-    Returns a list of artists followed by the user.
-  */
+  /**
+   * Get method to retrieve artists followed by a user.
+   * @param id The ID of the user whose followed artists are to be retrieved.
+   * @param query Optional query parameters for filtering.
+   * @param limit The maximum number of artists to return (default is 10).
+   * @param current The current page number (default is 1).
+   * @returns A paginated list of artists followed by the user.
+   */
   @Get(':id/following/artists')
   findFollowedArtists(
     @Param('id') id: string,
@@ -136,11 +146,12 @@ export class UsersController {
     return this.usersService.findFollowedArtists(id, query, limit, current);
   }
 
-  /* 
-    Put method to follow an artist.
-    @Body() followArtistDto: FollowArtistDto - The data transfer object containing user ID and artist ID.
-    Returns a confirmation message or the updated user object.
-  */
+  /**
+   * Put method to follow an artist.
+   * @param payload The current user's account information.
+   * @param artistId The ID of the artist to follow.
+   * @returns A confirmation message or the updated user object.
+   */
   @Put('me/following/artists')
   followArtist(
     @CurrentAccount() payload: TokenPayload,
@@ -149,11 +160,12 @@ export class UsersController {
     return this.usersService.followArtist({ userId: payload.sub, artistId });
   }
 
-  /* 
-    Delete method to unfollow an artist.
-    @Body() followArtistDto: FollowArtistDto - The data transfer object containing user ID and artist ID.
-    Returns a confirmation message or the updated user object.
-  */
+  /**
+   * Delete method to unfollow an artist.
+   * @param payload The current user's account information.
+   * @param artistId The ID of the artist to unfollow.
+   * @returns A confirmation message or the updated user object.
+   */
   @Delete('me/following/artists')
   unfollowArtist(
     @CurrentAccount() payload: TokenPayload,
@@ -162,11 +174,12 @@ export class UsersController {
     return this.usersService.unfollowArtist({ userId: payload.sub, artistId });
   }
 
-  /* 
-    Get method to retrieve artists followed by the user.
-    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
-    Returns a list of objects with 2 properties: artistId and isFollowing.
-  */
+  /**
+   * Get method to check if the current user is following specific artists.
+   * @param payload The current user's account information.
+   * @param artistIds The IDs of the artists to check.
+   * @returns A list of objects with 2 properties: artistId and isFollowing.
+   */
   @Public()
   @Get('me/following/artists/contains')
   checkIfUserIsFollowingArtists(
@@ -179,11 +192,14 @@ export class UsersController {
     );
   }
 
-  /* 
-    Get method to retrieve artists followed by current user.
-    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
-    Returns a list of artists followed by the user.
-  */
+  /**
+   * Get method to retrieve artists followed by current user.
+   * @param payload The current user's account information.
+   * @param query Optional query parameters for filtering.
+   * @param limit The maximum number of artists to return (default is 10).
+   * @param current The current page number (default is 1).
+   * @returns A paginated list of artists followed by the user.
+   */
   @Get('me/following/albums')
   findMyFollowedAlbums(
     @CurrentAccount() payload: TokenPayload,
@@ -199,11 +215,14 @@ export class UsersController {
     );
   }
 
-  /* 
-    Get method to retrieve artists followed by a user.
-    @Param('id') id: string - The ID of the user whose followed artists are to be retrieved.
-    Returns a list of artists followed by the user.
-  */
+  /**
+   * Get method to retrieve artists followed by a user.
+   * @param id The ID of the user whose followed artists are to be retrieved.
+   * @param query Optional query parameters for filtering.
+   * @param limit The maximum number of artists to return (default is 10).
+   * @param current The current page number (default is 1).
+   * @returns A paginated list of artists followed by the user.
+   */
   @Get(':id/following/albums')
   findFollowedAlbums(
     @Param('id') id: string,
@@ -214,11 +233,12 @@ export class UsersController {
     return this.usersService.findFollowedAlbums(id, query, limit, current);
   }
 
-  /* 
-    Put method to follow an album.
-    @Body() followAlbumDto: FollowAlbumDto - The data transfer object containing user ID and album ID.
-    Returns a confirmation message or the updated user object.
-  */
+  /**
+   * Put method to follow an album.
+   * @param payload The current user's account information.
+   * @param albumId The ID of the album to follow.
+   * @returns A confirmation message or the updated user object.
+   */
   @Put('me/following/albums')
   followAlbum(
     @CurrentAccount() payload: TokenPayload,
@@ -227,11 +247,12 @@ export class UsersController {
     return this.usersService.followAlbum({ userId: payload.sub, albumId });
   }
 
-  /* 
-    Delete method to unfollow an album.
-    @Body() followAlbumDto: FollowAlbumDto - The data transfer object containing user ID and album ID.
-    Returns a confirmation message or the updated user object.
-  */
+  /**
+   * Delete method to unfollow an album.
+   * @param payload The current user's account information.
+   * @param albumId The ID of the album to unfollow.
+   * @returns A confirmation message or the updated user object.
+   */
   @Delete('me/following/albums')
   unfollowAlbum(
     @CurrentAccount() payload: TokenPayload,
@@ -240,12 +261,12 @@ export class UsersController {
     return this.usersService.unfollowAlbum({ userId: payload.sub, albumId });
   }
 
-  /* 
-    Get method to check if a user is following specific albums.
-    @Param('id') id: string - The ID of the user whose followed albums are to be checked.
-    @Query('albumIds') albumIds: string - Comma-separated list of album IDs to check.
-    Returns a list of objects with 2 properties: albumId and isFollowing.
-  */
+  /**
+   * Get method to check if a user is following specific albums.
+   * @param payload The current user's account information.
+   * @param albumIds The IDs of the albums to check.
+   * @returns A list of objects with 2 properties: albumId and isFollowing.
+   */
   @Public()
   @Get('me/following/albums/contains')
   checkIfUserIsFollowingAlbum(
@@ -258,12 +279,12 @@ export class UsersController {
     );
   }
 
-  /* 
-    Get method to retrieve playlists of a current user.
-    @CurrentAccount() payload: TokenPayload - Jwt payload containing user information.
-    @Query() query: Record<string, any> - Optional query parameters for filtering.
-    Returns a list of playlists associated with the user.
-  */
+  /**
+   * Get method to retrieve playlists of a current user.
+   * @param payload The current user's account information.
+   * @param query Optional query parameters for filtering.
+   * @returns A list of playlists associated with the user.
+   */
   @Get('me/playlists')
   findMyPlaylists(
     @CurrentAccount() payload: TokenPayload,
@@ -272,12 +293,22 @@ export class UsersController {
     return this.usersService.findPlaylist(payload.sub, query);
   }
 
-  /* 
-    Get method to retrieve playlists of a user.
-    @Param('id') id: string - The ID of the user whose playlists are to be retrieved.
-    @Query() query: Record<string, any> - Optional query parameters for filtering.
-    Returns a list of playlists associated with the user.
-  */
+  /**
+   * Get method to retrieve liked playlists of a current user.
+   * @param payload - The JWT payload containing user information.
+   * @returns A list of liked playlists associated with the user.
+   */
+  @Get('me/playlists/liked')
+  findMyLikedPlaylists(@CurrentAccount() payload: TokenPayload) {
+    return this.usersService.findLikedPlaylists(payload.sub);
+  }
+
+  /**
+   * Get method to retrieve playlists of a user.
+   * @param id The ID of the user whose playlists are to be retrieved.
+   * @param query Optional query parameters for filtering.
+   * @returns A list of playlists associated with the user.
+   */
   @Get(':id/playlists')
   findPlaylist(@Param('id') id: string, @Query() query: Record<string, any>) {
     return this.usersService.findPlaylist(id, query);
