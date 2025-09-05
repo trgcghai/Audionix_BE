@@ -265,11 +265,9 @@ export class UsersService extends BaseService<User> {
       };
     }
 
-    if (!this.checkIdsValid(id)) {
-      throw new BadRequestException('Invalid ID format');
-    }
+    const { item: user } = await this.findOne(id);
 
-    return await this.playlistsService.findByUser(id, query);
+    return await this.playlistsService.findByUser(user, query);
   }
 
   async findFollowedArtists(
