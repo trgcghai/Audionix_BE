@@ -142,11 +142,12 @@ export class ArtistsController {
    * @Query() query: Record<string, any> - Optional query parameters for filtering.
    * Returns a list of related artists.
    */
-  @Get(':id/related-artists')
-  findRelatedArtists(
+  @Public()
+  @Get(':id/similar')
+  findSimilarArtists(
     @Param('id') id: string,
     @Query() query: Record<string, any>,
   ) {
-    return this.artistsService.findRelatedArtists(id, query);
+    return this.artistsService.findSimilarArtists(id, query);
   }
 }

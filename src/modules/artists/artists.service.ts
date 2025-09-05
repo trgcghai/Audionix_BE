@@ -68,7 +68,7 @@ export class ArtistsService extends BaseService<Artist> {
     }
   }
 
-  async findRelatedArtists(id: string, query: Record<string, any>) {
+  async findSimilarArtists(id: string, query: Record<string, any>) {
     if (!mongoose.isValidObjectId(id)) {
       throw new BadRequestException('Invalid artist ID format');
     }
