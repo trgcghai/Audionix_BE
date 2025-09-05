@@ -254,7 +254,17 @@ export class UsersService extends BaseService<User> {
     };
   }
 
-  async findPlaylist(id: string, query: Record<string, any>) {
+  async findPlaylist(id: string | null, query: Record<string, any>) {
+    if (!id) {
+      return {
+        items: [],
+        totalItems: 0,
+        totalPages: 0,
+        current: 0,
+        limit: 10,
+      };
+    }
+
     if (!this.checkIdsValid(id)) {
       throw new BadRequestException('Invalid ID format');
     }

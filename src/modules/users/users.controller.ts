@@ -264,12 +264,13 @@ export class UsersController {
     @Query() query: Record<string, any> - Optional query parameters for filtering.
     Returns a list of playlists associated with the user.
   */
+  @Public()
   @Get('me/playlists')
   findMyPlaylists(
     @CurrentAccount() payload: TokenPayload,
     @Query() query: Record<string, any>,
   ) {
-    return this.usersService.findPlaylist(payload.sub, query);
+    return this.usersService.findPlaylist(payload ? payload.sub : null, query);
   }
 
   /* 
