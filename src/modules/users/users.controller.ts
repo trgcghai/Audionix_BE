@@ -180,7 +180,6 @@ export class UsersController {
    * @param artistIds The IDs of the artists to check.
    * @returns A list of objects with 2 properties: artistId and isFollowing.
    */
-  @Public()
   @Get('me/following/artists/contains')
   checkIfUserIsFollowingArtists(
     @CurrentAccount() payload: TokenPayload,
@@ -267,7 +266,6 @@ export class UsersController {
    * @param albumIds The IDs of the albums to check.
    * @returns A list of objects with 2 properties: albumId and isFollowing.
    */
-  @Public()
   @Get('me/following/albums/contains')
   checkIfUserIsFollowingAlbum(
     @CurrentAccount() payload: TokenPayload,

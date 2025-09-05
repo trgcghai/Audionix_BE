@@ -216,7 +216,6 @@ export class PlaylistsController {
    * @param trackIds - An array of track IDs to check for in the liked songs.
    * @returns An array indicating whether each track is liked by the user.
    */
-  @Public()
   @Get('liked/tracks/contains')
   checkLikedTracks(
     @CurrentAccount() payload: TokenPayload,
