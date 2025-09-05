@@ -142,19 +142,7 @@ export class UsersService extends BaseService<User> {
     };
   }
 
-  async checkIfUserIsFollowingArtists(
-    userId: string | null,
-    artistIds: string[],
-  ) {
-    if (!userId) {
-      return {
-        result: artistIds.map((artistId) => ({
-          artistId,
-          isFollowing: false,
-        })),
-      };
-    }
-
+  async checkIfUserIsFollowingArtists(userId: string, artistIds: string[]) {
     if (!this.checkIdsValid(userId, ...artistIds)) {
       throw new BadRequestException('Invalid user ID format');
     }
@@ -225,19 +213,7 @@ export class UsersService extends BaseService<User> {
     };
   }
 
-  async checkIfUserIsFollowingAlbums(
-    userId: string | null,
-    albumIds: string[],
-  ) {
-    if (!userId) {
-      return {
-        result: albumIds.map((albumId) => ({
-          albumId,
-          isFollowing: false,
-        })),
-      };
-    }
-
+  async checkIfUserIsFollowingAlbums(userId: string, albumIds: string[]) {
     if (!this.checkIdsValid(...albumIds, userId)) {
       throw new BadRequestException('Invalid user ID format');
     }

@@ -186,7 +186,7 @@ export class UsersController {
     @Query('artistIds') artistIds: string,
   ) {
     return this.usersService.checkIfUserIsFollowingArtists(
-      payload ? payload.sub : null,
+      payload.sub,
       artistIds.split(','),
     );
   }
@@ -272,7 +272,7 @@ export class UsersController {
     @Query('albumIds') albumIds: string,
   ) {
     return this.usersService.checkIfUserIsFollowingAlbums(
-      payload ? payload.sub : null,
+      payload.sub,
       albumIds.split(','),
     );
   }

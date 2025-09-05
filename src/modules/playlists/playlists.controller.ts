@@ -222,7 +222,7 @@ export class PlaylistsController {
     @Query('trackIds') trackIds: string,
   ) {
     return this.playlistsService.checkTracksInLiked(
-      payload ? payload.sub : null,
+      payload.sub,
       trackIds.split(','),
     );
   }

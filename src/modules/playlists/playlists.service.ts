@@ -315,23 +315,7 @@ export class PlaylistsService extends BaseService<Playlist> {
     };
   }
 
-  async checkTracksInLiked(userId: string | null, trackIds: string[]) {
-    if (!userId) {
-      return {
-        playlistId: null,
-        playlistTitle: null,
-        results: trackIds.map((trackId) => ({
-          trackId,
-          inPlaylist: false,
-        })),
-        summary: {
-          total: trackIds.length,
-          inPlaylist: 0,
-          notInPlaylist: trackIds.length,
-        },
-      };
-    }
-
+  async checkTracksInLiked(userId: string, trackIds: string[]) {
     if (!this.checkIdsValid(...trackIds, userId)) {
       throw new BadRequestException('Invalid provided IDs');
     }
