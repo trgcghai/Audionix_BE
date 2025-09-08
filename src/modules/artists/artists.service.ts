@@ -1,5 +1,8 @@
 import { AlbumsService } from '@albums/albums.service';
-import { CreateArtistDto } from '@artists/dto/create-artist.dto';
+import {
+  CreateArtistDto,
+  UpdateArtistDto,
+} from '@artists/dto/create-artist.dto';
 import { Artist } from '@artists/entities/artist.entity';
 import {
   BadRequestException,
@@ -10,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { TracksService } from '@tracks/tracks.service';
+import { UploadService } from '@upload/upload.service';
 import { BaseService } from '@utils/service.util';
 import mongoose, { Model, PipelineStage } from 'mongoose';
 
@@ -21,6 +25,7 @@ export class ArtistsService extends BaseService<Artist> {
     private trackService: TracksService,
     @Inject(forwardRef(() => AlbumsService))
     private albumService: AlbumsService,
+    private uploadService: UploadService,
   ) {
     super(artistModel);
   }
@@ -162,5 +167,50 @@ export class ArtistsService extends BaseService<Artist> {
   async findById(id: string) {
     const { item } = await this.findOne(id);
     return item;
+  }
+
+  async update(
+    id: string,
+    updateArtistDto: UpdateArtistDto,
+    cover_images: Express.Multer.File,
+  ) {
+    try {
+      const { item: user } = await this.findOne(id);
+      const { name, genres } = updateArtistDto;
+
+      if (name) {
+        user.name = name;
+      }
+
+      if (genres) {
+        user.genres = JSON.parse(genres);
+      }
+
+      if (cover_images) {
+        const { url, key, height, width } =
+          await this.uploadService.uploadImage({
+            fileName: cover_images.originalname,
+            file: cover_images,
+            author: user._id.toString(),
+          });
+
+        user.cover_images = [
+          {
+            height,
+            width,
+            url,
+            key,
+          },
+        ];
+      }
+
+      const result = await user.save();
+
+      return {
+        result,
+      };
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
   }
 }

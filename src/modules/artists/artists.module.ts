@@ -5,11 +5,13 @@ import { Artist, ArtistSchema } from '@artists/entities/artist.entity';
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TracksModule } from '@tracks/tracks.module';
+import { UploadModule } from '@upload/upload.module';
 
 @Module({
   imports: [
     forwardRef(() => TracksModule),
     forwardRef(() => AlbumsModule),
+    UploadModule,
     MongooseModule.forFeature([
       {
         name: Artist.name,

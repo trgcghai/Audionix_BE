@@ -5,3 +5,13 @@ export class CreateArtistDto {
   @IsNotEmpty()
   name: string;
 }
+
+export class UpdateArtistDto {
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsString()
+  @IsOptional()
+  genres?: string;
+}
