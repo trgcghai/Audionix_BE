@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
@@ -15,9 +15,9 @@ import { Account, AccountSchema } from '@auth/entities/account.entity';
 
 @Module({
   imports: [
-    UsersModule,
     PassportModule,
     RedisModule,
+    forwardRef(() => UsersModule),
     MongooseModule.forFeature([
       {
         name: Account.name,
@@ -46,5 +46,6 @@ import { Account, AccountSchema } from '@auth/entities/account.entity';
     JwtStrategy,
     JwtRefreshStrategy,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

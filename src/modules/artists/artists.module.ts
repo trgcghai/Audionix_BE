@@ -12,7 +12,7 @@ import { UploadModule } from '@upload/upload.module';
   imports: [
     forwardRef(() => TracksModule),
     forwardRef(() => AlbumsModule),
-    // forwardRef(() => AuthModule),
+    forwardRef(() => AuthModule),
     UploadModule,
     MongooseModule.forFeature([
       {

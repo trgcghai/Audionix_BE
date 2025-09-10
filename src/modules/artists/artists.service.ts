@@ -27,8 +27,8 @@ export class ArtistsService extends BaseService<Artist> {
     @Inject(forwardRef(() => AlbumsService))
     private albumService: AlbumsService,
     private uploadService: UploadService,
-    // @Inject(forwardRef(() => AuthService))
-    // private authService: AuthService,
+    @Inject(forwardRef(() => AuthService))
+    private authService: AuthService,
   ) {
     super(artistModel);
   }
@@ -78,15 +78,15 @@ export class ArtistsService extends BaseService<Artist> {
       ];
     }
 
-    // const { item: account } = await this.authService.findOne(id);
+    const { item: account } = await this.authService.findOne(id);
 
-    // const currentRoles = Array.isArray(account.role)
-    //   ? account.role
-    //   : [account.role];
-    // if (!currentRoles.includes(Role.ARTIST)) {
-    //   account.role = [...currentRoles, Role.ARTIST];
-    // }
-    // await account.save();
+    const currentRoles = Array.isArray(account.role)
+      ? account.role
+      : [account.role];
+    if (!currentRoles.includes(Role.ARTIST)) {
+      account.role = [...currentRoles, Role.ARTIST];
+    }
+    await account.save();
 
     return { result };
   }

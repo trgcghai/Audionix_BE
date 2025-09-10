@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -25,7 +26,7 @@ import { RedisItemName, RedisServiceName } from '@redis/redis-key.enum';
 export class AuthService {
   constructor(
     @InjectModel(Account.name) private accountModel: Model<Account>,
-    @Inject() private userService: UsersService,
+    @Inject(forwardRef(() => UsersService)) private userService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
     private redisService: RedisService,
