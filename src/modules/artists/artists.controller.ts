@@ -32,9 +32,19 @@ export class ArtistsController {
    * @Body() createArtistDto: CreateArtistDto - The data transfer object containing artist details.
    * Returns the id of the created artist.
    */
+  @UseInterceptors(FileInterceptor('cover_images'))
   @Post()
-  create(@Body() createArtistDto: CreateArtistDto) {
-    return this.artistsService.create(createArtistDto);
+  create(
+    @CurrentAccount() payload: TokenPayload,
+    @Body() createArtistDto: CreateArtistDto,
+    @UploadedFile(new UpdateUserAvatarValidator())
+    cover_images: Express.Multer.File,
+  ) {
+    return this.artistsService.create(
+      payload.sub,
+      createArtistDto,
+      cover_images,
+    );
   }
 
   /*

@@ -4,12 +4,13 @@ import {
   UpdateArtistDto,
 } from '@artists/dto/create-artist.dto';
 import { Artist } from '@artists/entities/artist.entity';
+import { AuthService } from '@auth/auth.service';
+import { Role } from '@enums/role.enum';
 import {
   BadRequestException,
   forwardRef,
   Inject,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { TracksService } from '@tracks/tracks.service';
@@ -26,6 +27,8 @@ export class ArtistsService extends BaseService<Artist> {
     @Inject(forwardRef(() => AlbumsService))
     private albumService: AlbumsService,
     private uploadService: UploadService,
+    // @Inject(forwardRef(() => AuthService))
+    // private authService: AuthService,
   ) {
     super(artistModel);
   }
@@ -36,41 +39,64 @@ export class ArtistsService extends BaseService<Artist> {
     }
     const isArtistExists = await this.artistModel.exists({ _id: id });
 
-    if (!isArtistExists) {
-      throw new NotFoundException('Artist not found');
-    }
-
     return !!isArtistExists;
   }
 
-  async create(createArtistDto: CreateArtistDto) {
-    const { name } = createArtistDto;
+  async create(
+    id: string,
+    createArtistDto: CreateArtistDto,
+    cover_images: Express.Multer.File,
+  ) {
+    const isArtistExists = await this.checkArtistExists(id);
+    if (isArtistExists) {
+      throw new BadRequestException('Artist already exists');
+    }
+
+    const { name, genres } = createArtistDto;
 
     const result = await this.artistModel.create({
+      _id: id,
       name,
       cover_images: [],
-      genres: [],
+      genres: genres ? JSON.parse(genres) : [],
     });
 
-    return {
-      _id: result._id,
-    };
+    if (cover_images) {
+      const { url, key, height, width } = await this.uploadService.uploadImage({
+        fileName: cover_images.originalname,
+        file: cover_images,
+        author: result._id.toString(),
+      });
+
+      result.cover_images = [
+        {
+          height,
+          width,
+          url,
+          key,
+        },
+      ];
+    }
+
+    // const { item: account } = await this.authService.findOne(id);
+
+    // const currentRoles = Array.isArray(account.role)
+    //   ? account.role
+    //   : [account.role];
+    // if (!currentRoles.includes(Role.ARTIST)) {
+    //   account.role = [...currentRoles, Role.ARTIST];
+    // }
+    // await account.save();
+
+    return { result };
   }
 
   async findAllTracks(id: string, query: Record<string, any>) {
-    const isArtistExists = await this.checkArtistExists(id);
-
-    if (isArtistExists) {
-      return await this.trackService.findByArtist(id, query);
-    }
+    return await this.trackService.findByArtist(id, query);
   }
 
   async findAllAlbums(id: string, query: Record<string, any>) {
-    const isArtistExists = await this.checkArtistExists(id);
-
-    if (isArtistExists) {
-      return await this.albumService.findByArtist(id, query);
-    }
+    return await this.albumService.findByArtist(id, query);
   }
 
   async findSimilarArtists(id: string, query: Record<string, any>) {

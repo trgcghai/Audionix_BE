@@ -4,6 +4,10 @@ export class CreateArtistDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  genres: string;
 }
 
 export class UpdateArtistDto {

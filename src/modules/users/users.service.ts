@@ -21,9 +21,10 @@ import { UploadService } from '@upload/upload.service';
 export class UsersService extends BaseService<User> {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    private readonly artistService: ArtistsService,
+    @Inject(forwardRef(() => ArtistsService))
+    private artistService: ArtistsService,
     @Inject(forwardRef(() => AlbumsService))
-    private readonly albumService: AlbumsService,
+    private albumService: AlbumsService,
     @Inject(forwardRef(() => PlaylistsService))
     private playlistsService: PlaylistsService,
     private uploadService: UploadService,
