@@ -83,6 +83,16 @@ export class AlbumsController {
   }
 
   /**
+   * Get method to retrieve album filter options for the current artist.
+   * @param payload The current user's token payload.
+   * @returns An array of album filter options.
+   */
+  @Get('my-options')
+  findMyAlbumAsFilterOptions(@CurrentAccount() payload: TokenPayload) {
+    return this.albumsService.findMyAlbumsAsFilterOptions(payload.sub);
+  }
+
+  /**
    * Get method to retrieve an album by ID.
    * @Param('id') id: string - The ID of the album to retrieve.
    * Returns the album object if found.

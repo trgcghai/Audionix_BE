@@ -414,4 +414,15 @@ export class AlbumsService extends BaseService<Album> {
 
     return item;
   }
+
+  async findMyAlbumsAsFilterOptions(artistId: string) {
+    const results = await this.albumModel.find({ artist: artistId });
+
+    return {
+      options: results.map((album) => ({
+        label: album.title,
+        value: album._id,
+      })),
+    };
+  }
 }
