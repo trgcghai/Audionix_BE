@@ -161,26 +161,37 @@ export class AlbumsService extends BaseService<Album> {
 
     const { items: tracks } = await this.trackService.findMany(trackIds);
 
-    if (tracks.length === 0) {
-      throw new NotFoundException('No tracks found with the provided IDs');
-    }
-
     const now = new Date();
-    const trackIdsSet = [...new Set(trackIds)].map((id) => ({
-      _id: id,
-      time_added: now,
-    }));
+    const trackIdsSet = [...new Set(trackIds)];
+    const bulkOps: any[] = [];
 
-    const bulkOps = albumIds.map((albumId) => ({
-      updateOne: {
-        filter: { _id: albumId },
-        update: {
-          $addToSet: {
-            tracks: { $each: trackIdsSet },
+    for (const album of albums) {
+      // Get existing track IDs in the album to avoid duplicates
+      const existingTrackIds = new Set(
+        album.tracks.map((track: any) => track._id.toString()),
+      );
+
+      // Filter out tracks that are already in the album
+      const tracksToAdd = trackIdsSet
+        .filter((trackId) => !existingTrackIds.has(trackId))
+        .map((trackId) => ({
+          _id: trackId,
+          time_added: now,
+        }));
+
+      if (tracksToAdd.length > 0) {
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: album._id },
+            update: {
+              $addToSet: {
+                tracks: { $each: tracksToAdd },
+              },
+            },
           },
-        },
-      },
-    }));
+        });
+      }
+    }
 
     const bulkResult = await this.albumModel.bulkWrite(bulkOps);
 
