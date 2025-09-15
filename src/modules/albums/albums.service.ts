@@ -3,7 +3,6 @@ import {
   UpdateMultipleStatusDto,
   UpdateStatusDto,
 } from '@albums/dto/create-album.dto';
-import { TrackAlbumDto } from '@albums/dto/track-album.dto';
 import { Album } from '@albums/entities/album.entity';
 import { AlbumStatus } from '@albums/enum/album-status.enum';
 import { ArtistsService } from '@artists/artists.service';
@@ -137,71 +136,99 @@ export class AlbumsService extends BaseService<Album> {
 
     return {
       _id: album._id,
-      tracks: album.tracks,
+      results: album.tracks,
     };
   }
 
-  async addTracksToAlbum(addTrackToAlbumDto: TrackAlbumDto) {
-    const { albumId, trackIds } = addTrackToAlbumDto;
-
-    if (!this.checkIdsValid(albumId)) {
-      throw new BadRequestException('Album ID is invalid');
+  async addTracksToAlbums({
+    albumIds,
+    trackIds,
+  }: {
+    albumIds: string[];
+    trackIds: string[];
+  }) {
+    if (!this.checkIdsValid(...albumIds, ...trackIds)) {
+      throw new BadRequestException('Invalid album or track IDs');
     }
 
-    const { item: album } = await this.findOne(albumId);
+    const albums = await this.albumModel.find({
+      _id: { $in: albumIds },
+    });
 
-    if (!album) {
-      throw new NotFoundException('Album not found');
-    }
-
-    if (!this.checkIdsValid(...trackIds)) {
-      throw new BadRequestException('Invalid track IDs');
+    if (albums.length === 0) {
+      throw new NotFoundException('No albums found with the provided IDs');
     }
 
     const { items: tracks } = await this.trackService.findMany(trackIds);
 
-    const result = await album.updateOne({
-      $addToSet: {
-        tracks: tracks,
-      },
-    });
-
-    return {
-      _id: album._id,
-      result,
-    };
-  }
-
-  async removeTracksFromAlbum(removeTracksFromAlbum: TrackAlbumDto) {
-    const { albumId, trackIds } = removeTracksFromAlbum;
-
-    if (!this.checkIdsValid(albumId)) {
-      throw new BadRequestException('Album ID is invalid');
+    if (tracks.length === 0) {
+      throw new NotFoundException('No tracks found with the provided IDs');
     }
 
-    const { item: album } = await this.findOne(albumId);
-
-    if (!album) {
-      throw new NotFoundException('Album not found');
-    }
-
-    if (!this.checkIdsValid(...trackIds)) {
-      throw new BadRequestException('Invalid track IDs');
-    }
-
-    const result = await album.updateOne({
-      $pull: {
-        tracks: {
-          _id: {
-            $in: trackIds,
+    const bulkOps = albumIds.map((albumId) => ({
+      updateOne: {
+        filter: { _id: albumId },
+        update: {
+          $addToSet: {
+            tracks: { $each: tracks },
           },
         },
       },
-    });
+    }));
+
+    const bulkResult = await this.albumModel.bulkWrite(bulkOps);
 
     return {
-      _id: album._id,
-      result,
+      success: bulkResult.modifiedCount > 0,
+      message: `Added ${tracks.length} track(s) to ${bulkResult.modifiedCount} album(s)`,
+      stats: {
+        tracksAdded: tracks.length,
+        albumsModified: bulkResult.modifiedCount,
+        albumsAttempted: albumIds.length,
+      },
+    };
+  }
+
+  async removeTracksFromAlbums({
+    albumIds,
+    trackIds,
+  }: {
+    albumIds: string[];
+    trackIds: string[];
+  }) {
+    if (!this.checkIdsValid(...albumIds, ...trackIds)) {
+      throw new BadRequestException('Invalid album or track IDs');
+    }
+
+    const albums = await this.albumModel.find({
+      _id: { $in: albumIds },
+    });
+
+    if (albums.length === 0) {
+      throw new NotFoundException('No albums found with the provided IDs');
+    }
+
+    const bulkOps = albumIds.map((albumId) => ({
+      updateOne: {
+        filter: { _id: albumId },
+        update: {
+          $pull: {
+            tracks: { _id: { $in: trackIds } },
+          },
+        },
+      },
+    }));
+
+    const bulkResult = await this.albumModel.bulkWrite(bulkOps);
+
+    return {
+      success: bulkResult.modifiedCount > 0,
+      message: `Removed ${trackIds.length} track(s) from ${bulkResult.modifiedCount} album(s)`,
+      stats: {
+        tracksRemoved: trackIds.length,
+        albumsModified: bulkResult.modifiedCount,
+        albumsAttempted: albumIds.length,
+      },
     };
   }
 

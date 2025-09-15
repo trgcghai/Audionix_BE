@@ -28,8 +28,10 @@ export class AlbumsController {
 
   /**
    * Post method to create a new album.
-   * @Body() createAlbumDto: CreateAlbumDto - The data transfer object containing album details.
-   * Returns the id of the created album.
+   * @param createAlbumDto The data transfer object containing album details.
+   * @param payload The current user's token payload.
+   * @param cover_image The cover image file for the album.
+   * @returns The ID of the created album.
    */
   @Post()
   @Roles(Role.ARTIST)
@@ -45,10 +47,10 @@ export class AlbumsController {
 
   /**
    * Get method to retrieve all albums.
-   * @Query() query: Record<string, any> - Optional query parameters for filtering.
-   * @Query('limit') limit: number - The maximum number of albums to return (default is 10).
-   * @Query('current') current: number - The current page number (default is 1).
-   * Returns a paginated list of albums.
+   * @param query Optional query parameters for filtering.
+   * @param limit The maximum number of albums to return (default is 10).
+   * @param current The current page number (default is 1).
+   * @returns A paginated list of albums.
    */
   @Get()
   findAll(
@@ -61,10 +63,11 @@ export class AlbumsController {
 
   /**
    * Get method to retrieve latest albums by user's followed artists, if user has no followed artist, just return latest albums.
-   * @Query() query: Record<string, any> - Optional query parameters for filtering.
-   * @Query('limit') limit: number - The maximum number of albums to return (default is 10).
-   * @Query('current') current: number - The current page number (default is 1).
-   * Returns a paginated list of albums.
+   * @param payload The current user's token payload.
+   * @param query Optional query parameters for filtering.
+   * @param limit The maximum number of albums to return (default is 10).
+   * @param current The current page number (default is 1).
+   * @returns A paginated list of albums.
    */
   @Get('latest')
   @Public()
@@ -94,8 +97,8 @@ export class AlbumsController {
 
   /**
    * Get method to retrieve an album by ID.
-   * @Param('id') id: string - The ID of the album to retrieve.
-   * Returns the album object if found.
+   * @param id - The ID of the album to retrieve.
+   * @returns The album object if found.
    */
   @Public()
   @Get(':id')
@@ -105,8 +108,8 @@ export class AlbumsController {
 
   /**
    * Delete method to remove an album by ID.
-   * @Param('id') id: string - The ID of the album to remove.
-   * Returns a confirmation message or the removed album object.
+   * @param id - The ID of the album to remove.
+   * @returns A confirmation message or the removed album object.
    */
   @Delete(':id')
   remove(@Param('id') id: string) {
@@ -115,8 +118,8 @@ export class AlbumsController {
 
   /**
    * Delete method to remove multiple albums by their IDs.
-   * @Body('ids') ids: string[] - An array of album IDs to remove.
-   * Returns a confirmation message or the removed album objects.
+   * @param ids - An array of album IDs to remove.
+   * @returns A confirmation message or the removed album objects.
    */
   @Delete()
   removeMultiple(@Body('ids') ids: string[]) {
@@ -125,8 +128,8 @@ export class AlbumsController {
 
   /**
    * Get method to retrieve tracks in an album.
-   * @Param('id') id: string - The ID of the album whose tracks are to be retrieved.
-   * Returns a list of tracks in the album.
+   * @param id - The ID of the album whose tracks are to be retrieved.
+   * @returns A list of tracks in the album.
    */
   @Get(':id/tracks')
   findTracksInAlbum(@Param('id') id: string) {
@@ -134,38 +137,38 @@ export class AlbumsController {
   }
 
   /**
-   * Put method to add tracks to an album.
-   * @Param('id') id: string - The ID of the album to which tracks are to be added.
-   * @Body('trackIds') trackIds: string[] - An array of track IDs to add to the album.
-   * Returns a confirmation message or the updated album object.
+   * Put method to add tracks to multiple albums.
+   * @param albumIds - The IDs of the albums to which tracks are to be added.
+   * @param trackIds - The IDs of the tracks to add to the albums.
+   * @returns A confirmation message or the updated album objects.
    */
-  @Put(':id/tracks')
-  addTracksToAlbum(
-    @Param('id') albumId: string,
-    @Body('trackIds') trackIds: string[] = [],
+  @Put('tracks')
+  addTracksToAlbums(
+    @Body('albumIds') albumIds: string[],
+    @Body('trackIds') trackIds: string[],
   ) {
-    return this.albumsService.addTracksToAlbum({ albumId, trackIds });
+    return this.albumsService.addTracksToAlbums({ albumIds, trackIds });
   }
 
   /**
-   * Delete method to remove tracks from an album.
-   * @Param('id') id: string - The ID of the album from which tracks are to be removed.
-   * @Body('trackIds') trackIds: string[] - An array of track IDs to remove from the album.
-   * Returns a confirmation message or the updated album object.
+   * Delete method to remove tracks from multiple albums.
+   * @param albumIds - The IDs of the albums from which tracks are to be removed.
+   * @param trackIds - The IDs of the tracks to remove from the albums.
+   * @returns A confirmation message or the updated album objects.
    */
-  @Delete(':id/tracks')
-  removeTracksFromAlbum(
-    @Param('id') albumId: string,
+  @Delete('tracks')
+  removeTracksFromAlbums(
+    @Body('albumIds') albumIds: string[],
     @Body('trackIds') trackIds: string[] = [],
   ) {
-    return this.albumsService.removeTracksFromAlbum({ albumId, trackIds });
+    return this.albumsService.removeTracksFromAlbums({ albumIds, trackIds });
   }
 
   /**
    * Patch method to update the status of an album.
-   * @Param('id') id: string - The ID of the album to update.
-   * @Body('status') status: AlbumStatus - The new status to set for the album.
-   * Returns the updated album object.
+   * @param albumId - The ID of the album to update.
+   * @param status - The new status to set for the album.
+   * @returns The updated album object.
    */
   @Patch(':id/status')
   updateStatus(
@@ -177,9 +180,9 @@ export class AlbumsController {
 
   /**
    * Patch method to update the status of multiple albums.
-   * @Body('ids') ids: string[] - The IDs of the albums to update.
-   * @Body('status') status: AlbumStatus - The new status to set for the albums.
-   * Returns the updated album objects.
+   * @param albumIds - The IDs of the albums to update.
+   * @param status - The new status to set for the albums.
+   * @returns The updated album objects.
    */
   @Patch('status')
   updateMultipleStatus(
