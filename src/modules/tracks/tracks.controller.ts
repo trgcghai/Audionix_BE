@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   Patch,
+  Put,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UploadTrackFilesValidator } from '@common/validators/file.validator';
@@ -122,16 +123,39 @@ export class TracksController {
     return this.tracksService.deleteMultipleTracks(...ids);
   }
 
+  /**
+   * Patch method to update the status of a track.
+   * @param id - The ID of the track to update.
+   * @param status - The new status to set for the track.
+   * @returns The updated track object.
+   */
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body('status') status: TrackStatus) {
     return this.tracksService.updateStatus({ id, status });
   }
 
+  /**
+   * Patch method to update the status of multiple tracks.
+   * @param ids - The IDs of the tracks to update.
+   * @param status - The new status to set for the tracks.
+   * @returns The updated track objects.
+   */
   @Patch('status')
   updateMultipleStatus(
     @Body('ids') ids: string[],
     @Body('status') status: TrackStatus,
   ) {
     return this.tracksService.updateMultipleStatus({ ids, status });
+  }
+
+  /**
+   * Patch method to update a track.
+   * @param id - The ID of the track to update.
+   * @param updateTrackDto - The data to update the track with.
+   * @returns The updated track object.
+   */
+  @Put(':id')
+  updateTrack(@Param('id') id: string, @Body() updateTrackDto: CreateTrackDto) {
+    return this.tracksService.updateTrack(id, updateTrackDto);
   }
 }

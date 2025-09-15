@@ -165,18 +165,26 @@ export class AlbumsService extends BaseService<Album> {
       throw new NotFoundException('No tracks found with the provided IDs');
     }
 
+    const now = new Date();
+    const trackIdsSet = [...new Set(trackIds)].map((id) => ({
+      _id: id,
+      time_added: now,
+    }));
+
     const bulkOps = albumIds.map((albumId) => ({
       updateOne: {
         filter: { _id: albumId },
         update: {
           $addToSet: {
-            tracks: { $each: tracks },
+            tracks: { $each: trackIdsSet },
           },
         },
       },
     }));
 
     const bulkResult = await this.albumModel.bulkWrite(bulkOps);
+
+    await this.trackService.addAlbumToTracks(albumIds, trackIds);
 
     return {
       success: bulkResult.modifiedCount > 0,

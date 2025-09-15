@@ -20,6 +20,7 @@ import {
   UpdateOneTrackStatusDto,
 } from '@tracks/dto/status-track.dto';
 import { TrackStatus } from '@tracks/enum/track-status.enum';
+import { Album } from '@albums/entities/album.entity';
 
 @Injectable()
 export class TracksService extends BaseService<Track> {
@@ -128,6 +129,10 @@ export class TracksService extends BaseService<Track> {
   async findById(id: string) {
     const { item } = await this.findOne(id);
     await item.populate<{ artist: Artist }>('artist', '_id name cover_images');
+    await item.populate<{ albums: Album[] }>(
+      'albums',
+      '_id title cover_images',
+    );
     return item;
   }
 
@@ -407,5 +412,22 @@ export class TracksService extends BaseService<Track> {
       current: parseInt(current.toString()),
       limit: parseInt(limit.toString()),
     };
+  }
+
+  async addAlbumToTracks(albumIds: string[], trackIds: string[]) {
+    this.trackModel
+      .updateMany(
+        {
+          _id: { $in: trackIds },
+        },
+        {
+          $addToSet: { albums: { $each: albumIds } },
+        },
+      )
+      .exec();
+  }
+
+  async updateTrack(id: string, updateTrackDto: CreateTrackDto) {
+    return "This endpoint is used to update track, but it's not implemented yet.";
   }
 }

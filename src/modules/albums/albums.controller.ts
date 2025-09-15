@@ -107,6 +107,34 @@ export class AlbumsController {
   }
 
   /**
+   * Put method to add tracks to multiple albums.
+   * @param albumIds - The IDs of the albums to which tracks are to be added.
+   * @param trackIds - The IDs of the tracks to add to the albums.
+   * @returns A confirmation message or the updated album objects.
+   */
+  @Put('tracks')
+  addTracksToAlbums(
+    @Body('albumIds') albumIds: string[],
+    @Body('trackIds') trackIds: string[],
+  ) {
+    return this.albumsService.addTracksToAlbums({ albumIds, trackIds });
+  }
+
+  /**
+   * Delete method to remove tracks from multiple albums.
+   * @param albumIds - The IDs of the albums from which tracks are to be removed.
+   * @param trackIds - The IDs of the tracks to remove from the albums.
+   * @returns A confirmation message or the updated album objects.
+   */
+  @Delete('tracks')
+  removeTracksFromAlbums(
+    @Body('albumIds') albumIds: string[],
+    @Body('trackIds') trackIds: string[] = [],
+  ) {
+    return this.albumsService.removeTracksFromAlbums({ albumIds, trackIds });
+  }
+
+  /**
    * Delete method to remove an album by ID.
    * @param id - The ID of the album to remove.
    * @returns A confirmation message or the removed album object.
@@ -134,34 +162,6 @@ export class AlbumsController {
   @Get(':id/tracks')
   findTracksInAlbum(@Param('id') id: string) {
     return this.albumsService.findTracksInAlbum(id);
-  }
-
-  /**
-   * Put method to add tracks to multiple albums.
-   * @param albumIds - The IDs of the albums to which tracks are to be added.
-   * @param trackIds - The IDs of the tracks to add to the albums.
-   * @returns A confirmation message or the updated album objects.
-   */
-  @Put('tracks')
-  addTracksToAlbums(
-    @Body('albumIds') albumIds: string[],
-    @Body('trackIds') trackIds: string[],
-  ) {
-    return this.albumsService.addTracksToAlbums({ albumIds, trackIds });
-  }
-
-  /**
-   * Delete method to remove tracks from multiple albums.
-   * @param albumIds - The IDs of the albums from which tracks are to be removed.
-   * @param trackIds - The IDs of the tracks to remove from the albums.
-   * @returns A confirmation message or the updated album objects.
-   */
-  @Delete('tracks')
-  removeTracksFromAlbums(
-    @Body('albumIds') albumIds: string[],
-    @Body('trackIds') trackIds: string[] = [],
-  ) {
-    return this.albumsService.removeTracksFromAlbums({ albumIds, trackIds });
   }
 
   /**
