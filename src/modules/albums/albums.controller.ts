@@ -1,5 +1,5 @@
 import { AlbumsService } from '@albums/albums.service';
-import { CreateAlbumDto } from '@albums/dto/create-album.dto';
+import { CreateAlbumDto, UpdateAlbumDto } from '@albums/dto/create-album.dto';
 import { AlbumStatus } from '@albums/enum/album-status.enum';
 import { CurrentAccount } from '@decorators/current-account.decorator';
 import { Public } from '@decorators/is-public.decorator';
@@ -190,5 +190,30 @@ export class AlbumsController {
     @Body('status') status: AlbumStatus,
   ) {
     return this.albumsService.updateMultipleStatus({ ids: albumIds, status });
+  }
+
+  /**
+   * Put method to update an album by ID.
+   * @param id - The ID of the album to update.
+   * @param updateAlbumDto - The data to update the album with.
+   * @param payload - The current user's token payload.
+   * @param cover_image - The new cover image file.
+   * @returns The updated album object.
+   */
+  @Put(':id')
+  @UseInterceptors(FileInterceptor('cover_images'))
+  update(
+    @Param('id') id: string,
+    @Body() updateAlbumDto: UpdateAlbumDto,
+    @CurrentAccount() payload: TokenPayload,
+    @UploadedFile(new CreateAlbumFileValidator())
+    cover_image: Express.Multer.File,
+  ) {
+    return this.albumsService.updateAlbum(
+      id,
+      payload.sub,
+      updateAlbumDto,
+      cover_image,
+    );
   }
 }

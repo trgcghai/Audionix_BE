@@ -15,6 +15,20 @@ export class CreateAlbumDto {
   genres: string;
 }
 
+export class UpdateAlbumDto {
+  @IsOptional()
+  @IsString()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsString()
+  @IsOptional()
+  genres: string;
+}
+
 export class UpdateStatusDto {
   @IsNotEmpty()
   @IsString()

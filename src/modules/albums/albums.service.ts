@@ -1,5 +1,6 @@
 import {
   CreateAlbumDto,
+  UpdateAlbumDto,
   UpdateMultipleStatusDto,
   UpdateStatusDto,
 } from '@albums/dto/create-album.dto';
@@ -461,5 +462,45 @@ export class AlbumsService extends BaseService<Album> {
         value: album._id,
       })),
     };
+  }
+
+  async updateAlbum(
+    id: string,
+    artistId: string,
+    updateAlbumDto: UpdateAlbumDto,
+    cover_images: Express.Multer.File,
+  ) {
+    const { item: album } = await this.findOne(id);
+
+    if (album.artist.toString() !== artistId) {
+      throw new BadRequestException('You are not the owner of this album');
+    }
+
+    const { description, genres, title } = updateAlbumDto;
+
+    if (description) album.description = description;
+    if (genres) album.genres = JSON.parse(genres);
+    if (title) album.title = title;
+
+    if (cover_images) {
+      const { url, height, width, key } = await this.uploadService.uploadImage({
+        fileName: cover_images.originalname,
+        file: cover_images,
+        path: 'cover_images',
+        author: artistId,
+      });
+
+      album.cover_images = [
+        {
+          height,
+          width,
+          key,
+          url,
+        },
+      ];
+    }
+
+    const result = await album.save();
+    return result;
   }
 }
