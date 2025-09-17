@@ -30,15 +30,6 @@ export class PlaylistsService extends BaseService<Playlist> {
     super(playlistModel);
   }
 
-  checkIdsValid(...ids: string[]) {
-    for (const id of ids) {
-      if (!mongoose.isValidObjectId(id)) {
-        return false;
-      }
-      return true;
-    }
-  }
-
   async checkPlaylistExists(id: string): Promise<boolean> {
     if (!mongoose.isValidObjectId(id)) {
       throw new BadRequestException('Invalid playlist ID format');

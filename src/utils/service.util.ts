@@ -1,4 +1,3 @@
-// src/common/utils/base.service.ts
 import {
   BadRequestException,
   Injectable,
@@ -11,6 +10,15 @@ import { PaginatedResponse } from '@common/interfaces/response.interface';
 @Injectable()
 export class BaseService<T> {
   constructor(private readonly model: Model<T>) {}
+
+  checkIdsValid(...ids: string[]) {
+    for (const id of ids) {
+      if (!mongoose.isValidObjectId(id)) {
+        return false;
+      }
+      return true;
+    }
+  }
 
   /**
    * Find all documents with pagination and optional filtering, sorting, and population.

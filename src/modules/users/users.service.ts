@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { BaseService } from '@utils/service.util';
-import mongoose, { Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '@users/entities/user.entity';
 import { ArtistsService } from '@artists/artists.service';
@@ -30,15 +30,6 @@ export class UsersService extends BaseService<User> {
     private uploadService: UploadService,
   ) {
     super(userModel);
-  }
-
-  checkIdsValid(...ids: string[]) {
-    for (const id of ids) {
-      if (!mongoose.isValidObjectId(id)) {
-        return false;
-      }
-      return true;
-    }
   }
 
   checkUserAlreadyFollowed(

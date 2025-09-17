@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateTrackDto } from './dto/create-track.dto';
+import { CreateTrackDto, UpdateTrackDto } from './dto/create-track.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
 import mongoose, { Model } from 'mongoose';
@@ -59,10 +59,6 @@ export class TracksService extends BaseService<Track> {
       await this.albumService.findOne(albumId);
     }
 
-    if (!mongoose.isValidObjectId(artistId)) {
-      throw new BadRequestException('Invalid artist ID');
-    }
-
     if (!audioFile || audioFile.length === 0) {
       throw new BadRequestException('Audio file is required');
     }
@@ -72,10 +68,6 @@ export class TracksService extends BaseService<Track> {
     }
 
     const { item: artist } = await this.artistService.findOne(artistId);
-
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
-    }
 
     const {
       url: audioUrl,
@@ -121,6 +113,11 @@ export class TracksService extends BaseService<Track> {
         size: audioSize,
         mimetype: audioMimetype,
       },
+    });
+
+    await this.albumService.addTracksToAlbums({
+      albumIds: albumIdsParsed,
+      trackIds: [result._id.toString()],
     });
 
     return { result };
@@ -427,7 +424,111 @@ export class TracksService extends BaseService<Track> {
       .exec();
   }
 
-  async updateTrack(id: string, updateTrackDto: CreateTrackDto) {
-    return "This endpoint is used to update track, but it's not implemented yet.";
+  async updateTrack({
+    id,
+    updateTrackDto,
+    audioFile,
+    coverImageFile,
+    artistId,
+  }: {
+    id: string;
+    updateTrackDto: UpdateTrackDto;
+    audioFile?: Express.Multer.File[];
+    coverImageFile?: Express.Multer.File[];
+    artistId: string;
+  }) {
+    const { albumIds, genres, title } = updateTrackDto;
+
+    let albumIdsParsed: string[] = [];
+
+    if (albumIds) {
+      albumIdsParsed = JSON.parse(albumIds);
+    }
+
+    const { item: track } = await this.findOne(id);
+
+    if (track.artist.toString() !== artistId) {
+      throw new BadRequestException('You are not the owner of this track');
+    }
+
+    const oldAlbums = track.albums;
+    track.albums = [];
+
+    for (const albumId of albumIdsParsed) {
+      const { item: album } = await this.albumService.findOne(albumId);
+      track.albums.push(album._id);
+    }
+
+    await this.albumService.removeTracksFromAlbums({
+      albumIds: oldAlbums
+        .map((album) => album.toString())
+        .filter((id) => !albumIdsParsed.includes(id)),
+      trackIds: [track._id.toString()],
+    });
+
+    await this.albumService.addTracksToAlbums({
+      albumIds: albumIdsParsed,
+      trackIds: [track._id.toString()],
+    });
+
+    await this.artistService.findOne(artistId);
+
+    if (title) {
+      track.title = title;
+    }
+
+    if (genres) {
+      track.genres = JSON.parse(genres);
+    }
+
+    if (audioFile && audioFile.length > 0) {
+      const {
+        url: audioUrl,
+        key: audioKey,
+        size: audioSize,
+        mimetype: audioMimetype,
+        duration: audioDuration,
+      } = await this.uploadService.uploadTrack({
+        fileName: audioFile[0].originalname,
+        file: audioFile[0],
+        author: artistId,
+      });
+
+      track.file = {
+        url: audioUrl,
+        key: audioKey,
+        size: audioSize,
+        mimetype: audioMimetype,
+      };
+
+      track.duration_ms = audioDuration || track.duration_ms;
+    }
+
+    if (coverImageFile && coverImageFile.length > 0) {
+      const {
+        url: coverImageUrl,
+        height: coverImageHeight,
+        width: coverImageWidth,
+        key: coverImageKey,
+      } = await this.uploadService.uploadImage({
+        fileName: coverImageFile[0].originalname,
+        file: coverImageFile[0],
+        path: 'cover_images',
+        author: artistId,
+      });
+
+      track.cover_images = [
+        {
+          url: coverImageUrl,
+          height: coverImageHeight,
+          width: coverImageWidth,
+          key: coverImageKey,
+        },
+      ];
+    }
+
+    const result = await track.save();
+
+    return { result };
   }
 }

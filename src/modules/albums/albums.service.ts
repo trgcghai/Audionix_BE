@@ -35,15 +35,6 @@ export class AlbumsService extends BaseService<Album> {
     super(albumModel);
   }
 
-  checkIdsValid(...ids: string[]) {
-    for (const id of ids) {
-      if (!mongoose.isValidObjectId(id)) {
-        return false;
-      }
-      return true;
-    }
-  }
-
   async create(
     artistId: string,
     createAlbumDto: CreateAlbumDto,

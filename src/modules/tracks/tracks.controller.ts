@@ -14,7 +14,7 @@ import {
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UploadTrackFilesValidator } from '@common/validators/file.validator';
 import { TracksService } from '@tracks/tracks.service';
-import { CreateTrackDto } from '@tracks/dto/create-track.dto';
+import { CreateTrackDto, UpdateTrackDto } from '@tracks/dto/create-track.dto';
 import { CurrentAccount } from '@decorators/current-account.decorator';
 import { TokenPayload } from '@interfaces/token-payload.interface';
 import { Roles } from '@decorators/roles.decorator';
@@ -152,10 +152,34 @@ export class TracksController {
    * Patch method to update a track.
    * @param id - The ID of the track to update.
    * @param updateTrackDto - The data to update the track with.
+   * @param token - The current user's token.
+   * @param files - The uploaded files.
    * @returns The updated track object.
    */
+  @Roles(Role.ARTIST)
   @Put(':id')
-  updateTrack(@Param('id') id: string, @Body() updateTrackDto: CreateTrackDto) {
-    return this.tracksService.updateTrack(id, updateTrackDto);
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'audio', maxCount: 1 },
+      { name: 'cover_image', maxCount: 1 },
+    ]),
+  )
+  updateTrack(
+    @Param('id') id: string,
+    @Body() updateTrackDto: UpdateTrackDto,
+    @CurrentAccount() token: TokenPayload,
+    @UploadedFiles(new UploadTrackFilesValidator())
+    files: {
+      audio?: Express.Multer.File[];
+      cover_image?: Express.Multer.File[];
+    },
+  ) {
+    return this.tracksService.updateTrack({
+      id,
+      updateTrackDto,
+      audioFile: files.audio,
+      coverImageFile: files.cover_image,
+      artistId: token.sub,
+    });
   }
 }
