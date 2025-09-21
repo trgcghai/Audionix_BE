@@ -19,6 +19,7 @@ import { TracksService } from '@tracks/tracks.service';
 import { UploadService } from '@upload/upload.service';
 import { UsersService } from '@users/users.service';
 import { BaseService } from '@utils/service.util';
+import aqp from 'api-query-params';
 import mongoose, { Model } from 'mongoose';
 
 @Injectable()
@@ -455,6 +456,21 @@ export class AlbumsService extends BaseService<Album> {
 
   async findMyAlbumsAsFilterOptions(artistId: string) {
     const results = await this.albumModel.find({ artist: artistId });
+
+    return {
+      options: results.map((album) => ({
+        label: album.title,
+        value: album._id,
+      })),
+    };
+  }
+
+  async findAlbumsAsFilterOptions({ query }: { query: Record<string, any> }) {
+    const { filter, sort } = aqp(query);
+
+    const results = await this.albumModel
+      .find(filter)
+      .sort(sort as Record<string, 1 | -1>);
 
     return {
       options: results.map((album) => ({
