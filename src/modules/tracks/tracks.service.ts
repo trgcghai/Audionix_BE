@@ -98,7 +98,7 @@ export class TracksService extends BaseService<Track> {
       duration_ms: audioDuration,
       artist,
       genres: genres ? JSON.parse(genres) : [],
-      albums: albumIdsParsed,
+      albums: albumIdsParsed ? albumIdsParsed : [],
       cover_images: [
         {
           url: coverImageUrl,
@@ -115,10 +115,12 @@ export class TracksService extends BaseService<Track> {
       },
     });
 
-    await this.albumService.addTracksToAlbums({
-      albumIds: albumIdsParsed,
-      trackIds: [result._id.toString()],
-    });
+    if (albumIdsParsed.length > 0) {
+      await this.albumService.addTracksToAlbums({
+        albumIds: albumIdsParsed,
+        trackIds: [result._id.toString()],
+      });
+    }
 
     return { result };
   }

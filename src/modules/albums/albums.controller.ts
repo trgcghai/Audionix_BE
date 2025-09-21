@@ -34,7 +34,7 @@ export class AlbumsController {
    * @returns The ID of the created album.
    */
   @Post()
-  @Roles(Role.ARTIST)
+  @Roles(Role.ARTIST, Role.ADMIN)
   @UseInterceptors(FileInterceptor('cover_images'))
   create(
     @Body() createAlbumDto: CreateAlbumDto,
@@ -95,6 +95,18 @@ export class AlbumsController {
   @Get('my-options')
   findMyAlbumAsFilterOptions(@CurrentAccount() payload: TokenPayload) {
     return this.albumsService.findMyAlbumsAsFilterOptions(payload.sub);
+  }
+
+  /**
+   * Get method to retrieve album filter options for the current artist.
+   * @param payload The current user's token payload.
+   * @returns An array of album filter options.
+   */
+  @Get('options')
+  findAlbumAsFilterOptions(@Query() query: Record<string, any>) {
+    return this.albumsService.findAlbumsAsFilterOptions({
+      query,
+    });
   }
 
   /**
