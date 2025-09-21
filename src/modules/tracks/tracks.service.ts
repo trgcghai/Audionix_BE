@@ -461,12 +461,16 @@ export class TracksService extends BaseService<Track> {
       track.albums.push(album._id);
     }
 
-    await this.albumService.removeTracksFromAlbums({
-      albumIds: oldAlbums
-        .map((album) => album.toString())
-        .filter((id) => !albumIdsParsed.includes(id)),
-      trackIds: [track._id.toString()],
-    });
+    const removedAlbumIds = oldAlbums
+      .map((album) => album.toString())
+      .filter((id) => !albumIdsParsed.includes(id));
+
+    if (removedAlbumIds.length > 0) {
+      await this.albumService.removeTracksFromAlbums({
+        albumIds: removedAlbumIds,
+        trackIds: [track._id.toString()],
+      });
+    }
 
     await this.albumService.addTracksToAlbums({
       albumIds: albumIdsParsed,
