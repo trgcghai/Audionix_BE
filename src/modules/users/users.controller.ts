@@ -1,5 +1,4 @@
 import { CurrentAccount } from '@decorators/current-account.decorator';
-import { Public } from '@decorators/is-public.decorator';
 import { TokenPayload } from '@interfaces/token-payload.interface';
 import {
   Controller,
@@ -45,7 +44,10 @@ export class UsersController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
-    return this.usersService.findAll(query, limit, current);
+    return this.usersService.findAll(query, limit, current, '', '', [
+      'username',
+      'email',
+    ]);
   }
 
   /**
