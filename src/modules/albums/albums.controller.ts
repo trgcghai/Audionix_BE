@@ -58,7 +58,9 @@ export class AlbumsController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
-    return this.albumsService.findAll(query, limit, current, '', '', ['title']);
+    return this.albumsService.findAll(query, limit, current, ['artist'], '', [
+      'title',
+    ]);
   }
 
   /**
