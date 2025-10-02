@@ -50,6 +50,11 @@ export class UsersController {
     ]);
   }
 
+  @Get('options')
+  getOptions() {
+    return this.usersService.findAsOptions();
+  }
+
   /**
    * Get method to retrieve the current user's information.
    * @param payload The current user's account information.

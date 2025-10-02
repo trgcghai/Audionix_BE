@@ -50,7 +50,11 @@ export class UsersService extends BaseService<User> {
     return false;
   }
 
-  async create(createUserDto: CreateUserDto, _id?: string) {
+  async create(
+    createUserDto: CreateUserDto,
+    _id?: string,
+    avatar?: Express.Multer.File,
+  ) {
     const { email } = createUserDto;
 
     const isEmailExists = await this.userModel.exists({ email }).exec();
@@ -67,6 +71,24 @@ export class UsersService extends BaseService<User> {
       followed_artists: [],
       followed_albums: [],
     });
+
+    if (avatar) {
+      const { url, key, height, width } = await this.uploadService.uploadImage({
+        path: 'user_avatars',
+        author: userCreated._id.toString(),
+        fileName: avatar.originalname,
+        file: avatar,
+      });
+
+      userCreated.avatar = [
+        {
+          height,
+          width,
+          url,
+          key,
+        },
+      ];
+    }
 
     const likedSongsResult = await this.playlistsService.create(
       {
@@ -326,6 +348,7 @@ export class UsersService extends BaseService<User> {
 
     if (avatar) {
       const { url, key, height, width } = await this.uploadService.uploadImage({
+        path: 'user_avatars',
         fileName: avatar.originalname,
         file: avatar,
         author: user._id.toString(),
@@ -351,5 +374,17 @@ export class UsersService extends BaseService<User> {
 
   async findLikedPlaylists(id: string) {
     return await this.playlistsService.findUserLikedSongs(id);
+  }
+
+  async findAsOptions() {
+    const { items: users } = await this.findAll({}, 1000, 1, '', '', [
+      'username',
+    ]);
+    return {
+      items: users.map((user) => ({
+        label: user.username,
+        value: user._id,
+      })),
+    };
   }
 }

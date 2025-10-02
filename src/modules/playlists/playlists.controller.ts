@@ -51,7 +51,7 @@ export class PlaylistsController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
-    return this.playlistsService.findAll(query, limit, current, '', '', [
+    return this.playlistsService.findAll(query, limit, current, 'owner', '', [
       'title',
     ]);
   }
