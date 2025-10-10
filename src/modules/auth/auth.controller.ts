@@ -21,6 +21,8 @@ import { JwtRefreshAuthGuard } from '@guards/jwt-refresh-auth.guard';
 import { TokenPayload } from '@interfaces/token-payload.interface';
 import { JwtLogoutGuard } from '@guards/jwt-logout.guard';
 import { Public } from '@decorators/is-public.decorator';
+import { Roles } from '@decorators/roles.decorator';
+import { Role } from '@enums/role.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -201,6 +203,7 @@ export class AuthController {
    * @param accountIds Array of account IDs to activate
    * @returns Activation result
    */
+  @Roles(Role.ADMIN)
   @Put('accounts/activation')
   activateAccounts(@Body('accountIds') accountIds: string[]) {
     return this.authService.activateAccounts(accountIds);
@@ -211,6 +214,7 @@ export class AuthController {
    * @param accountIds Array of account IDs to deactivate
    * @returns Deactivation result
    */
+  @Roles(Role.ADMIN)
   @Put('accounts/deactivation')
   deactivateAccounts(@Body('accountIds') accountIds: string[]) {
     return this.authService.deactivateAccounts(accountIds);

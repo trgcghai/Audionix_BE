@@ -380,7 +380,6 @@ export class AuthService extends BaseService<Account> {
       modifiedCount: result.modifiedCount,
       matchedCount: result.matchedCount,
       notFoundIds: notFoundIds.length > 0 ? notFoundIds : undefined,
-      status: 'Activated',
       message: `Successfully activated ${result.modifiedCount} accounts`,
     };
   }
@@ -409,7 +408,6 @@ export class AuthService extends BaseService<Account> {
       modifiedCount: result.modifiedCount,
       matchedCount: result.matchedCount,
       notFoundIds: notFoundIds.length > 0 ? notFoundIds : undefined,
-      status: 'Deactivated',
       message: `Successfully deactivated ${result.modifiedCount} accounts`,
     };
   }
