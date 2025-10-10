@@ -32,6 +32,12 @@ export class Account {
     default: false,
   })
   isVerified: boolean;
+
+  @Prop({
+    type: Boolean,
+    default: true,
+  })
+  isActivate: boolean;
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);

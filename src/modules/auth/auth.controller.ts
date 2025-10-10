@@ -39,7 +39,11 @@ export class AuthController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
-    return this.authService.findAll(query, limit, current);
+    return this.authService.findAll(query, limit, current, '', '', [
+      'email',
+      'firstName',
+      'lastName',
+    ]);
   }
 
   /**
@@ -190,5 +194,25 @@ export class AuthController {
       oldPassword,
       newPassword,
     });
+  }
+
+  /**
+   * Activate user accounts
+   * @param accountIds Array of account IDs to activate
+   * @returns Activation result
+   */
+  @Put('accounts/activation')
+  activateAccounts(@Body('accountIds') accountIds: string[]) {
+    return this.authService.activateAccounts(accountIds);
+  }
+
+  /**
+   * Deactivate user accounts
+   * @param accountIds Array of account IDs to deactivate
+   * @returns Deactivation result
+   */
+  @Put('accounts/deactivation')
+  deactivateAccounts(@Body('accountIds') accountIds: string[]) {
+    return this.authService.deactivateAccounts(accountIds);
   }
 }

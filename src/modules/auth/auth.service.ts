@@ -22,8 +22,9 @@ import { RedisService } from '@redis/redis.service';
 import { OtpService } from '@auth/otp.service';
 import { RegisterDto, UpdatePasswordDto } from '@auth/dto/auth.dto';
 import { RedisItemName, RedisServiceName } from '@redis/redis-key.enum';
+import { BaseService } from '@utils/service.util';
 @Injectable()
-export class AuthService {
+export class AuthService extends BaseService<Account> {
   constructor(
     @InjectModel(Account.name) private accountModel: Model<Account>,
     @Inject(forwardRef(() => UsersService)) private userService: UsersService,
@@ -32,7 +33,9 @@ export class AuthService {
     private redisService: RedisService,
     private mailerService: MailerService,
     private otpService: OtpService,
-  ) {}
+  ) {
+    super(accountModel);
+  }
 
   async hashPassword(password: string): Promise<string> {
     try {
@@ -73,36 +76,6 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-    };
-  }
-
-  async findAll(
-    query: Record<string, any>,
-    limit: number = 10,
-    current: number = 1,
-  ) {
-    const { filter, sort } = aqp(query);
-
-    if (filter.limit) delete filter.limit;
-    if (filter.current) delete filter.current;
-
-    const totalItems = await this.accountModel.countDocuments(filter).exec();
-    const totalPages = Math.ceil(totalItems / limit);
-    const skip = (current - 1) * limit;
-
-    const result = await this.accountModel
-      .find(filter)
-      .skip(skip)
-      .limit(limit)
-      .sort(sort as Record<string, 1 | -1>)
-      .exec();
-
-    return {
-      items: result,
-      totalItems,
-      totalPages,
-      current: parseInt(current.toString()),
-      limit: parseInt(limit.toString()),
     };
   }
 
@@ -380,6 +353,64 @@ export class AuthService {
 
     return {
       message: 'Password updated successfully',
+    };
+  }
+
+  async activateAccounts(accountIds: string[]) {
+    // Validate tất cả ID
+    for (const id of accountIds) {
+      if (!mongoose.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+    }
+
+    // Tìm tất cả account trước khi cập nhật để trả về thông tin chi tiết
+    const accounts = await this.accountModel
+      .find({ _id: { $in: accountIds } })
+      .exec();
+    const foundIds = accounts.map((account) => account._id.toString());
+    const notFoundIds = accountIds.filter((id) => !foundIds.includes(id));
+
+    // Cập nhật trạng thái các tài khoản
+    const result = await this.accountModel
+      .updateMany({ _id: { $in: foundIds } }, { $set: { isActivate: true } })
+      .exec();
+
+    return {
+      modifiedCount: result.modifiedCount,
+      matchedCount: result.matchedCount,
+      notFoundIds: notFoundIds.length > 0 ? notFoundIds : undefined,
+      status: 'Activated',
+      message: `Successfully activated ${result.modifiedCount} accounts`,
+    };
+  }
+
+  async deactivateAccounts(accountIds: string[]) {
+    // Validate tất cả ID
+    for (const id of accountIds) {
+      if (!mongoose.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+    }
+
+    // Tìm tất cả account trước khi cập nhật để trả về thông tin chi tiết
+    const accounts = await this.accountModel
+      .find({ _id: { $in: accountIds } })
+      .exec();
+    const foundIds = accounts.map((account) => account._id.toString());
+    const notFoundIds = accountIds.filter((id) => !foundIds.includes(id));
+
+    // Cập nhật trạng thái các tài khoản
+    const result = await this.accountModel
+      .updateMany({ _id: { $in: foundIds } }, { $set: { isActivate: false } })
+      .exec();
+
+    return {
+      modifiedCount: result.modifiedCount,
+      matchedCount: result.matchedCount,
+      notFoundIds: notFoundIds.length > 0 ? notFoundIds : undefined,
+      status: 'Deactivated',
+      message: `Successfully deactivated ${result.modifiedCount} accounts`,
     };
   }
 }
