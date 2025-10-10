@@ -50,6 +50,15 @@ export class UsersService extends BaseService<User> {
     return false;
   }
 
+  async findById(id: string) {
+    if (!this.checkIdsValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    const { item: user } = await this.findOne(id);
+
+    return user;
+  }
+
   async create(
     createUserDto: CreateUserDto,
     _id?: string,
