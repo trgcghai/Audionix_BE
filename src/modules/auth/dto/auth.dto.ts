@@ -1,6 +1,10 @@
+import { Role } from '@enums/role.enum';
 import {
+  IsArray,
   IsDefined,
   IsEmail,
+  IsEnum,
+  IsMongoId,
   IsNotEmpty,
   IsString,
   IsStrongPassword,
@@ -54,4 +58,14 @@ export class UpdatePasswordDto {
     minUppercase: 1,
   })
   newPassword: string;
+}
+
+export class UpdateRolesDto {
+  @IsArray()
+  @IsMongoId({ each: true })
+  accountIds: string[];
+
+  @IsArray()
+  @IsEnum(Role, { each: true })
+  newRoles: Role[];
 }

@@ -20,7 +20,11 @@ import { Account } from '@auth/entities/account.entity';
 import { UsersService } from '@users/users.service';
 import { RedisService } from '@redis/redis.service';
 import { OtpService } from '@auth/otp.service';
-import { RegisterDto, UpdatePasswordDto } from '@auth/dto/auth.dto';
+import {
+  RegisterDto,
+  UpdatePasswordDto,
+  UpdateRolesDto,
+} from '@auth/dto/auth.dto';
 import { RedisItemName, RedisServiceName } from '@redis/redis-key.enum';
 import { BaseService } from '@utils/service.util';
 @Injectable()
@@ -409,6 +413,41 @@ export class AuthService extends BaseService<Account> {
       matchedCount: result.matchedCount,
       notFoundIds: notFoundIds.length > 0 ? notFoundIds : undefined,
       message: `Successfully deactivated ${result.modifiedCount} accounts`,
+    };
+  }
+
+  async updateAccountRoles(updateRolesDto: UpdateRolesDto) {
+    const { accountIds, newRoles } = updateRolesDto;
+
+    // Validate all IDs
+    if (!accountIds || accountIds.length === 0) {
+      throw new BadRequestException('Account IDs are required');
+    }
+
+    for (const id of accountIds) {
+      if (!mongoose.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+    }
+
+    // Find all accounts before update to get details for response
+    const accounts = await this.accountModel
+      .find({ _id: { $in: accountIds } })
+      .exec();
+    const foundIds = accounts.map((account) => account._id.toString());
+    const notFoundIds = accountIds.filter((id) => !foundIds.includes(id));
+
+    // Update the roles of all found accounts
+    const result = await this.accountModel
+      .updateMany({ _id: { $in: foundIds } }, { $set: { role: newRoles } })
+      .exec();
+
+    return {
+      modifiedCount: result.modifiedCount,
+      matchedCount: result.matchedCount,
+      notFoundIds: notFoundIds.length > 0 ? notFoundIds : undefined,
+      updatedRoles: newRoles,
+      message: `Successfully updated roles for ${result.modifiedCount} accounts`,
     };
   }
 }

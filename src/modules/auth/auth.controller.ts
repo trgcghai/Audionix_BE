@@ -14,7 +14,11 @@ import {
 import { Request as ExpressRequest, Response } from 'express';
 import { CurrentAccount } from '@common/decorators/current-account.decorator';
 import { AuthService } from '@auth/auth.service';
-import { RegisterDto, UpdatePasswordDto } from '@auth/dto/auth.dto';
+import {
+  RegisterDto,
+  UpdatePasswordDto,
+  UpdateRolesDto,
+} from '@auth/dto/auth.dto';
 import { LocalAuthGuard } from '@guards/local-auth.guard';
 import { Account } from '@auth/entities/account.entity';
 import { JwtRefreshAuthGuard } from '@guards/jwt-refresh-auth.guard';
@@ -218,5 +222,16 @@ export class AuthController {
   @Put('accounts/deactivation')
   deactivateAccounts(@Body('accountIds') accountIds: string[]) {
     return this.authService.deactivateAccounts(accountIds);
+  }
+
+  /**
+   * Update roles for multiple accounts
+   * @param updateRolesDto Contains account IDs and new roles
+   * @returns Update operation result
+   */
+  @Roles(Role.ADMIN)
+  @Put('accounts/roles')
+  updateAccountRoles(@Body() updateRolesDto: UpdateRolesDto) {
+    return this.authService.updateAccountRoles(updateRolesDto);
   }
 }
