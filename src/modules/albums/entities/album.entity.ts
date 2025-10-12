@@ -85,7 +85,7 @@ export class Album {
     type: String,
     default: 'album',
   })
-  type: String;
+  type: string;
 }
 
 export const AlbumSchema = SchemaFactory.createForClass(Album);

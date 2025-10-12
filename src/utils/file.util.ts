@@ -17,7 +17,10 @@ const getAudioDuration = async (
           : (metadata.format.duration ?? 0) * 1000,
     };
   } catch (error) {
-    console.error('Get audio metadata error', error.stack || error.message);
+    console.error(
+      'Get audio metadata error',
+      (error as Error).stack || (error as Error).message,
+    );
     return {
       duration: 0,
     };
@@ -35,7 +38,10 @@ const getImageDimensions = async (
       height: metadata.height ?? 0,
     };
   } catch (error) {
-    console.error('Get image dimension error', error.stack || error.message);
+    console.error(
+      'Get image dimension error',
+      (error as Error).stack || (error as Error).message,
+    );
     return {
       width: 0,
       height: 0,

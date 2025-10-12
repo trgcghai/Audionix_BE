@@ -193,6 +193,12 @@ export class AuthService extends BaseService<Account> {
       throw new BadRequestException('Account is not verified');
     }
 
+    if (!account.isActivate) {
+      throw new BadRequestException(
+        'Account is banned for some reasons. Please contact admin for more information.',
+      );
+    }
+
     const { accessToken, refreshToken } = await this.generateTokens({
       sub: account._id.toString(),
       email: account.email,

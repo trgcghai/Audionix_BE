@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { BaseService } from '@utils/service.util';
-import { Model } from 'mongoose';
+import { Model, Query } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '@users/entities/user.entity';
 import { ArtistsService } from '@artists/artists.service';

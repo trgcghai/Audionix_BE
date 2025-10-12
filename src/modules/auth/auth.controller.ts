@@ -167,6 +167,7 @@ export class AuthController {
    * @param code OTP code
    * @returns Verification result
    */
+  @Public()
   @Post('verify-otp')
   verifyOtp(@Body('email') email: string, @Body('code') code: string) {
     return this.authService.verifyOtp(email, code);
@@ -177,6 +178,7 @@ export class AuthController {
    * @param email User email
    * @returns Resend result
    */
+  @Public()
   @Post('send-otp')
   resendOtp(@Body('email') email: string) {
     return this.authService.sendOtp(email);
