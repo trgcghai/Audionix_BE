@@ -56,6 +56,9 @@ export class UsersService extends BaseService<User> {
     }
     const { item: user } = await this.findOne(id);
 
+    await user.populate({ path: 'followed_artists', select: 'name' });
+    await user.populate({ path: 'followed_albums', select: 'title' });
+
     return user;
   }
 
