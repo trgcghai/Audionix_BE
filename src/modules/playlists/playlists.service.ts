@@ -18,6 +18,8 @@ import {
 import { TrackPlaylistDto } from '@playlists/dto/track-playlist.dto';
 import { PaginatedResponse } from '@interfaces/response.interface';
 import { UploadService } from '@upload/upload.service';
+import { Track, TrackDocument } from '@tracks/entities/track.entity';
+import { TrackStatus } from '@tracks/enum/track-status.enum';
 @Injectable()
 export class PlaylistsService extends BaseService<Playlist> {
   constructor(
@@ -126,16 +128,6 @@ export class PlaylistsService extends BaseService<Playlist> {
   async findById(id: string) {
     const { item: playlist } = await this.findOne(id);
 
-    await playlist.populate({
-      path: 'tracks.artist',
-      select: '_id name',
-    });
-
-    await playlist.populate({
-      path: 'tracks.albums',
-      select: '_id title',
-    });
-
     return playlist;
   }
 
@@ -166,20 +158,37 @@ export class PlaylistsService extends BaseService<Playlist> {
 
     const { items: tracks } = await this.trackService.findMany(trackIds);
 
-    if (tracks.length === 0) {
-      throw new NotFoundException('No tracks found with the provided IDs');
-    }
+    const now = new Date();
+    const trackIdsSet = [...new Set(trackIds)];
+    const bulkOps: any[] = [];
 
-    const bulkOps = playlistIds.map((playlistId) => ({
-      updateOne: {
-        filter: { _id: playlistId },
-        update: {
-          $addToSet: {
-            tracks: { $each: tracks },
+    for (const playlist of playlists) {
+      // Get existing track IDs in the playlist to avoid duplicates
+      const existingTrackIds = new Set(
+        playlist.tracks.map((track: any) => track._id.toString()),
+      );
+
+      // Filter out tracks that are already in the playlist
+      const tracksToAdd = trackIdsSet
+        .filter((trackId) => !existingTrackIds.has(trackId))
+        .map((trackId) => ({
+          _id: trackId,
+          time_added: now,
+        }));
+
+      if (tracksToAdd.length > 0) {
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: playlist._id },
+            update: {
+              $addToSet: {
+                tracks: { $each: tracksToAdd },
+              },
+            },
           },
-        },
-      },
-    }));
+        });
+      }
+    }
 
     const bulkResult = await this.playlistModel.bulkWrite(bulkOps);
 
@@ -242,9 +251,16 @@ export class PlaylistsService extends BaseService<Playlist> {
 
     await playlist.populate('tracks._id');
 
+    for (const track of playlist.tracks) {
+      await (track._id as any as TrackDocument).populate('artist');
+      await (track._id as any as TrackDocument).populate('albums');
+    }
+
     return {
       _id: playlist._id,
-      tracks: playlist.tracks,
+      results: playlist.tracks.filter(
+        (t) => (t._id as any as Track).status === TrackStatus.PUBLISHED,
+      ),
     };
   }
 
@@ -276,6 +292,15 @@ export class PlaylistsService extends BaseService<Playlist> {
     });
 
     return result;
+  }
+
+  async findTracksInLiked(userId: string) {
+    if (!this.checkIdsValid(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+    const { item: user } = await this.userService.findOne(userId);
+
+    return await this.findTracksInPlaylist(user.liked_songs.toString());
   }
 
   async checkTracksInPlaylist(playlistId: string, trackIds: string[]) {

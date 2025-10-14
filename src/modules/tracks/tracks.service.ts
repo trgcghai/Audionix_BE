@@ -156,51 +156,6 @@ export class TracksService extends BaseService<Track> {
     };
   }
 
-  async findWithArtist(
-    query: Record<string, any>,
-    limit: number = 10,
-    current: number = 1,
-  ) {
-    const { filter, sort } = aqp(query);
-
-    if (limit < 1) {
-      limit = 10;
-    }
-
-    if (current < 1) {
-      current = 1;
-    }
-
-    if (filter.limit) delete filter.limit;
-    if (filter.current) delete filter.current;
-
-    if (filter.title) {
-      filter.title = {
-        $regex: new RegExp(filter.title, 'i'),
-      };
-    }
-
-    const totalItems = await this.trackModel.countDocuments(filter).exec();
-    const totalPages = Math.ceil(totalItems / limit);
-    const skip = (current - 1) * limit;
-
-    const result = await this.trackModel
-      .find(filter)
-      .skip(skip)
-      .limit(limit)
-      .sort(sort as Record<string, 1 | -1>)
-      .populate<{ artist: Artist }>('artist', '_id name cover_images')
-      .exec();
-
-    return {
-      items: result,
-      totalItems,
-      totalPages,
-      current: parseInt(current.toString()),
-      limit: parseInt(limit.toString()),
-    };
-  }
-
   async deleteTrack(id: string) {
     if (!mongoose.isValidObjectId(id)) {
       throw new BadRequestException(`Invalid ID format: ${id}`);

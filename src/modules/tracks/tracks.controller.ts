@@ -57,7 +57,7 @@ export class TracksController {
   }
 
   /**
-   * Get method to retrieve all tracks.
+   * Get method to retrieve all tracks for users.
    * @Query() query: Record<string, any> - Optional query parameters for filtering.
    * @Query('limit') limit: number - The maximum number of tracks to return (default is 10).
    * @Query('current') current: number - The current page number (default is 1).
@@ -70,7 +70,24 @@ export class TracksController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
-    return this.tracksService.findWithArtist(query, limit, current);
+    query.status = TrackStatus.PUBLISHED;
+    return this.tracksService.findAll(query, limit, current, 'artist');
+  }
+
+  /**
+   * Get method to retrieve all tracks for management.
+   * @param query Record<string, any> - Optional query parameters for filtering.
+   * @param limit limit: number = 10,
+   * @param current current: number = 1,
+   * @returns A paginated list of tracks.
+   */
+  @Get('/management')
+  findAllForManagement(
+    @Query() query: Record<string, any>,
+    @Query('limit') limit: number = 10,
+    @Query('current') current: number = 1,
+  ) {
+    return this.tracksService.findAll(query, limit, current, 'artist');
   }
 
   /**
@@ -100,6 +117,7 @@ export class TracksController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
+    query.status = TrackStatus.PUBLISHED;
     return this.tracksService.findSimilarTrack(id, query, limit, current);
   }
 

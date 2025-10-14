@@ -15,6 +15,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Track } from '@tracks/entities/track.entity';
+import { TrackStatus } from '@tracks/enum/track-status.enum';
 import { TracksService } from '@tracks/tracks.service';
 import { UploadService } from '@upload/upload.service';
 import { UsersService } from '@users/users.service';
@@ -129,7 +131,9 @@ export class AlbumsService extends BaseService<Album> {
 
     return {
       _id: album._id,
-      results: album.tracks,
+      results: album.tracks.filter(
+        (t) => (t._id as any as Track).status === TrackStatus.PUBLISHED,
+      ),
     };
   }
 

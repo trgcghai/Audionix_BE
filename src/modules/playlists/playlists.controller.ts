@@ -201,6 +201,16 @@ export class PlaylistsController {
   }
 
   /**
+   * Get method to retrieve all tracks in the user's liked songs.
+   * @param payload - The current user's token payload.
+   * @returns An array of track objects in the user's liked songs.
+   */
+  @Get('liked/tracks')
+  findLikedTracks(@CurrentAccount() payload: TokenPayload) {
+    return this.playlistsService.findTracksInLiked(payload.sub);
+  }
+
+  /**
    * Get method to retrieve all tracks in a playlist.
    * @Param('id') playlistId: string - The ID of the playlist to retrieve tracks from.
    * Returns an array of track objects.

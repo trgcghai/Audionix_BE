@@ -2,10 +2,6 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { Image } from '@common/interfaces/entity.interface';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { PlaylistStatus } from '@playlists/enum/playlist-status.enum';
-import {
-  EmbeddedTrack,
-  EmbeddedTrackSchema,
-} from '@tracks/entities/embeddedTrack.entity';
 
 export type PlaylistDocument = HydratedDocument<Playlist>;
 
@@ -55,9 +51,17 @@ export class Playlist {
   cover_images: Image[];
 
   @Prop({
-    type: [EmbeddedTrackSchema],
+    type: [
+      {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Track' },
+        time_added: { type: mongoose.Schema.Types.Date, default: Date.now },
+      },
+    ],
   })
-  tracks: EmbeddedTrack[];
+  tracks: {
+    _id: mongoose.Schema.Types.ObjectId;
+    time_added: mongoose.Schema.Types.Date;
+  }[];
 
   @Prop({
     default: 'playlist',
