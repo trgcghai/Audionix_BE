@@ -202,7 +202,7 @@ export class AuthService extends BaseService<Account> {
     const { accessToken, refreshToken } = await this.generateTokens({
       sub: account._id.toString(),
       email: account.email,
-      role: account.role,
+      roles: account.role,
     });
 
     response.cookie('Authentication', accessToken, {

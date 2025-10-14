@@ -449,6 +449,10 @@ export class AlbumsService extends BaseService<Album> {
   async findById(id: string) {
     const { item } = await this.findOne(id);
 
+    if (item.status !== AlbumStatus.PUBLISHED) {
+      throw new NotFoundException('Album not found');
+    }
+
     await item.populate('artist', '_id name cover_images');
 
     return item;

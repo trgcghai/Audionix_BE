@@ -46,7 +46,7 @@ export class AlbumsController {
   }
 
   /**
-   * Get method to retrieve all albums.
+   * Get method to retrieve all albums for client.
    * @param query Optional query parameters for filtering.
    * @param limit The maximum number of albums to return (default is 10).
    * @param current The current page number (default is 1).
@@ -54,6 +54,25 @@ export class AlbumsController {
    */
   @Get()
   findAll(
+    @Query() query: Record<string, any>,
+    @Query('limit') limit: number = 10,
+    @Query('current') current: number = 1,
+  ) {
+    query.status = AlbumStatus.PUBLISHED;
+    return this.albumsService.findAll(query, limit, current, ['artist'], '', [
+      'title',
+    ]);
+  }
+
+  /**
+   * Get method to retrieve all albums for management.
+   * @param query Optional query parameters for filtering.
+   * @param limit The maximum number of albums to return (default is 10).
+   * @param current The current page number (default is 1).
+   * @returns A paginated list of albums.
+   */
+  @Get('/management')
+  findAllForManagement(
     @Query() query: Record<string, any>,
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
@@ -79,6 +98,7 @@ export class AlbumsController {
     @Query('limit') limit: number = 10,
     @Query('current') current: number = 1,
   ) {
+    query.status = AlbumStatus.PUBLISHED;
     return this.albumsService.findLatestAlbums(
       query,
       limit,
@@ -98,7 +118,7 @@ export class AlbumsController {
   }
 
   /**
-   * Get method to retrieve album filter options for the current artist.
+   * Get method to retrieve album filter options for admin.
    * @param payload The current user's token payload.
    * @returns An array of album filter options.
    */
