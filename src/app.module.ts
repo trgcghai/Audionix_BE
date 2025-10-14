@@ -21,6 +21,7 @@ import { SeedService } from '@modules/seeds/seed.service';
 import { Account, AccountSchema } from '@auth/entities/account.entity';
 import { User, UserSchema } from '@users/entities/user.entity';
 import { Artist, ArtistSchema } from '@artists/entities/artist.entity';
+import { DashboardModule } from '@modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Artist, ArtistSchema } from '@artists/entities/artist.entity';
     AuthModule,
     UploadModule,
     RedisModule,
+    DashboardModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

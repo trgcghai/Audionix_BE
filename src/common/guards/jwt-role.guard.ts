@@ -30,11 +30,11 @@ export class JwtRoleGuard extends JwtAuthGuard {
 
     const { user } = context.switchToHttp().getRequest();
 
-    if (!user || !user.role) {
+    if (!user || !user.roles) {
       throw new ForbiddenException('User role not found');
     }
 
-    const hasRole = requiredRoles.some((role) => user.role.includes(role));
+    const hasRole = requiredRoles.some((role) => user.roles.includes(role));
     if (!hasRole) {
       throw new ForbiddenException(
         'Forbidden: You do not have the permission to access this resource',

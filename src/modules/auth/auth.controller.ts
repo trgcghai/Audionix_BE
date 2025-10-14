@@ -14,11 +14,7 @@ import {
 import { Request as ExpressRequest, Response } from 'express';
 import { CurrentAccount } from '@common/decorators/current-account.decorator';
 import { AuthService } from '@auth/auth.service';
-import {
-  RegisterDto,
-  UpdatePasswordDto,
-  UpdateRolesDto,
-} from '@auth/dto/auth.dto';
+import { RegisterDto, UpdateRolesDto } from '@auth/dto/auth.dto';
 import { LocalAuthGuard } from '@guards/local-auth.guard';
 import { Account } from '@auth/entities/account.entity';
 import { JwtRefreshAuthGuard } from '@guards/jwt-refresh-auth.guard';
