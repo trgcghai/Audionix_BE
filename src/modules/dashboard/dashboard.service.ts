@@ -47,17 +47,18 @@ export class DashboardService {
     };
   }
 
-  private async getMainStats(): Promise<DashboardStatsDto> {
+  async getMainStats(): Promise<DashboardStatsDto> {
     const now = new Date();
     const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
     // Get current totals
     const [totalUsers, totalTracks, totalLikes, userPlaylists] =
       await Promise.all([
-        this.userModel.countDocuments(),
-        this.trackModel.countDocuments(),
-        this.getTotalLikes(),
-        this.playlistModel.countDocuments(),
+        this.userModel.countDocuments({ createdAt: { $lt: currentMonth } }),
+        this.trackModel.countDocuments({ createdAt: { $lt: currentMonth } }),
+        this.getTotalLikes(currentMonth),
+        this.playlistModel.countDocuments({ createdAt: { $lt: currentMonth } }),
       ]);
 
     // Get last month totals for growth calculation
@@ -67,11 +68,11 @@ export class DashboardService {
       lastMonthLikes,
       lastMonthPlaylists,
     ] = await Promise.all([
-      this.userModel.countDocuments({ createdAt: { $lt: currentMonth } }),
-      this.trackModel.countDocuments({ createdAt: { $lt: currentMonth } }),
-      this.getTotalLikes(currentMonth),
+      this.userModel.countDocuments({ createdAt: { $lt: lastMonth } }),
+      this.trackModel.countDocuments({ createdAt: { $lt: lastMonth } }),
+      this.getTotalLikes(lastMonth),
       this.playlistModel.countDocuments({
-        createdAt: { $lt: currentMonth },
+        createdAt: { $lt: lastMonth },
       }),
     ]);
 
@@ -105,7 +106,7 @@ export class DashboardService {
     };
   }
 
-  private async getTotalLikes(beforeDate?: Date): Promise<number> {
+  async getTotalLikes(beforeDate?: Date): Promise<number> {
     const pipeline: PipelineStage[] = [
       {
         $lookup: {
@@ -143,7 +144,7 @@ export class DashboardService {
     return result[0]?.totalLikes || 0;
   }
 
-  private async getUserRegistrationData(): Promise<UserRegistrationDataDto[]> {
+  async getUserRegistrationData(): Promise<UserRegistrationDataDto[]> {
     const tenMonthsAgo = new Date();
     tenMonthsAgo.setMonth(tenMonthsAgo.getMonth() - 10);
 
@@ -192,29 +193,92 @@ export class DashboardService {
     return await this.userModel.aggregate(pipeline);
   }
 
-  private async getTopArtistsData(): Promise<TopArtistDataDto[]> {
-    const pipeline: PipelineStage[] = [
-      {
-        $sort: {
-          number_of_followers: -1,
+  async getTopArtistsData(): Promise<TopArtistDataDto[]> {
+    try {
+      // First, get artist direct follows count
+      const artistDirectFollows = await this.userModel.aggregate([
+        {
+          $unwind: '$followed_artists',
         },
-      },
-      {
-        $limit: 10,
-      },
-      {
-        $project: {
-          _id: 0,
-          name: 1,
-          likes: '$number_of_followers',
+        {
+          $group: {
+            _id: '$followed_artists',
+            directFollows: { $sum: 1 },
+          },
         },
-      },
-    ];
+      ] as PipelineStage[]);
 
-    return await this.artistModel.aggregate(pipeline);
+      // Then, get artist album follows count
+      const artistAlbumFollows = await this.userModel.aggregate([
+        {
+          $unwind: '$followed_albums',
+        },
+        {
+          $lookup: {
+            from: 'albums',
+            localField: 'followed_albums',
+            foreignField: '_id',
+            as: 'album',
+          },
+        },
+        {
+          $unwind: '$album',
+        },
+        {
+          $group: {
+            _id: '$album.artist',
+            albumFollows: { $sum: 1 },
+          },
+        },
+      ] as PipelineStage[]);
+
+      // Combine the results
+      const followsMap = new Map();
+
+      // Add direct follows
+      artistDirectFollows.forEach((item) => {
+        followsMap.set(item._id.toString(), {
+          directFollows: item.directFollows,
+          albumFollows: 0,
+        });
+      });
+
+      // Add album follows
+      artistAlbumFollows.forEach((item) => {
+        const artistId = item._id.toString();
+        const existing = followsMap.get(artistId) || {
+          directFollows: 0,
+          albumFollows: 0,
+        };
+        existing.albumFollows = item.albumFollows;
+        followsMap.set(artistId, existing);
+      });
+
+      // Get artist names and calculate total
+      const results: TopArtistDataDto[] = [];
+      for (const [artistId, follows] of followsMap) {
+        const artist = await this.artistModel
+          .findById(artistId, { name: 1 })
+          .lean();
+        if (artist) {
+          results.push({
+            name: artist.name,
+            likes: follows.directFollows + follows.albumFollows,
+          });
+        }
+      }
+
+      // Sort and limit to top 10
+      const topArtists = results.sort((a, b) => b.likes - a.likes).slice(0, 10);
+
+      return topArtists;
+    } catch (error) {
+      console.error('Error in getTopArtistsData:', error);
+      return [];
+    }
   }
 
-  private async getLikesData(): Promise<LikesDataDto[]> {
+  async getLikesData(): Promise<LikesDataDto[]> {
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
@@ -333,7 +397,7 @@ export class DashboardService {
     );
   }
 
-  private async getPlaylistData(): Promise<PlaylistDataDto[]> {
+  async getPlaylistData(): Promise<PlaylistDataDto[]> {
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 

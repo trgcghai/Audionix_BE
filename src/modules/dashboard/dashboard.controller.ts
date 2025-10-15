@@ -5,6 +5,7 @@ import { Role } from '@enums/role.enum';
 import { Roles } from '@decorators/roles.decorator';
 
 @Controller('dashboard')
+@Roles(Role.ADMIN)
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
@@ -13,7 +14,6 @@ export class DashboardController {
    * @returns Dashboard statistics including user growth, top artists, likes data, and playlist data
    */
   @Get('stats')
-  @Roles(Role.ADMIN)
   async getDashboardStats(): Promise<DashboardResponseDto> {
     return await this.dashboardService.getDashboardStats();
   }
