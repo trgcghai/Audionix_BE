@@ -24,25 +24,18 @@ export class DashboardService {
   ) {}
 
   async getDashboardStats(): Promise<DashboardResponseDto> {
-    const [
-      stats,
-      userRegistrationData,
-      topArtistsData,
-      likesData,
-      playlistData,
-    ] = await Promise.all([
-      this.getMainStats(),
-      this.getUserRegistrationData(),
-      this.getTopArtistsData(),
-      this.getLikesData(),
-      this.getPlaylistData(),
-    ]);
+    const [stats, userRegistrationData, topArtistsData, playlistData] =
+      await Promise.all([
+        this.getMainStats(),
+        this.getUserRegistrationData(),
+        this.getTopArtistsData(),
+        this.getPlaylistData(),
+      ]);
 
     return {
       stats,
       userRegistrationData,
       topArtistsData,
-      likesData,
       playlistData,
     };
   }
@@ -276,125 +269,6 @@ export class DashboardService {
       console.error('Error in getTopArtistsData:', error);
       return [];
     }
-  }
-
-  async getLikesData(): Promise<LikesDataDto[]> {
-    const twelveMonthsAgo = new Date();
-    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-
-    // Get songs likes data
-    const songsLikesData = await this.userModel.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: twelveMonthsAgo },
-        },
-      },
-      {
-        $lookup: {
-          from: 'playlists',
-          localField: 'liked_songs',
-          foreignField: '_id',
-          as: 'likedPlaylist',
-        },
-      },
-      {
-        $unwind: '$likedPlaylist',
-      },
-      {
-        $unwind: '$likedPlaylist.tracks',
-      },
-      {
-        $group: {
-          _id: {
-            year: { $year: '$likedPlaylist.tracks.time_added' },
-            month: { $month: '$likedPlaylist.tracks.time_added' },
-          },
-          songs: { $sum: 1 },
-        },
-      },
-      {
-        $sort: {
-          '_id.year': 1,
-          '_id.month': 1,
-        } as any,
-      },
-    ] as PipelineStage[]);
-
-    // Get albums follows data
-    const albumsFollowsData = await this.userModel.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: twelveMonthsAgo },
-        },
-      },
-      {
-        $unwind: '$followed_albums',
-      },
-      {
-        $group: {
-          _id: {
-            year: { $year: '$followed_albums.time_followed' },
-            month: { $month: '$followed_albums.time_followed' },
-          },
-          albums: { $sum: 1 },
-        },
-      },
-      {
-        $sort: {
-          '_id.year': 1,
-          '_id.month': 1,
-        } as any,
-      },
-    ] as PipelineStage[]);
-
-    // Merge data by month
-    const monthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    const likesDataMap = new Map<string, { songs: number; albums: number }>();
-
-    // Process songs data
-    songsLikesData.forEach((item) => {
-      const monthKey = `${item._id.year}-${item._id.month}`;
-      const existing = likesDataMap.get(monthKey) || { songs: 0, albums: 0 };
-      existing.songs = item.songs;
-      likesDataMap.set(monthKey, existing);
-    });
-
-    // Process albums data
-    albumsFollowsData.forEach((item) => {
-      const monthKey = `${item._id.year}-${item._id.month}`;
-      const existing = likesDataMap.get(monthKey) || { songs: 0, albums: 0 };
-      existing.albums = item.albums;
-      likesDataMap.set(monthKey, existing);
-    });
-
-    // Convert to array with month names
-    const result: LikesDataDto[] = [];
-    for (const [key, value] of likesDataMap) {
-      const [year, month] = key.split('-');
-      result.push({
-        month: monthNames[parseInt(month) - 1],
-        songs: value.songs,
-        albums: value.albums,
-      });
-    }
-
-    return result.sort(
-      (a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month),
-    );
   }
 
   async getPlaylistData(): Promise<PlaylistDataDto[]> {

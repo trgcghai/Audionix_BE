@@ -34,6 +34,5 @@ export class DashboardResponseDto {
   stats: DashboardStatsDto;
   userRegistrationData: UserRegistrationDataDto[];
   topArtistsData: TopArtistDataDto[];
-  likesData: LikesDataDto[];
   playlistData: PlaylistDataDto[];
 }
