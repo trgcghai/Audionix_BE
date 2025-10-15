@@ -1,98 +1,110 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Audionix - Music Streaming Platform Backend 🎧
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+📖 **Giới thiệu**
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Audionix là một nền tảng streaming nhạc trực tuyến được xây dựng bằng **NestJS**, cung cấp API backend cho ứng dụng nghe nhạc với đầy đủ tính năng như Spotify. Dự án hỗ trợ quản lý người dùng, nghệ sĩ, album, bài hát, playlist và nhiều tính năng khác.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+✨ **Tính năng chính**
 
-## Project setup
+### 🎵 Quản lý nhạc
+
+- **Tracks**: Upload, quản lý và streaming bài hát.
+- **Albums**: Tạo và quản lý album cho nghệ sĩ.
+- **Artists**: Hồ sơ nghệ sĩ và quản lý nội dung.
+- **Playlists**: Tạo playlist cá nhân và công khai.
+
+### 👥 Quản lý người dùng
+
+- **Authentication**: Đăng ký, đăng nhập với JWT.
+- **Authorization**: Phân quyền theo role (USER, ARTIST, ADMIN).
+- **Profiles**: Quản lý hồ sơ người dùng.
+- **Following**: Follow nghệ sĩ và album.
+
+### 📊 Tính năng nâng cao
+
+- **Dashboard Analytics**: Thống kê chi tiết cho admin.
+- **Search**: Tìm kiếm đa tiêu chí.
+- **Recommendations**: Gợi ý bài hát tương tự.
+- **Liked Songs**: Quản lý bài hát yêu thích.
+- **File Upload**: Upload audio và hình ảnh.
+
+### 🔧 Tính năng hệ thống
+
+- **Caching**: Redis cho performance tối ưu.
+- **Email Service**: Gửi email xác thực và thông báo.
+- **Data Seeding**: Dữ liệu mẫu cho development.
+- **Error Handling**: Xử lý lỗi toàn cục.
+- **Validation**: Validate dữ liệu đầu vào.
+
+---
+
+🛠️ **Công nghệ sử dụng**
+
+- **Backend Framework**
+  - [NestJS](https://nestjs.com/) - Progressive Node.js framework
+  - [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+  - [Node.js](https://nodejs.org/) - Runtime environment
+- **Database & Storage**
+  - [MongoDB](https://www.mongodb.com/) - NoSQL database với Mongoose ODM
+  - [Redis](https://redis.io/) - In-memory caching và session storage
+  - [Multer](https://github.com/expressjs/multer) - File upload middleware
+- **Authentication & Security**
+  - [JWT](https://jwt.io/) - JSON Web Tokens cho authentication
+  - [Passport](http://www.passportjs.org/) - Authentication middleware
+  - [Bcrypt](https://www.google.com/search?q=https://github.com/kelektiv/node.bcrypt.js) - Password hashing
+- **Utilities**
+  - [Nodemailer](https://nodemailer.com/) - Email service
+  - [Handlebars](https://handlebarsjs.com/) - Template engine cho email
+  - [Class Validator](https://github.com/typestack/class-validator) - DTO validation
+  - [Class Transformer](https://github.com/typestack/class-transformer) - Object transformation
+
+---
+
+📦 **Cài đặt**
+
+### 1\. Clone repository
 
 ```bash
-$ npm install
+git clone https://github.com/your-username/audionix-nestjs.git
+cd audionix-nestjs
 ```
 
-## Compile and run the project
+### 2\. Cài đặt dependencies
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+# hoặc
+yarn install
 ```
 
-## Run tests
+### 3\. Cấu hình môi trường
+
+Tạo file `.env` từ file `.env.example` và cấu hình các biến môi trường cần thiết:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
 ```
 
-## Deployment
+Cập nhật các thông tin trong file `.env` (database connection, JWT secret, email credentials...).
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 4\. Khởi động dịch vụ
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Development mode
+npm run start:dev
+
+# Production mode
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+🚀 **Sử dụng**
 
-Check out a few resources that may come in handy when working with NestJS:
+### API Documentation
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Sau khi khởi động server, bạn có thể truy cập Swagger UI để xem tài liệu API chi tiết:
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- **API Base URL**: `http://localhost:8080/api`
